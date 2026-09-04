@@ -54,9 +54,9 @@
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
           <span>Sync GitHub</span>
         </button>
-        <a class="btn-action-secondary" href="/api/download/define" download id="btn-download-package">
+        <button class="btn-action-secondary" id="btn-download-package">
           <span>Define.xml</span>
-        </a>
+        </button>
         <button class="btn-action-ghost" id="btn-open-settings" title="Settings &amp; GitHub Setup">⚙️</button>
       </div>
     </header>
@@ -359,7 +359,7 @@
             </div>
             
             <!-- TAB 1: P21 QC Audit -->
-            <div class="tab-pane active" id="tab-qc">
+            <div class="tab-pane" id="tab-qc">
               <div class="pane-card">
                 <div class="card-title-bar">
                   <h3>Pinnacle 21 &amp; CDISC Regulatory QC Audit</h3>
@@ -421,7 +421,7 @@
                   <h3>Clinical Study Report (CSR) Table Suite per ICH E3</h3>
                   <div class="card-actions">
                     <button class="btn-sm" id="btn-copy-tlfs">Copy Tables</button>
-                    <a class="btn-sm" href="/api/download/tlf" download>Download tlfs.txt</a>
+                    <button class="btn-sm" id="btn-download-tlfs">Download tlfs.txt</button>
                   </div>
                 </div>
                 <pre class="code-output" id="tlf-text-view">Execute task to generate CSR tables...</pre>
