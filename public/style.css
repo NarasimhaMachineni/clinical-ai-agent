@@ -1991,3 +1991,38 @@ html, body {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* Gem Sparkle & Futuristic Accents */
+.gem-sparkle-icon {
+  font-size: 18px;
+  animation: gemGlow 2.5s infinite alternate;
+}
+
+@keyframes gemGlow {
+  0% { filter: drop-shadow(0 0 2px #38bdf8); }
+  50% { filter: drop-shadow(0 0 8px #a855f7); }
+  100% { filter: drop-shadow(0 0 12px #3fb950); }
+}
+
+.bridge-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(63, 185, 80, 0.1);
+  border: 1px solid rgba(63, 185, 80, 0.3);
+  border-radius: 12px;
+  padding: 3px 10px;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.pill-dot {
+  color: #3fb950;
+  font-size: 10px;
+}
+
+.task-radio-card.auto-cycle-card.active {
+  border-color: #a855f7;
+  box-shadow: 0 0 14px rgba(168, 85, 247, 0.4);
+}

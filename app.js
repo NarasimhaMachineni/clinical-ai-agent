@@ -1600,8 +1600,16 @@ function setupTaskRadios() {
       if (radioInput) radioInput.checked = true;
 
       // Instantly run that task!
-      appendTerminalLog('STATE', task, `Radio Selected: Running ${task} immediately at ${getFormattedLocalTime()}...`);
-      executeTask(task);
+      if (task === 'AUTO_CYCLE') {
+        automatorActive = true;
+        automatorCountdown = 15;
+        appendTerminalLog('STATE', 'AUTO_CYCLE', `15-Second Continuous Automator Activated at ${getFormattedLocalTime()}.`);
+        const nextTask = CORE_TASK_ROTATION[currentRotationIndex % CORE_TASK_ROTATION.length];
+        executeTask(nextTask);
+      } else {
+        appendTerminalLog('STATE', task, `Radio Selected: Running ${task} immediately at ${getFormattedLocalTime()}...`);
+        executeTask(task);
+      }
     });
   });
 

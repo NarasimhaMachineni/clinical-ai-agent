@@ -208,28 +208,142 @@
            ========================================================= -->
       <main class="agent-main">
         
-        <!-- 1. Task Commander Input Bar -->
-        <section class="commander-section">
-          <div class="commander-box">
-            <span class="commander-icon">⚡</span>
-            <input type="text" id="commander-input" placeholder="Instruct the AI Agent: e.g. 'Scan PC inbox data', 'Run P21 audit', 'Derive ADLB change from baseline', 'Push deliverables to GitHub'...">
-            <button class="btn-execute" id="btn-execute-cmd">
-              <span>Execute Task</span>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
-            </button>
+        <!-- 1. Instant Task Radio Selector & Clinical Data Bridge -->
+        <section class="task-radio-section">
+          <div class="task-radio-header">
+            <div class="task-radio-title">
+              <span class="gem-sparkle-icon">💎</span>
+              <span>Execute Clinical Task: Click Any Radio Button to Run Instantly</span>
+              <span class="badge-live-pulse" style="margin-left:8px;">INSTANT EXECUTE</span>
+            </div>
+            <div class="bridge-status-pill">
+              <span class="status-dot pulse" style="background:#3fb950; width:6px; height:6px;"></span>
+              <span>PC File Explorer Bridge: <code>data_inbox/</code> (Direct Access)</span>
+            </div>
           </div>
 
-          <div class="commander-pills">
-            <span class="pills-label">Core Automated Tasks:</span>
-            <button class="cmd-pill" data-cmd="SDTM Ingestion & Mapping">🧬 SDTM Ingestion &amp; Mapping</button>
-            <button class="cmd-pill" data-cmd="ADaM Derivation Engine">📐 ADaM Derivation Engine</button>
-            <button class="cmd-pill" data-cmd="Pinnacle 21 QC Audit">🔍 Pinnacle 21 QC Audit</button>
-            <button class="cmd-pill" data-cmd="Double Programming QC">⚖️ Double Programming QC</button>
-            <button class="cmd-pill" data-cmd="Safety & Efficacy Screening">🩺 Safety &amp; Efficacy Screening</button>
-            <button class="cmd-pill pill-git" data-cmd="git push">🐙 git push</button>
-            <button class="cmd-pill pill-git" data-cmd="git sync">🔄 git sync</button>
-            <button class="cmd-pill pill-code" data-cmd="show r pharmaverse">💻 R Pharmaverse</button>
-            <button class="cmd-pill pill-code" data-cmd="show sas proc suite">📊 SAS PROCs</button>
+          <!-- Interactive Task Radio Cards Grid -->
+          <div class="task-radio-grid" id="task-radio-container">
+            
+            <label class="task-radio-card active" data-task="SDTM_MAPPING">
+              <input type="radio" name="clinicalTask" value="SDTM_MAPPING" checked>
+              <div class="radio-card-body">
+                <div class="radio-card-top">
+                  <span class="radio-task-icon">🧬</span>
+                  <span class="radio-status-tag">100% GxP</span>
+                </div>
+                <strong class="radio-task-title">SDTM Ingestion &amp; Mapping</strong>
+                <span class="radio-task-desc">Transform to DM, VS, LB, AE, EX</span>
+              </div>
+            </label>
+
+            <label class="task-radio-card" data-task="ADAM_DERIVATION">
+              <input type="radio" name="clinicalTask" value="ADAM_DERIVATION">
+              <div class="radio-card-body">
+                <div class="radio-card-top">
+                  <span class="radio-task-icon">📐</span>
+                  <span class="radio-status-tag">ADSL DERIVED</span>
+                </div>
+                <strong class="radio-task-title">ADaM Derivation Engine</strong>
+                <span class="radio-task-desc">Derive ADSL, ADAE, ADLB &amp; flags</span>
+              </div>
+            </label>
+
+            <label class="task-radio-card" data-task="PINNACLE21_QC">
+              <input type="radio" name="clinicalTask" value="PINNACLE21_QC">
+              <div class="radio-card-body">
+                <div class="radio-card-top">
+                  <span class="radio-task-icon">🔍</span>
+                  <span class="radio-status-tag">5/5 PASS</span>
+                </div>
+                <strong class="radio-task-title">Pinnacle 21 QC Audit</strong>
+                <span class="radio-task-desc">Run Python regulatory assertions</span>
+              </div>
+            </label>
+
+            <label class="task-radio-card" data-task="DOUBLE_PROG_QC">
+              <input type="radio" name="clinicalTask" value="DOUBLE_PROG_QC">
+              <div class="radio-card-body">
+                <div class="radio-card-top">
+                  <span class="radio-task-icon">⚖️</span>
+                  <span class="radio-status-tag">&amp;SYSINFO=0</span>
+                </div>
+                <strong class="radio-task-title">Double Programming QC</strong>
+                <span class="radio-task-desc">PROC COMPARE independent check</span>
+              </div>
+            </label>
+
+            <label class="task-radio-card" data-task="SAFETY_SURVEILLANCE">
+              <input type="radio" name="clinicalTask" value="SAFETY_SURVEILLANCE">
+              <div class="radio-card-body">
+                <div class="radio-card-top">
+                  <span class="radio-task-icon">🩺</span>
+                  <span class="radio-status-tag">0 HY'S LAW</span>
+                </div>
+                <strong class="radio-task-title">Safety &amp; Efficacy Screening</strong>
+                <span class="radio-task-desc">Auto-screen Safety &amp; Efficacy</span>
+              </div>
+            </label>
+
+            <label class="task-radio-card auto-cycle-card" data-task="AUTO_CYCLE">
+              <input type="radio" name="clinicalTask" value="AUTO_CYCLE">
+              <div class="radio-card-body">
+                <div class="radio-card-top">
+                  <span class="radio-task-icon">⚡</span>
+                  <span class="radio-status-tag" style="background:rgba(168,85,247,0.15); color:#c084fc; border-color:rgba(168,85,247,0.3);">15s CYCLE</span>
+                </div>
+                <strong class="radio-task-title">15-Second Automator</strong>
+                <span class="radio-task-desc">Self-driving continuous review</span>
+              </div>
+            </label>
+
+          </div>
+
+          <!-- In-Page Clinical Data Files & PC Ingestion Bridge -->
+          <div class="ingestion-bridge-card">
+            <div class="ingestion-bridge-header">
+              <div class="bridge-title">
+                <span>📁</span>
+                <span>Clinical Trial Data Bridge (Direct PC Explorer &amp; Web Upload)</span>
+              </div>
+              <span style="font-size:11.5px; color:var(--text-muted);">
+                Monitored PC Directory: <code style="color:var(--primary-blue);">data_inbox/</code>
+              </span>
+            </div>
+
+            <!-- Active Ingested Files -->
+            <div class="bridge-files-row" id="ingestion-files-list">
+              <div class="bridge-file-pill present" title="Demographics Domain (10 Subjects)">
+                <span class="pill-dot">●</span> <strong>raw_demog.csv</strong> (DM: 10)
+              </div>
+              <div class="bridge-file-pill present" title="Vital Signs Domain (7 Records)">
+                <span class="pill-dot">●</span> <strong>raw_vitals.csv</strong> (VS: 7)
+              </div>
+              <div class="bridge-file-pill present" title="Laboratory Domain (6 Chemistry Records)">
+                <span class="pill-dot">●</span> <strong>raw_labs.csv</strong> (LB: 6)
+              </div>
+              <div class="bridge-file-pill present" title="Adverse Events Domain (7 TEAEs)">
+                <span class="pill-dot">●</span> <strong>raw_ae.csv</strong> (AE: 7)
+              </div>
+              <div class="bridge-file-pill present" title="Exposure / Dosing Domain (5 Doses)">
+                <span class="pill-dot">●</span> <strong>raw_dosing.csv</strong> (EX: 5)
+              </div>
+            </div>
+
+            <!-- In-Page Drag & Drop Upload Zone -->
+            <div class="drop-zone-mini" id="mini-drop-zone">
+              <span style="font-size:18px;">📥</span>
+              <span><strong>Drag &amp; Drop CSV files here</strong> or click to browse your PC (Auto-maps to SDTM &amp; ADaM instantly)</span>
+              <input type="file" id="mini-file-input" multiple accept=".csv,.json" style="display:none;">
+            </div>
+            <div id="mini-upload-status" style="margin-top:6px; font-size:11.5px; color:var(--primary-blue); font-weight:600;"></div>
+          </div>
+
+          <!-- Secondary Natural Language & Git Directive Bar -->
+          <div class="commander-input-row" style="margin-top:12px; display:flex; gap:8px;">
+            <input type="text" id="commander-input" class="form-input" style="flex:1; background:rgba(0,0,0,0.3); font-size:12.5px; padding:7px 12px;" placeholder="Or type a custom command: e.g. 'git sync', 'show r pharmaverse', 'show sas proc suite'...">
+            <button class="btn-execute" id="btn-execute-cmd" style="padding:7px 14px;">Run Task</button>
+            <button class="btn-live-sync" id="btn-commander-git-sync">🔄 Git Live Sync</button>
           </div>
         </section>
 
@@ -822,6 +936,6 @@
 
   </div>
 
-  <script src="app.js?v=9.0"></script>
+  <script src="app.js?v=9.5"></script>
 </body>
 </html>
