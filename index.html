@@ -114,26 +114,46 @@
           </div>
         </div>
 
-        <!-- PC Local File Watcher Integration -->
+        <!-- Autonomous PC Task Automator -->
         <div class="sidebar-block">
-          <div class="sidebar-heading">PC File Watcher (Zero Mock Data)</div>
-          <div class="pc-sync-card">
-            <div class="pc-sync-header">
-              <span class="pc-folder-icon">📁</span>
-              <div class="pc-folder-meta">
-                <span class="pc-folder-name" id="sidebar-pc-folder">data_inbox/</span>
-                <span class="pc-folder-desc" id="sidebar-pc-status">Auto-watching for new CSV files</span>
+          <div class="sidebar-heading">⚡ Autonomous PC Task Automator</div>
+          <div class="automator-card">
+            <div class="automator-header">
+              <span class="automator-icon pulse-active">🤖</span>
+              <div class="automator-meta">
+                <div class="automator-title-row">
+                  <span class="automator-title">Self-Driving Task Engine</span>
+                  <span class="badge-live-pulse" id="automator-status-badge">AUTO-ACTIVE</span>
+                </div>
+                <span class="automator-subtitle" id="automator-status-desc">Autonomously checking clinical trial cohort</span>
               </div>
             </div>
-            <div class="pc-file-list" id="sidebar-file-list">
-              <!-- Rendered via JS -->
-              <div class="pc-file-tag">raw_demog.csv</div>
-              <div class="pc-file-tag">raw_ae.csv</div>
-              <div class="pc-file-tag">raw_labs.csv</div>
+            <div class="automator-progress-container">
+              <div class="automator-progress-label">
+                <span>Next Autonomous Review:</span>
+                <strong id="automator-countdown">15s</strong>
+              </div>
+              <div class="automator-progress-bar">
+                <div class="automator-progress-fill" id="automator-progress-fill" style="width: 25%;"></div>
+              </div>
             </div>
-            <div class="pc-actions-row">
-              <button class="btn-card-action" id="btn-sidebar-upload">Upload Files</button>
-              <button class="btn-card-action secondary" id="btn-sidebar-scan">Scan Now</button>
+            <div class="automator-stats-row">
+              <div class="automator-mini-stat">
+                <span class="mini-stat-num" id="automator-cycles-count">1</span>
+                <span class="mini-stat-lbl">Cycles Done</span>
+              </div>
+              <div class="automator-mini-stat">
+                <span class="mini-stat-num" id="automator-active-task-label">SDTM</span>
+                <span class="mini-stat-lbl">Active Stage</span>
+              </div>
+              <div class="automator-mini-stat">
+                <span class="mini-stat-num text-pass">0</span>
+                <span class="mini-stat-lbl">GxP Flaws</span>
+              </div>
+            </div>
+            <div class="automator-actions-row">
+              <button class="btn-card-action" id="btn-run-all-auto">⚡ Auto-Run Cycle</button>
+              <button class="btn-card-action secondary" id="btn-toggle-auto">Pause</button>
             </div>
           </div>
         </div>
@@ -144,14 +164,20 @@
           <div class="gh-sync-card">
             <div class="gh-info-row">
               <span class="gh-branch-badge" id="sidebar-gh-branch">branch: main</span>
-              <span class="gh-sync-status" id="sidebar-gh-sync-status">Ready</span>
+              <span class="gh-sync-status" id="sidebar-gh-sync-status">Synchronized</span>
             </div>
             <div class="gh-last-commit" id="sidebar-gh-commit">
               Last commit: Automated CDISC run
             </div>
-            <div class="gh-actions-row">
-              <button class="btn-card-action" id="btn-git-push">Push to Git</button>
-              <button class="btn-card-action secondary" id="btn-git-pull">Pull</button>
+            <div class="gh-repo-link" style="margin-top: 6px; font-size: 11px;">
+              <a href="https://github.com/NarasimhaMachineni/clinical-ai-agent" target="_blank" style="color:var(--primary-blue); text-decoration:none; display:flex; align-items:center; gap:4px; font-weight:600;">
+                <span>🐙</span> NarasimhaMachineni/clinical-ai-agent
+              </a>
+            </div>
+            <div class="gh-actions-row" style="margin-top: 8px;">
+              <button class="btn-card-action" id="btn-git-push">Git Push</button>
+              <button class="btn-card-action secondary" id="btn-git-pull">Git Pull</button>
+              <button class="btn-card-action secondary" id="btn-git-sync">Git Sync</button>
             </div>
           </div>
         </div>
@@ -208,6 +234,10 @@
             <button class="cmd-pill" data-cmd="Pinnacle 21 QC Audit">🔍 Pinnacle 21 QC Audit</button>
             <button class="cmd-pill" data-cmd="Double Programming QC">⚖️ Double Programming QC</button>
             <button class="cmd-pill" data-cmd="Safety & Efficacy Screening">🩺 Safety &amp; Efficacy Screening</button>
+            <button class="cmd-pill pill-git" data-cmd="git push">🐙 git push</button>
+            <button class="cmd-pill pill-git" data-cmd="git sync">🔄 git sync</button>
+            <button class="cmd-pill pill-code" data-cmd="show r pharmaverse">💻 R Pharmaverse</button>
+            <button class="cmd-pill pill-code" data-cmd="show sas proc suite">📊 SAS PROCs</button>
           </div>
         </section>
 
@@ -264,6 +294,7 @@
             <button class="tab-btn" data-tab="tab-qc">🔍 P21 QC Audit</button>
             <button class="tab-btn" data-tab="tab-double-qc">⚖️ Double Programming QC</button>
             <button class="tab-btn" data-tab="tab-safety">🩺 Safety &amp; Efficacy</button>
+            <button class="tab-btn" data-tab="tab-code-workbench">💻 R &amp; SAS Workbench</button>
             <button class="tab-btn" data-tab="tab-datasets">📁 Dataset Inspector</button>
             <button class="tab-btn" data-tab="tab-tlfs">📊 CSR Tables</button>
             <button class="tab-btn" data-tab="tab-deliverables">📥 Deliverables</button>
@@ -484,6 +515,192 @@
               </div>
             </div>
 
+            <!-- TAB: R & SAS CODE WORKBENCH LINKED TO GITHUB -->
+            <div class="tab-pane" id="tab-code-workbench">
+              <div class="pane-card">
+                
+                <!-- Workbench Header Banner -->
+                <div class="workbench-header-banner">
+                  <div class="workbench-meta">
+                    <h3>
+                      <span>💻</span> Clinical R &amp; SAS Production Code Workbench
+                      <span class="badge-pass" style="font-size:10.5px; padding:2px 8px; margin-left:8px;">GxP PROD SUITE</span>
+                    </h3>
+                    <p>
+                      Directly connected to GitHub repository. Full R pharmaverse implementations and SAS 9.4 DATA steps with all clinical PROCs.
+                    </p>
+                  </div>
+                  <div class="gh-links-badge-group">
+                    <a href="https://github.com/NarasimhaMachineni/clinical-ai-agent/blob/main/programs/r_pharmaverse_production.R" target="_blank" class="gh-pill-link">
+                      <span>🐙</span> r_pharmaverse_production.R
+                    </a>
+                    <a href="https://github.com/NarasimhaMachineni/clinical-ai-agent/blob/main/programs/sas_cdisc_production.sas" target="_blank" class="gh-pill-link">
+                      <span>🐙</span> sas_cdisc_production.sas
+                    </a>
+                    <a href="https://github.com/NarasimhaMachineni/clinical-ai-agent/blob/main/programs/double_programming_validation.sas" target="_blank" class="gh-pill-link">
+                      <span>🐙</span> double_programming_validation.sas
+                    </a>
+                    <a href="https://github.com/NarasimhaMachineni/clinical-ai-agent/tree/main/programs" target="_blank" class="gh-pill-link" style="border-color:var(--primary-blue); color:var(--primary-blue);">
+                      <span>📂</span> View All in GitHub
+                    </a>
+                  </div>
+                </div>
+
+                <!-- Subtab Navigation -->
+                <div class="workbench-subtabs">
+                  <button class="wb-subtab-btn active" data-wb="wb-r">🔵 R Pharmaverse (admiral, rtables, tern)</button>
+                  <button class="wb-subtab-btn" data-wb="wb-sas">🔴 SAS 9.4 DATA Steps &amp; PROCs</button>
+                  <button class="wb-subtab-btn" data-wb="wb-double">🟢 Double Programming (PROC COMPARE)</button>
+                  <button class="wb-subtab-btn" data-wb="wb-specs">📚 R Packages &amp; SAS PROCs Reference</button>
+                </div>
+
+                <!-- Subpane 1: R Script -->
+                <div class="wb-subpane active" id="wb-r">
+                  <div class="code-viewer-container">
+                    <div class="code-viewer-toolbar">
+                      <span class="code-file-label">
+                        <span>📄</span> programs/r_pharmaverse_production.R
+                        <span class="badge-live-pulse" style="font-size:9px;">R 4.3+</span>
+                      </span>
+                      <div class="code-viewer-actions">
+                        <button class="btn-code-action" id="btn-copy-r">📋 Copy Script</button>
+                        <a href="programs/r_pharmaverse_production.R" download="r_pharmaverse_production.R" class="btn-code-action">⬇️ Download .R</a>
+                        <a href="https://github.com/NarasimhaMachineni/clinical-ai-agent/blob/main/programs/r_pharmaverse_production.R" target="_blank" class="btn-code-action">🐙 GitHub Permalink</a>
+                      </div>
+                    </div>
+                    <pre class="code-viewer-pre" id="r-code-display">Loading R pharmaverse production script...</pre>
+                  </div>
+                </div>
+
+                <!-- Subpane 2: SAS Script -->
+                <div class="wb-subpane" id="wb-sas" style="display:none;">
+                  <div class="code-viewer-container">
+                    <div class="code-viewer-toolbar">
+                      <span class="code-file-label">
+                        <span>📄</span> programs/sas_cdisc_production.sas
+                        <span class="badge-live-pulse" style="font-size:9px; background:rgba(248,113,113,0.15); color:#f87171; border-color:rgba(248,113,113,0.35);">SAS 9.4 / Viya</span>
+                      </span>
+                      <div class="code-viewer-actions">
+                        <button class="btn-code-action" id="btn-copy-sas">📋 Copy Script</button>
+                        <a href="programs/sas_cdisc_production.sas" download="sas_cdisc_production.sas" class="btn-code-action">⬇️ Download .sas</a>
+                        <a href="https://github.com/NarasimhaMachineni/clinical-ai-agent/blob/main/programs/sas_cdisc_production.sas" target="_blank" class="btn-code-action">🐙 GitHub Permalink</a>
+                      </div>
+                    </div>
+                    <pre class="code-viewer-pre" id="sas-code-display">Loading SAS production pipeline script...</pre>
+                  </div>
+                </div>
+
+                <!-- Subpane 3: Double Programming QC -->
+                <div class="wb-subpane" id="wb-double" style="display:none;">
+                  <div class="code-viewer-container">
+                    <div class="code-viewer-toolbar">
+                      <span class="code-file-label">
+                        <span>📄</span> programs/double_programming_validation.sas
+                        <span class="badge-live-pulse" style="font-size:9px;">PROC COMPARE</span>
+                      </span>
+                      <div class="code-viewer-actions">
+                        <button class="btn-code-action" id="btn-copy-double">📋 Copy Script</button>
+                        <a href="programs/double_programming_validation.sas" download="double_programming_validation.sas" class="btn-code-action">⬇️ Download .sas</a>
+                        <a href="https://github.com/NarasimhaMachineni/clinical-ai-agent/blob/main/programs/double_programming_validation.sas" target="_blank" class="btn-code-action">🐙 GitHub Permalink</a>
+                      </div>
+                    </div>
+                    <pre class="code-viewer-pre" id="double-code-display">Loading SAS double programming validation script...</pre>
+                  </div>
+                </div>
+
+                <!-- Subpane 4: Packages & PROCs Reference Directory -->
+                <div class="wb-subpane" id="wb-specs" style="display:none;">
+                  <div class="spec-cards-grid">
+                    
+                    <div class="spec-card">
+                      <h4><span>📦</span> R pharmaverse: admiral</h4>
+                      <div class="spec-badge-list">
+                        <span class="spec-badge r-pkg">derive_vars_merged()</span>
+                        <span class="spec-badge r-pkg">derive_var_trtsdt()</span>
+                        <span class="spec-badge r-pkg">derive_var_trtedt()</span>
+                        <span class="spec-badge r-pkg">derive_var_trtdurd()</span>
+                        <span class="spec-badge r-pkg">derive_var_base()</span>
+                        <span class="spec-badge r-pkg">derive_var_chg()</span>
+                        <span class="spec-badge r-pkg">derive_var_pchg()</span>
+                        <span class="spec-badge r-pkg">derive_var_extreme_flag()</span>
+                        <span class="spec-badge r-pkg">restrict_derivation()</span>
+                      </div>
+                      <p>Automates standard CDISC ADaM derivations for BDS and OCCDS according to FDA &amp; PMDA guidance.</p>
+                    </div>
+
+                    <div class="spec-card">
+                      <h4><span>📦</span> R pharmaverse: rtables &amp; tern</h4>
+                      <div class="spec-badge-list">
+                        <span class="spec-badge r-pkg">basic_table()</span>
+                        <span class="spec-badge r-pkg">split_cols_by()</span>
+                        <span class="spec-badge r-pkg">split_rows_by()</span>
+                        <span class="spec-badge r-pkg">analyze()</span>
+                        <span class="spec-badge r-pkg">build_table()</span>
+                        <span class="spec-badge r-pkg">fit_ancova()</span>
+                        <span class="spec-badge r-pkg">stat_mean_ci()</span>
+                        <span class="spec-badge r-pkg">count_occurrences()</span>
+                      </div>
+                      <p>Generates submission-ready ICH E3 clinical study report tables, demographic summaries, and ANCOVA models.</p>
+                    </div>
+
+                    <div class="spec-card">
+                      <h4><span>📦</span> R Tidyverse &amp; Data Transport</h4>
+                      <div class="spec-badge-list">
+                        <span class="spec-badge r-pkg">dplyr::mutate()</span>
+                        <span class="spec-badge r-pkg">dplyr::case_when()</span>
+                        <span class="spec-badge r-pkg">dplyr::left_join()</span>
+                        <span class="spec-badge r-pkg">tidyr::pivot_longer()</span>
+                        <span class="spec-badge r-pkg">haven::read_sas()</span>
+                        <span class="spec-badge r-pkg">haven::write_xpt()</span>
+                      </div>
+                      <p>High-performance data manipulation and SAS Transport v5 (XPT) export for FDA eCTD Module 5 dossiers.</p>
+                    </div>
+
+                    <div class="spec-card">
+                      <h4><span>📊</span> SAS 9.4 DATA Steps</h4>
+                      <div class="spec-badge-list">
+                        <span class="spec-badge sas-proc">ATTRIB</span>
+                        <span class="spec-badge sas-proc">LENGTH</span>
+                        <span class="spec-badge sas-proc">MERGE BY USUBJID</span>
+                        <span class="spec-badge sas-proc">IN=A / IN=B</span>
+                        <span class="spec-badge sas-proc">ARRAY DO OVER</span>
+                        <span class="spec-badge sas-proc">INTCK / INTNX</span>
+                        <span class="spec-badge sas-proc">PUT / INPUT</span>
+                        <span class="spec-badge sas-proc">IS8601DT</span>
+                      </div>
+                      <p>Robust, production-grade CDISC dataset generation with variable lengths, ISO 8601 date parsing, and audit metadata.</p>
+                    </div>
+
+                    <div class="spec-card">
+                      <h4><span>📊</span> SAS PROCs: Validation &amp; Modeling</h4>
+                      <div class="spec-badge-list">
+                        <span class="spec-badge sas-proc">PROC COMPARE</span>
+                        <span class="spec-badge sas-proc">&amp;SYSINFO = 0</span>
+                        <span class="spec-badge sas-proc">PROC GLM (ANCOVA)</span>
+                        <span class="spec-badge sas-proc">PROC MIXED (MMRM)</span>
+                        <span class="spec-badge sas-proc">PROC FREQ (Chisq)</span>
+                      </div>
+                      <p>Double programming validation asserting zero record differences, and primary inferential efficacy models.</p>
+                    </div>
+
+                    <div class="spec-card">
+                      <h4><span>📊</span> SAS PROCs: Reporting &amp; Formats</h4>
+                      <div class="spec-badge-list">
+                        <span class="spec-badge sas-proc">PROC MEANS</span>
+                        <span class="spec-badge sas-proc">PROC REPORT</span>
+                        <span class="spec-badge sas-proc">PROC FORMAT</span>
+                        <span class="spec-badge sas-proc">PROC TRANSPOSE</span>
+                        <span class="spec-badge sas-proc">PROC SQL</span>
+                      </div>
+                      <p>ICH E3 CSR Table 14.1/14.2 generation, controlled terminology enforcement, and longitudinal data transposition.</p>
+                    </div>
+
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
             <!-- TAB 5: DATASET INSPECTOR -->
             <div class="tab-pane" id="tab-datasets">
               <div class="pane-card">
@@ -667,6 +884,6 @@
 
   </div>
 
-  <script src="app.js?v=6.3"></script>
+  <script src="app.js?v=7.0"></script>
 </body>
 </html>

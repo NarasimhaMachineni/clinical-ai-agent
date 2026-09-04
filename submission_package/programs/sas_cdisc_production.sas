@@ -199,3 +199,47 @@ proc means data=adam.adsl n mean std median min max clm;
   var age trtdurd;
   output out=adam.adsl_summary n=n mean=mean std=std median=median min=min max=max;
 run;
+
+/* ----------------------------------------------------------------------------
+   9. PROC REPORT: ICH E3 CSR TABLE 14-1 DEMOGRAPHIC SUMMARY
+   ---------------------------------------------------------------------------- */
+proc report data=adam.adsl headline headskip split='*';
+  columns trt01p n (age,(mean std median min max));
+  define trt01p / group 'Treatment Arm' width=25;
+  define n      / 'N' format=4.0 width=6;
+  define age    / analysis 'Age (Years)';
+  define mean   / format=6.1 'Mean';
+  define std    / format=6.2 'Std Dev';
+  define median / format=6.1 'Median';
+  define min    / format=6.0 'Min';
+  define max    / format=6.0 'Max';
+run;
+
+/* ----------------------------------------------------------------------------
+   10. PROC TRANSPOSE: LONGITUDINAL RESTRUCTURING FOR TIME-SERIES PROFILES
+   ---------------------------------------------------------------------------- */
+proc sort data=adam.adlb out=adlb_sort;
+  by usubjid paramcd;
+run;
+
+proc transpose data=adlb_sort out=adam.adlb_transposed(drop=_name_) prefix=VISIT_;
+  by usubjid paramcd;
+  id avisitn;
+  var aval;
+run;
+
+/* ----------------------------------------------------------------------------
+   11. PROC SQL: RELATIONAL INTEGRITY, POPULATION SUMMARY & AUDIT COUNTS
+   ---------------------------------------------------------------------------- */
+proc sql;
+  create table adam.adsl_pop_counts as
+  select 
+    trt01p,
+    count(distinct usubjid) as N_ITT,
+    sum(case when saffl = 'Y' then 1 else 0 end) as N_SAFETY,
+    sum(case when ppfl  = 'Y' then 1 else 0 end) as N_PER_PROTOCOL,
+    mean(age) as MEAN_AGE format=5.1
+  from adam.adsl
+  group by trt01p
+  order by trt01p;
+quit;
