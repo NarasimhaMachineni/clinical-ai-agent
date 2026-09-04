@@ -377,11 +377,11 @@
             </div>
 
             <!-- In-Page Drag & Drop Upload Zone -->
-            <div class="drop-zone-mini" id="mini-drop-zone">
+            <div class="drop-zone-mini" id="mini-drop-zone" style="cursor:pointer;" title="Click to browse your PC or drag CSV files here">
               <span style="font-size:18px;">📥</span>
               <span><strong>Drag &amp; Drop CSV files here</strong> or click to browse your PC (Auto-maps to SDTM &amp; ADaM instantly)</span>
-              <input type="file" id="mini-file-input" multiple accept=".csv,.json" style="display:none;">
             </div>
+            <input type="file" id="mini-file-input" multiple accept=".csv,.json" style="display:none;">
             <div id="mini-upload-status" style="margin-top:6px; font-size:11.5px; color:var(--primary-blue); font-weight:600;"></div>
           </div>
 
@@ -1106,7 +1106,7 @@
 
   </div>
 
-  <script src="app.js?v=10.0"></script>
+  <script src="app.js?v=11.0"></script>
   <!-- Self-Healing Error Pop-up Toast Container -->
   <div id="self-healing-toast-container"></div>
 </body>

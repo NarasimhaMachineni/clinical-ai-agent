@@ -2322,7 +2322,8 @@ html, body {
 
 .connector-line.pulse-active {
   stroke: #3fb950;
-  stroke-width: 2.5;
+  stroke-width: 2.8;
+  filter: drop-shadow(0 0 6px rgba(63, 185, 80, 0.8));
   animation: lineDashFlow 1.2s infinite linear;
 }
 
