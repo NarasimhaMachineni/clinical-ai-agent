@@ -12,10 +12,10 @@ const WORKSPACE_DIR = path.join(__dirname, '..');
 
 let githubConfig = {
   enabled: true,
-  repoUrl: '',
+  repoUrl: 'https://github.com/NarasimhaMachineni/clinical-ai-agent.git',
   branch: 'main',
   token: '',
-  autoPushOnTaskComplete: false
+  autoPushOnTaskComplete: true
 };
 
 function runGit(args, cwd = WORKSPACE_DIR) {
@@ -131,18 +131,14 @@ async function commitDeliverables(studyId = 'STUDY', commitMsg = null) {
  * Push to remote GitHub repository
  */
 async function pushToRemote() {
-  if (!githubConfig.repoUrl) {
-    return { success: false, error: 'No GitHub repository URL configured.' };
-  }
-
-  let pushUrl = githubConfig.repoUrl;
-  // Inject token into URL if provided for seamless authentication
-  if (githubConfig.token && pushUrl.startsWith('https://')) {
-    pushUrl = pushUrl.replace('https://', `https://${encodeURIComponent(githubConfig.token)}@`);
-  }
-
   const branch = githubConfig.branch || 'main';
-  const res = await runGit(['push', pushUrl, `HEAD:${branch}`]);
+  let pushTarget = 'origin';
+
+  if (githubConfig.token && githubConfig.repoUrl && githubConfig.repoUrl.startsWith('https://')) {
+    pushTarget = githubConfig.repoUrl.replace('https://', `https://${encodeURIComponent(githubConfig.token)}@`);
+  }
+
+  const res = await runGit(['push', pushTarget, `HEAD:${branch}`]);
   return {
     success: res.success,
     output: res.stdout || res.stderr
@@ -153,20 +149,48 @@ async function pushToRemote() {
  * Pull latest data or code from GitHub
  */
 async function pullFromRemote() {
-  if (!githubConfig.repoUrl) {
-    return { success: false, error: 'No GitHub repository URL configured.' };
-  }
-
-  let pullUrl = githubConfig.repoUrl;
-  if (githubConfig.token && pullUrl.startsWith('https://')) {
-    pullUrl = pullUrl.replace('https://', `https://${encodeURIComponent(githubConfig.token)}@`);
-  }
-
   const branch = githubConfig.branch || 'main';
-  const res = await runGit(['pull', pullUrl, branch]);
+  let pullTarget = 'origin';
+
+  if (githubConfig.token && githubConfig.repoUrl && githubConfig.repoUrl.startsWith('https://')) {
+    pullTarget = githubConfig.repoUrl.replace('https://', `https://${encodeURIComponent(githubConfig.token)}@`);
+  }
+
+  const res = await runGit(['pull', pullTarget, branch]);
   return {
     success: res.success,
     output: res.stdout || res.stderr
+  };
+}
+
+/**
+ * Complete Bidirectional Live Git Sync: Pull, Add All, GxP Commit, Push
+ */
+async function syncWithRemote(studyId = 'STUDY') {
+  await ensureGitRepo();
+  const pullRes = await pullFromRemote();
+
+  await runGit(['add', '-A']);
+  const statusRes = await runGit(['status', '--porcelain']);
+
+  let commitRes = { success: true, message: 'Working tree clean, no uncommitted changes.' };
+  if (statusRes.stdout && statusRes.stdout.trim().length > 0) {
+    const d = new Date();
+    const timeStr = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}:${String(d.getSeconds()).padStart(2, '0')}`;
+    const dateStr = d.toISOString().slice(0, 10);
+    const msg = `[CDISC-GxP] Live Sync: ${studyId} - ${dateStr} ${timeStr}`;
+    commitRes = await runGit(['commit', '-m', msg]);
+  }
+
+  const pushRes = await pushToRemote();
+  const logRes = await runGit(['log', '-1', '--oneline']);
+
+  return {
+    success: pushRes.success,
+    pull: pullRes,
+    commit: commitRes,
+    push: pushRes,
+    lastCommit: logRes.stdout || 'Live Sync Completed'
   };
 }
 
@@ -176,5 +200,6 @@ module.exports = {
   commitDeliverables,
   pushToRemote,
   pullFromRemote,
+  syncWithRemote,
   ensureGitRepo
 };

@@ -380,6 +380,16 @@ app.post("/api/github/pull", async (req, res) => {
   }
 });
 
+app.post("/api/github/sync", async (req, res) => {
+  try {
+    const { syncWithRemote } = require("./engines/githubEngine");
+    const result = await syncWithRemote(req.body.studyId || "ONC-2025-001");
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // 12. Universal PC System Agent Endpoints
 app.get("/api/pc/diagnostics", async (req, res) => {
   try {
