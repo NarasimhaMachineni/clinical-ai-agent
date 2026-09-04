@@ -42,32 +42,32 @@
             <button class="task-btn primary" data-task="SDTM_MAPPING">
               <span class="task-btn-icon">🧬</span>
               <div class="task-btn-info">
-                <strong>Standardize &amp; Map Patient Data</strong>
-                <span>Organize raw data into clinical trial format</span>
+                <strong>SDTM Ingestion &amp; Mapping</strong>
+                <span>Transform to DM, VS, LB, AE, EX</span>
               </div>
             </button>
 
             <button class="task-btn" data-task="ADAM_DERIVATION">
               <span class="task-btn-icon">📐</span>
               <div class="task-btn-info">
-                <strong>Build Analysis-Ready Datasets</strong>
-                <span>Create patient summaries, safety &amp; lab datasets</span>
+                <strong>ADaM Checks</strong>
+                <span>Derive ADSL, ADAE, ADLB &amp; flags</span>
               </div>
             </button>
 
             <button class="task-btn" data-task="P21_AUDIT">
               <span class="task-btn-icon">🔍</span>
               <div class="task-btn-info">
-                <strong>Run Regulatory Quality Check</strong>
-                <span>Verify data meets FDA/EMA submission rules</span>
+                <strong>Pinnacle 21 QC Audit</strong>
+                <span>Run Python regulatory assertions</span>
               </div>
             </button>
 
             <button class="task-btn" data-task="DOUBLE_PROG_QC">
               <span class="task-btn-icon">⚖️</span>
               <div class="task-btn-info">
-                <strong>Independent Cross-Verification</strong>
-                <span>Compare SAS and R outputs for 100% match</span>
+                <strong>Double Programming QC</strong>
+                <span>PROC COMPARE independent check</span>
               </div>
             </button>
 
@@ -112,8 +112,8 @@
                 <div class="row-left">
                   <span class="row-icon">🧬</span>
                   <div class="row-info">
-                    <strong>1. Data Standardization</strong>
-                    <span>Demographics, Labs, Side Effects &amp; Dosing</span>
+                    <strong>1. SDTM Ingestion</strong>
+                    <span>DM, VS, LB, AE, EX</span>
                   </div>
                 </div>
                 <span class="row-tag" id="row-tag-sdtm">100% OK</span>
@@ -123,8 +123,8 @@
                 <div class="row-left">
                   <span class="row-icon">📐</span>
                   <div class="row-info">
-                    <strong>2. Analysis Dataset Build</strong>
-                    <span>Patient summaries, safety &amp; lab analyses</span>
+                    <strong>2. ADaM Checks</strong>
+                    <span>ADSL, ADAE, ADLB</span>
                   </div>
                 </div>
                 <span class="row-tag" id="row-tag-adam">READY</span>
@@ -134,8 +134,8 @@
                 <div class="row-left">
                   <span class="row-icon">🔍</span>
                   <div class="row-info">
-                    <strong>3. FDA Regulatory Check</strong>
-                    <span>500+ FDA/EMA submission rules checked</span>
+                    <strong>3. Pinnacle 21 QC</strong>
+                    <span>Python Assertions</span>
                   </div>
                 </div>
                 <span class="row-tag" id="row-tag-p21">5/5 PASS</span>
@@ -145,8 +145,8 @@
                 <div class="row-left">
                   <span class="row-icon">⚖️</span>
                   <div class="row-info">
-                    <strong>4. Independent Cross-Check</strong>
-                    <span>SAS vs R: guaranteed match verification</span>
+                    <strong>4. Double Programming</strong>
+                    <span>PROC COMPARE Check</span>
                   </div>
                 </div>
                 <span class="row-tag" id="row-tag-double">&amp;SYSINFO=0</span>
@@ -156,8 +156,8 @@
                 <div class="row-left">
                   <span class="row-icon">🩺</span>
                   <div class="row-info">
-                    <strong>5. Safety &amp; Efficacy Review</strong>
-                    <span>Liver toxicity screening &amp; treatment effect</span>
+                    <strong>5. Safety &amp; Efficacy</strong>
+                    <span>Hy's Law &amp; ANCOVA</span>
                   </div>
                 </div>
                 <span class="row-tag" id="row-tag-safety">NORMAL</span>
@@ -215,7 +215,7 @@
               <span class="metric-lbl">Liver Toxicity Alerts</span>
             </div>
             <div class="metric-card full-span">
-              <span class="metric-val text-green" id="metric-p21">4 / 4 PASS</span>
+              <span class="metric-val text-green" id="metric-p21">—</span>
               <span class="metric-lbl">FDA Rules Checked</span>
             </div>
           </div>
@@ -252,8 +252,8 @@
                   <span class="radio-task-icon">🧬</span>
                   <span class="radio-status-tag">100% GxP</span>
                 </div>
-                <strong class="radio-task-title">Standardize Patient Data</strong>
-                <span class="radio-task-desc">Organize raw data into clinical format (Demographics, Labs, Safety, Dosing)</span>
+                <strong class="radio-task-title">SDTM Ingestion &amp; Mapping</strong>
+                <span class="radio-task-desc">Transform to DM, VS, LB, AE, EX</span>
               </div>
             </label>
 
@@ -264,8 +264,8 @@
                   <span class="radio-task-icon">📐</span>
                   <span class="radio-status-tag">ADSL DERIVED</span>
                 </div>
-                <strong class="radio-task-title">Build Analysis Datasets</strong>
-                <span class="radio-task-desc">Generate analysis-ready patient summaries, safety &amp; lab datasets</span>
+                <strong class="radio-task-title">ADaM Checks</strong>
+                <span class="radio-task-desc">Derive ADSL, ADAE, ADLB &amp; flags</span>
               </div>
             </label>
 
@@ -276,8 +276,8 @@
                   <span class="radio-task-icon">🔍</span>
                   <span class="radio-status-tag">5/5 PASS</span>
                 </div>
-                <strong class="radio-task-title">FDA Quality Check</strong>
-                <span class="radio-task-desc">Validate all data against FDA/EMA submission rules automatically</span>
+                <strong class="radio-task-title">Pinnacle 21 QC Audit</strong>
+                <span class="radio-task-desc">Run Python regulatory assertions</span>
               </div>
             </label>
 
@@ -288,8 +288,8 @@
                   <span class="radio-task-icon">⚖️</span>
                   <span class="radio-status-tag">&amp;SYSINFO=0</span>
                 </div>
-                <strong class="radio-task-title">Independent Verification</strong>
-                <span class="radio-task-desc">Cross-check SAS &amp; R results to guarantee 100% accuracy</span>
+                <strong class="radio-task-title">Double Programming QC</strong>
+                <span class="radio-task-desc">PROC COMPARE independent check</span>
               </div>
             </label>
 
@@ -300,8 +300,8 @@
                   <span class="radio-task-icon">🩺</span>
                   <span class="radio-status-tag">0 HY'S LAW</span>
                 </div>
-                <strong class="radio-task-title">Safety &amp; Treatment Review</strong>
-                <span class="radio-task-desc">Detect liver toxicity signals &amp; measure treatment effectiveness</span>
+                <strong class="radio-task-title">Safety &amp; Efficacy Screening</strong>
+                <span class="radio-task-desc">Auto-screen Safety &amp; Efficacy</span>
               </div>
             </label>
 
@@ -331,22 +331,10 @@
               </span>
             </div>
 
-            <!-- Active Ingested Files -->
+            <!-- Active Ingested Files (populated dynamically on upload) -->
             <div class="bridge-files-row" id="ingestion-files-list">
-              <div class="bridge-file-pill present" title="Demographics Domain (10 Subjects)">
-                <span class="pill-dot">●</span> <strong>raw_demog.csv</strong> (Demographics: 10 patients)
-              </div>
-              <div class="bridge-file-pill present" title="Vital Signs Domain (7 Records)">
-                <span class="pill-dot">●</span> <strong>raw_vitals.csv</strong> (Vital Signs: 7 records)
-              </div>
-              <div class="bridge-file-pill present" title="Laboratory Domain (6 Chemistry Records)">
-                <span class="pill-dot">●</span> <strong>raw_labs.csv</strong> (Lab Results: 6 records)
-              </div>
-              <div class="bridge-file-pill present" title="Adverse Events Domain (7 TEAEs)">
-                <span class="pill-dot">●</span> <strong>raw_ae.csv</strong> (Side Effects: 7 events)
-              </div>
-              <div class="bridge-file-pill present" title="Exposure / Dosing Domain (5 Doses)">
-                <span class="pill-dot">●</span> <strong>raw_dosing.csv</strong> (Dosing: 5 records)
+              <div class="bridge-file-pill empty" style="color:var(--text-muted); border-style:dashed; font-style:italic;">
+                No files loaded yet — upload your data files below
               </div>
             </div>
 
@@ -481,8 +469,8 @@
                   <span class="subagent-icon">📐</span>
                   <span class="subagent-badge" id="subnode-badge-adam">ADSL/ADAE</span>
                 </div>
-                <strong class="subagent-title">Dataset Builder</strong>
-                <span class="subagent-desc">Builds analysis summaries for each patient</span>
+                <strong class="subagent-title">ADaM Checks</strong>
+                <span class="subagent-desc">ADSL, ADAE, ADLB &amp; flags</span>
               </div>
 
               <!-- Subagent 3: Pinnacle 21 QC -->
@@ -1075,7 +1063,7 @@
         </div>
         <div class="modal-body">
           <p style="color:var(--text-secondary); font-size:13px; margin-bottom:14px;">
-            Select or drag &amp; drop real EDC clinical CSV or JSON files (e.g. <code>raw_demog.csv</code>, <code>raw_ae.csv</code>, <code>raw_labs.csv</code>, <code>raw_vitals.csv</code>). Files will be saved directly into your PC watched directory.
+            Select or drag &amp; drop your clinical data files (e.g. <code>demographics.csv</code>, <code>adverse_events.csv</code>, <code>lab_results.xlsx</code>). Any format is supported — files are auto-mapped to clinical domains instantly.
           </p>
           <div class="file-drop-area" id="file-drop-zone">
             <span style="font-size:32px; display:block; margin-bottom:8px;">📥</span>
