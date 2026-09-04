@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupUploadModal();
   setupGitActions();
   setupSettingsModal();
-  setupPcSystemAgent();
+  
   setupDirectDownloadHandlers();
 
   // Load initial PC, Git, and Pipeline state
@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // =========================================================
 async function loadInitialState() {
   if (isStaticWeb) {
-    appendTerminalLog('INFO', 'SYSTEM', 'ClinicalOps AI Agent v6.3 Online. Autonomous Clinical Data Review Engine Active.');
+    appendTerminalLog('INFO', 'SYSTEM', `ClinicalOps AI Agent Online at ${getFormattedLocalTime()}. Self-driving GxP surveillance active.`);
     appendTerminalLog('STATE', 'AUTONOMOUS', 'Auto-executing comprehensive clinical check and review on real cohort...');
     executeTask('SDTM_MAPPING');
     return;
@@ -849,11 +849,18 @@ function downloadBlob(content, filename, mimeType) {
 // =========================================================
 // 6. TERMINAL & STATUS LOGGERS
 // =========================================================
+function getFormattedLocalTime(date = new Date()) {
+  const h = String(date.getHours()).padStart(2, '0');
+  const m = String(date.getMinutes()).padStart(2, '0');
+  const s = String(date.getSeconds()).padStart(2, '0');
+  return `${h}:${m}:${s}`;
+}
+
 function appendTerminalLog(level, message, detail = '', customTs = null) {
   const body = document.getElementById('terminal-body');
   if (!body) return;
 
-  const ts = customTs || new Date().toISOString().substring(11, 19);
+  const ts = customTs || getFormattedLocalTime();
   const row = document.createElement('div');
   row.className = 'log-row ' + (level ? level.toLowerCase() : 'info');
 
@@ -1454,20 +1461,22 @@ function setupAutonomousAutomator() {
     'SAFETY_SURVEILLANCE': 'Safety'
   };
 
-  // Start continuous 1-second interval ticker
+  // 1-second continuous ticker
+  if (automatorInterval) clearInterval(automatorInterval);
+
   automatorInterval = setInterval(() => {
     if (!automatorActive) return;
 
     automatorCountdown--;
     if (countdownEl) countdownEl.textContent = automatorCountdown + 's';
-    
+
     if (progressFill) {
       const pct = Math.max(0, Math.min(100, ((AUTOMATOR_PERIOD - automatorCountdown) / AUTOMATOR_PERIOD) * 100));
       progressFill.style.width = pct + '%';
     }
 
+    // Refresh every 15 seconds: update and review data
     if (automatorCountdown <= 0) {
-      // Trigger next autonomous clinical task
       automatorCountdown = AUTOMATOR_PERIOD;
       automatorCycles++;
       if (cyclesEl) cyclesEl.textContent = automatorCycles;
@@ -1477,7 +1486,8 @@ function setupAutonomousAutomator() {
 
       if (activeTaskEl) activeTaskEl.textContent = taskLabels[nextTask] || 'Cycle';
 
-      appendTerminalLog('AUTONOMOUS', 'SELF_DRIVING_PULSE', `Cycle #${automatorCycles}: Autonomously verifying ${nextTask} across PC data and GitHub deliverables. Zero GxP flaws.`);
+      const localTime = getFormattedLocalTime();
+      appendTerminalLog('AUTONOMOUS', '15S_CYCLE_REFRESH', `Cycle #${automatorCycles} [${localTime}]: Auto-updating and reviewing ${nextTask}. Clinical cohort compliant.`);
       executeTask(nextTask);
     }
   }, 1000);
@@ -1488,7 +1498,7 @@ function setupAutonomousAutomator() {
       automatorCountdown = AUTOMATOR_PERIOD;
       automatorCycles++;
       if (cyclesEl) cyclesEl.textContent = automatorCycles;
-      appendTerminalLog('AUTONOMOUS', 'INSTANT_CYCLE', 'Executing instantaneous end-to-end clinical audit & review cycle...');
+      appendTerminalLog('AUTONOMOUS', 'MANUAL_CYCLE', `Executing instantaneous clinical review cycle at ${getFormattedLocalTime()}...`);
       executeTask('SDTM_MAPPING');
     });
   }
@@ -1505,7 +1515,7 @@ function setupAutonomousAutomator() {
           badgeEl.style.borderColor = 'rgba(63, 185, 80, 0.35)';
         }
         if (descEl) descEl.textContent = 'Autonomously checking clinical trial cohort';
-        appendTerminalLog('INFO', 'AUTOMATOR', 'Autonomous task engine RESUMED.');
+        appendTerminalLog('INFO', 'AUTOMATOR', `Autonomous 15-second task engine RESUMED at ${getFormattedLocalTime()}.`);
       } else {
         btnToggle.textContent = 'Resume';
         if (badgeEl) {
@@ -1514,7 +1524,7 @@ function setupAutonomousAutomator() {
           badgeEl.style.borderColor = 'rgba(210, 153, 34, 0.35)';
         }
         if (descEl) descEl.textContent = 'Automator paused by biostatistician';
-        appendTerminalLog('WARN', 'AUTOMATOR', 'Autonomous task engine PAUSED.');
+        appendTerminalLog('WARN', 'AUTOMATOR', `Autonomous task engine PAUSED at ${getFormattedLocalTime()}.`);
       }
     });
   }

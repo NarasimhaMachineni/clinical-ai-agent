@@ -42,22 +42,15 @@
       </div>
 
       <div class="header-actions">
-        <button class="btn-action-primary" id="btn-run-full-pipeline">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-          <span>Run Pipeline</span>
+        <a href="https://github.com/NarasimhaMachineni/clinical-ai-agent" target="_blank" class="gh-repo-badge" title="View Repository on GitHub">
+          <span class="gh-repo-icon">🐙</span>
+          <span class="gh-repo-text">NarasimhaMachineni/clinical-ai-agent</span>
+          <span class="gh-branch-pill">main</span>
+        </a>
+        <button class="btn-live-sync" id="btn-header-sync-git" title="Live sync deliverables directly to GitHub">
+          <span class="sync-icon">🔄</span>
+          <span id="btn-sync-label">Git Live Sync</span>
         </button>
-        <button class="btn-action-secondary" id="btn-open-upload">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-          <span>Upload EDC</span>
-        </button>
-        <button class="btn-action-secondary" id="btn-header-sync-git">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
-          <span>Sync GitHub</span>
-        </button>
-        <button class="btn-action-secondary" id="btn-download-package">
-          <span>Define.xml</span>
-        </button>
-        <button class="btn-action-ghost" id="btn-open-settings" title="Settings &amp; GitHub Setup">⚙️</button>
       </div>
     </header>
 
@@ -174,10 +167,9 @@
                 <span>🐙</span> NarasimhaMachineni/clinical-ai-agent
               </a>
             </div>
-            <div class="gh-actions-row" style="margin-top: 8px;">
-              <button class="btn-card-action" id="btn-git-push">Git Push</button>
-              <button class="btn-card-action secondary" id="btn-git-pull">Git Pull</button>
-              <button class="btn-card-action secondary" id="btn-git-sync">Git Sync</button>
+            <div class="gh-actions-row" style="margin-top: 10px; display:flex; gap:8px;">
+              <button class="btn-card-action" id="btn-sidebar-git-sync" style="background:linear-gradient(135deg,#1f6feb,#238636); font-weight:700;">🔄 Git Live Sync</button>
+              <a href="https://github.com/NarasimhaMachineni/clinical-ai-agent" target="_blank" class="btn-card-action secondary" style="text-decoration:none; text-align:center; min-width:60px;">🐙 View</a>
             </div>
           </div>
         </div>
@@ -298,7 +290,6 @@
             <button class="tab-btn" data-tab="tab-datasets">📁 Dataset Inspector</button>
             <button class="tab-btn" data-tab="tab-tlfs">📊 CSR Tables</button>
             <button class="tab-btn" data-tab="tab-deliverables">📥 Deliverables</button>
-            <button class="tab-btn" data-tab="tab-pc-agent">🖥️ PC Agent</button>
           </div>
 
           <div class="results-tab-content">
@@ -729,7 +720,7 @@
                   <h3>Clinical Study Report (CSR) Table Suite per ICH E3</h3>
                   <div class="card-actions">
                     <button class="btn-sm" id="btn-copy-tlfs">Copy Tables</button>
-                    <button class="btn-sm" id="btn-download-tlfs">Download tlfs.txt</button>
+                    
                   </div>
                 </div>
                 <pre class="code-output" id="tlf-text-view">Execute task to generate CSR tables...</pre>
@@ -748,60 +739,7 @@
               </div>
             </div>
 
-            <!-- TAB 8: PC SYSTEM AGENT -->
-            <div class="tab-pane" id="tab-pc-agent">
-              <div class="pane-card">
-                <div class="card-title-bar">
-                  <h3>🖥️ PC System Diagnostics, Automation &amp; Script Runner</h3>
-                  <button class="btn-sm" id="btn-refresh-diag">Refresh System Health</button>
-                </div>
-                
-                <div class="pc-diag-grid">
-                  <div class="diag-card">
-                    <span class="diag-val" id="diag-os">Windows 11 Pro (x64)</span>
-                    <span class="diag-lbl">Operating System</span>
-                  </div>
-                  <div class="diag-card">
-                    <span class="diag-val" id="diag-ram">16.0 GB RAM (64% Free)</span>
-                    <span class="diag-lbl">System Memory</span>
-                  </div>
-                  <div class="diag-card">
-                    <span class="diag-val" id="diag-python">Python 3.13.3</span>
-                    <span class="diag-lbl">Python Environment</span>
-                  </div>
-                  <div class="diag-card">
-                    <span class="diag-val" id="diag-git">Git 2.55.0</span>
-                    <span class="diag-lbl">Git Version Control</span>
-                  </div>
-                </div>
-
-                <div class="pc-agent-subpanel" style="margin-top:16px;">
-                  <h4 style="color:var(--text-secondary); font-size:12.5px; margin-bottom:8px;">⚡ Direct PC PowerShell / Python Command Runner</h4>
-                  <div class="pc-cmd-bar">
-                    <select id="pc-exec-type" class="form-select" style="max-width:130px;">
-                      <option value="powershell">PowerShell</option>
-                      <option value="python">Python</option>
-                    </select>
-                    <input type="text" id="input-direct-pc-cmd" class="form-input" placeholder="e.g. python scripts/cdisc_qc_audit.py, or Get-Process" style="flex:1;">
-                    <button class="btn-primary" id="btn-run-pc-cmd">Run on PC</button>
-                  </div>
-                  <pre class="code-output" id="pc-cmd-output" style="max-height:140px; margin-top:8px;">Command output will appear here...</pre>
-                </div>
-
-                <div class="pc-agent-subpanel" style="margin-top:16px;">
-                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                    <h4 style="color:var(--text-secondary); font-size:12.5px; margin:0;">⏰ Background Autonomous Schedulers</h4>
-                    <button class="btn-sm" id="btn-add-hourly-schedule">+ Schedule 1-Hour Automation</button>
-                  </div>
-                  <div id="pc-schedules-container">
-                    <div style="color:var(--text-muted); font-size:12px; padding:6px 0;">No scheduled background tasks currently active. Click above to schedule.</div>
-                  </div>
-                </div>
-
-              </div>
             </div>
-
-          </div>
         </section>
       </main>
     </div>
@@ -884,6 +822,6 @@
 
   </div>
 
-  <script src="app.js?v=7.0"></script>
+  <script src="app.js?v=8.0"></script>
 </body>
 </html>
