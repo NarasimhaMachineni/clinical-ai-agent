@@ -107,45 +107,91 @@
           </div>
         </div>
 
-        <!-- Autonomous PC Task Automator -->
+        <!-- Autonomous PC Task Automator (5 Parallel Subagents) -->
         <div class="sidebar-block">
-          <div class="sidebar-heading">⚡ Autonomous PC Task Automator</div>
+          <div class="sidebar-heading">⚡ 5-Subagent Task Automator (15s Loop)</div>
           <div class="automator-card">
             <div class="automator-header">
               <span class="automator-icon pulse-active">🤖</span>
               <div class="automator-meta">
                 <div class="automator-title-row">
-                  <span class="automator-title">Self-Driving Task Engine</span>
+                  <span class="automator-title">Parallel Task Engine</span>
                   <span class="badge-live-pulse" id="automator-status-badge">AUTO-ACTIVE</span>
                 </div>
-                <span class="automator-subtitle" id="automator-status-desc">Autonomously checking clinical trial cohort</span>
+                <span class="automator-subtitle" id="automator-status-desc">Re-checking &amp; healing data every 15s</span>
               </div>
             </div>
+            
             <div class="automator-progress-container">
               <div class="automator-progress-label">
-                <span>Next Autonomous Review:</span>
+                <span>Next 15s Re-Check:</span>
                 <strong id="automator-countdown">15s</strong>
               </div>
               <div class="automator-progress-bar">
                 <div class="automator-progress-fill" id="automator-progress-fill" style="width: 25%;"></div>
               </div>
             </div>
-            <div class="automator-stats-row">
-              <div class="automator-mini-stat">
-                <span class="mini-stat-num" id="automator-cycles-count">1</span>
-                <span class="mini-stat-lbl">Cycles Done</span>
+
+            <!-- 5 Tasks Live Status Rows in Automator -->
+            <div class="subagent-automators-list">
+              <div class="task-automator-row active" id="auto-row-sdtm">
+                <div class="row-left">
+                  <span class="row-icon">🧬</span>
+                  <div class="row-info">
+                    <strong>1. SDTM Ingestion</strong>
+                    <span>DM, VS, LB, AE, EX</span>
+                  </div>
+                </div>
+                <span class="row-tag" id="row-tag-sdtm">100% OK</span>
               </div>
-              <div class="automator-mini-stat">
-                <span class="mini-stat-num" id="automator-active-task-label">SDTM</span>
-                <span class="mini-stat-lbl">Active Stage</span>
+
+              <div class="task-automator-row" id="auto-row-adam">
+                <div class="row-left">
+                  <span class="row-icon">📐</span>
+                  <div class="row-info">
+                    <strong>2. ADaM Derivations</strong>
+                    <span>ADSL, ADAE, ADLB</span>
+                  </div>
+                </div>
+                <span class="row-tag" id="row-tag-adam">READY</span>
               </div>
-              <div class="automator-mini-stat">
-                <span class="mini-stat-num text-pass">0</span>
-                <span class="mini-stat-lbl">GxP Flaws</span>
+
+              <div class="task-automator-row" id="auto-row-p21">
+                <div class="row-left">
+                  <span class="row-icon">🔍</span>
+                  <div class="row-info">
+                    <strong>3. Pinnacle 21 QC</strong>
+                    <span>Python Assertions</span>
+                  </div>
+                </div>
+                <span class="row-tag" id="row-tag-p21">5/5 PASS</span>
+              </div>
+
+              <div class="task-automator-row" id="auto-row-double">
+                <div class="row-left">
+                  <span class="row-icon">⚖️</span>
+                  <div class="row-info">
+                    <strong>4. Double Programming</strong>
+                    <span>PROC COMPARE Check</span>
+                  </div>
+                </div>
+                <span class="row-tag" id="row-tag-double">&amp;SYSINFO=0</span>
+              </div>
+
+              <div class="task-automator-row" id="auto-row-safety">
+                <div class="row-left">
+                  <span class="row-icon">🩺</span>
+                  <div class="row-info">
+                    <strong>5. Safety &amp; Efficacy</strong>
+                    <span>Hy's Law &amp; ANCOVA</span>
+                  </div>
+                </div>
+                <span class="row-tag" id="row-tag-safety">NORMAL</span>
               </div>
             </div>
-            <div class="automator-actions-row">
-              <button class="btn-card-action" id="btn-run-all-auto">⚡ Auto-Run Cycle</button>
+
+            <div class="automator-actions-row" style="margin-top:10px;">
+              <button class="btn-card-action" id="btn-run-all-auto">⚡ Run All 5 Now</button>
               <button class="btn-card-action secondary" id="btn-toggle-auto">Pause</button>
             </div>
           </div>
@@ -347,34 +393,158 @@
           </div>
         </section>
 
-        <!-- 2. State Machine Visualizer -->
-        <section class="pipeline-section">
-          <div class="pipeline-tracker" id="pipeline-tracker">
-            <div class="pipeline-step active" id="step-sdtm">
-              <div class="step-circle">1</div>
-              <div class="step-label">SDTM Map</div>
+        <!-- 2. Multi-Agent Dynamic Flow Canvas (Reference Architecture) -->
+        <section class="agent-canvas-section">
+          
+          <div class="canvas-top-bar">
+            <div class="canvas-main-title">
+              <span style="font-size:20px;">🤖</span>
+              <div>
+                <h2>Single Master Agent + Dynamically Call Task Subagents</h2>
+                <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">
+                  Real-time autonomous subagent orchestration • 15-second multi-task cycle • Self-healing error recovery
+                </div>
+              </div>
             </div>
-            <div class="pipeline-connector"></div>
-            <div class="pipeline-step active" id="step-adam">
-              <div class="step-circle">2</div>
-              <div class="step-label">ADaM Derive</div>
-            </div>
-            <div class="pipeline-connector"></div>
-            <div class="pipeline-step active" id="step-p21">
-              <div class="step-circle">3</div>
-              <div class="step-label">P21 Audit</div>
-            </div>
-            <div class="pipeline-connector"></div>
-            <div class="pipeline-step active" id="step-double-qc">
-              <div class="step-circle">4</div>
-              <div class="step-label">Double QC</div>
-            </div>
-            <div class="pipeline-connector"></div>
-            <div class="pipeline-step active" id="step-safety-eff">
-              <div class="step-circle">5</div>
-              <div class="step-label">Safety &amp; Efficacy</div>
+            
+            <div class="canvas-controls">
+              <button class="btn-canvas-action heal-btn" id="btn-simulate-healing" title="Test error pop-up and autonomous self-healing fix">
+                <span>🔧</span> Test Self-Healing Auto-Fix
+              </button>
+              <button class="btn-canvas-action" id="btn-canvas-refresh-all">
+                <span>⚡</span> Run All 5 Subagents
+              </button>
             </div>
           </div>
+
+          <!-- Flow Canvas Nodes Grid -->
+          <div class="canvas-flow-container">
+            
+            <!-- SVG Connectors Overlay -->
+            <svg class="canvas-svg-overlay" id="canvas-svg-lines">
+              <!-- Animated connector curves dynamically updated via JS -->
+            </svg>
+
+            <!-- Top Row: Source EDC -> Master Agent -> Verified Deliverables -->
+            <div class="flow-row-top">
+              
+              <!-- Node 1: EDC Files / PC Watcher -->
+              <div class="flow-node node-input-edc" id="node-edc-source">
+                <div class="node-header-row">
+                  <div class="node-icon-wrapper" style="background:rgba(56,189,248,0.15); color:var(--primary-blue);">📁</div>
+                  <div class="node-label-group">
+                    <strong>EDC Ingestion</strong>
+                    <span>data_inbox/ (PC Bridge)</span>
+                  </div>
+                </div>
+                <div class="socket-pill-group">
+                  <span class="socket-pill">Input: 5 CSVs</span>
+                  <span class="socket-pill">ISO 8601</span>
+                </div>
+                <div class="node-status-bar">
+                  <span style="color:var(--text-muted);">Status:</span>
+                  <strong style="color:#3fb950;" id="canvas-edc-status">Active (5 Domains)</strong>
+                </div>
+              </div>
+
+              <!-- Node 2: Master Orchestrator Agent (Center) -->
+              <div class="flow-node node-master-agent pulse-running" id="node-master-agent">
+                <div class="node-header-row">
+                  <div class="node-icon-wrapper" style="background:rgba(168,85,247,0.15); color:#c084fc; font-size:18px;">🤖</div>
+                  <div class="node-label-group">
+                    <strong style="font-size:14px;">ClinicalOps Orchestrator</strong>
+                    <span>Autonomous CDISC State Controller</span>
+                  </div>
+                </div>
+                <div class="socket-pill-group" style="justify-content:center;">
+                  <span class="socket-pill model">Model: Claude 3.7 Sonnet</span>
+                  <span class="socket-pill memory">Memory: ONC-2025-001</span>
+                  <span class="socket-pill tool">Tool: 15s Cycle</span>
+                </div>
+                <div class="node-status-bar">
+                  <span style="color:var(--text-muted);">Current Active Loop:</span>
+                  <strong style="color:var(--primary-blue);" id="canvas-active-subagent-label">SDTM Ingestion Subagent</strong>
+                </div>
+              </div>
+
+              <!-- Node 3: Deliverables & GitHub Output -->
+              <div class="flow-node node-output-pkg" id="node-output-pkg">
+                <div class="node-header-row">
+                  <div class="node-icon-wrapper" style="background:rgba(63,185,80,0.15); color:#3fb950;">📦</div>
+                  <div class="node-label-group">
+                    <strong>Verified Deliverables</strong>
+                    <span>Define-XML &amp; CSR TLFs</span>
+                  </div>
+                </div>
+                <div class="socket-pill-group">
+                  <span class="socket-pill">eCTD Module 5</span>
+                  <span class="socket-pill">GitHub: main</span>
+                </div>
+                <div class="node-status-bar">
+                  <span style="color:var(--text-muted);">Concordance:</span>
+                  <strong style="color:#3fb950;">100% GxP Validated</strong>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Bottom Row: The 5 Dynamically Called Clinical Subagents -->
+            <div class="flow-row-subagents">
+              
+              <!-- Subagent 1: SDTM -->
+              <div class="subagent-node active-executing" id="subnode-sdtm" data-task="SDTM_MAPPING">
+                <div class="subagent-header">
+                  <span class="subagent-icon">🧬</span>
+                  <span class="subagent-badge" id="subnode-badge-sdtm">100% MAPPED</span>
+                </div>
+                <strong class="subagent-title">SDTM Subagent</strong>
+                <span class="subagent-desc">DM, VS, LB, AE, EX standards</span>
+              </div>
+
+              <!-- Subagent 2: ADaM -->
+              <div class="subagent-node" id="subnode-adam" data-task="ADAM_DERIVATION">
+                <div class="subagent-header">
+                  <span class="subagent-icon">📐</span>
+                  <span class="subagent-badge" id="subnode-badge-adam">ADSL/ADAE</span>
+                </div>
+                <strong class="subagent-title">ADaM Subagent</strong>
+                <span class="subagent-desc">ADSL, ADAE, ADLB &amp; flags</span>
+              </div>
+
+              <!-- Subagent 3: Pinnacle 21 QC -->
+              <div class="subagent-node" id="subnode-p21" data-task="PINNACLE21_QC">
+                <div class="subagent-header">
+                  <span class="subagent-icon">🔍</span>
+                  <span class="subagent-badge" id="subnode-badge-p21">5/5 PASS</span>
+                </div>
+                <strong class="subagent-title">P21 QC Subagent</strong>
+                <span class="subagent-desc">FDA/PMDA rule assertions</span>
+              </div>
+
+              <!-- Subagent 4: Double QC -->
+              <div class="subagent-node" id="subnode-double" data-task="DOUBLE_PROG_QC">
+                <div class="subagent-header">
+                  <span class="subagent-icon">⚖️</span>
+                  <span class="subagent-badge" id="subnode-badge-double">&amp;SYSINFO=0</span>
+                </div>
+                <strong class="subagent-title">Double QC Subagent</strong>
+                <span class="subagent-desc">SAS COMPARE vs R admiral</span>
+              </div>
+
+              <!-- Subagent 5: Safety & Efficacy -->
+              <div class="subagent-node" id="subnode-safety" data-task="SAFETY_SURVEILLANCE">
+                <div class="subagent-header">
+                  <span class="subagent-icon">🩺</span>
+                  <span class="subagent-badge" id="subnode-badge-safety">0 HY'S LAW</span>
+                </div>
+                <strong class="subagent-title">Safety Subagent</strong>
+                <span class="subagent-desc">Hy's Law &amp; ANCOVA model</span>
+              </div>
+
+            </div>
+
+          </div>
+
         </section>
 
         <!-- 3. Real-Time Terminal Log -->
@@ -936,6 +1106,8 @@
 
   </div>
 
-  <script src="app.js?v=9.5"></script>
+  <script src="app.js?v=10.0"></script>
+  <!-- Self-Healing Error Pop-up Toast Container -->
+  <div id="self-healing-toast-container"></div>
 </body>
 </html>
