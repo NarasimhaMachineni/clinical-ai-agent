@@ -1,0 +1,15 @@
+﻿{
+  "name": "clinical-domain-ai-agent",
+  "version": "1.0.0",
+  "description": "Autonomous Clinical Domain AI Agent - CDISC SDTM/ADaM, Biostatistics, and GxP Surveillance",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "qc": "python scripts/cdisc_qc_audit.py"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2"
+  }
+}

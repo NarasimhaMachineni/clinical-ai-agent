@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ClinicalOps AI Agent — Autonomous PC Task Engine &amp; GitHub Sync</title>
+  <link rel="stylesheet" href="style.css?v=6.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="agent-layout">
+
+    <!-- =========================================================
+         TOP BAR: MISSION CONTROL
+         ========================================================= -->
+    <header class="agent-header">
+      <div class="header-brand">
+        <div class="brand-icon">🧬</div>
+        <div class="brand-text">
+          <h1>ClinicalOps AI Agent</h1>
+          <span class="brand-tag">Autonomous PC File Engine &amp; GitHub Synchronization</span>
+        </div>
+      </div>
+
+      <div class="header-status-indicator">
+        <span class="status-dot pulse" id="agent-status-dot"></span>
+        <span class="status-label" id="agent-status-label">STATUS: READY</span>
+      </div>
+
+      <div class="header-badges">
+        <div class="hdr-badge" id="badge-pc-folder" title="Monitored PC folder for automatic task execution">
+          <span class="badge-icon">📁</span>
+          <span class="badge-text" id="hdr-pc-dir">PC: data_inbox</span>
+          <span class="badge-live-dot" title="Live Auto-Watcher"></span>
+        </div>
+        <div class="hdr-badge" id="badge-github" title="GitHub Version Control">
+          <span class="badge-icon">🐙</span>
+          <span class="badge-text" id="hdr-gh-status">Git: Local</span>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button class="btn-action-primary" id="btn-run-full-pipeline">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+          <span>Run Pipeline</span>
+        </button>
+        <button class="btn-action-secondary" id="btn-open-upload">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+          <span>Upload EDC</span>
+        </button>
+        <button class="btn-action-secondary" id="btn-header-sync-git">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+          <span>Sync GitHub</span>
+        </button>
+        <a class="btn-action-secondary" href="/api/download/define" download id="btn-download-package">
+          <span>Define.xml</span>
+        </a>
+        <button class="btn-action-ghost" id="btn-open-settings" title="Settings &amp; GitHub Setup">⚙️</button>
+      </div>
+    </header>
+
+    <div class="agent-body">
+      
+      <!-- =========================================================
+           LEFT SIDEBAR: DAILY TASKS, PC FOLDER & GITHUB SYNC
+           ========================================================= -->
+      <aside class="agent-sidebar">
+        
+        <!-- Daily Tasks -->
+        <div class="sidebar-block">
+          <div class="sidebar-heading">Daily Automation Tasks</div>
+          <div class="task-action-list">
+            <button class="task-btn primary" data-task="FULL_PIPELINE">
+              <span class="task-btn-icon">⚡</span>
+              <div class="task-btn-info">
+                <strong>Run Daily Full Pipeline</strong>
+                <span>Real PC &rarr; SDTM &rarr; ADaM &rarr; P21 &rarr; Git</span>
+              </div>
+            </button>
+
+            <button class="task-btn" data-task="SDTM_MAPPING">
+              <span class="task-btn-icon">🧬</span>
+              <div class="task-btn-info">
+                <strong>SDTM Ingestion &amp; Mapping</strong>
+                <span>Transform to DM, VS, LB, AE, EX</span>
+              </div>
+            </button>
+
+            <button class="task-btn" data-task="ADAM_DERIVATION">
+              <span class="task-btn-icon">📐</span>
+              <div class="task-btn-info">
+                <strong>ADaM Derivation Engine</strong>
+                <span>Derive ADSL, ADAE, ADLB &amp; flags</span>
+              </div>
+            </button>
+
+            <button class="task-btn" data-task="P21_AUDIT">
+              <span class="task-btn-icon">🔍</span>
+              <div class="task-btn-info">
+                <strong>Pinnacle 21 QC Audit</strong>
+                <span>Run Python regulatory assertions</span>
+              </div>
+            </button>
+
+            <button class="task-btn" data-task="DOUBLE_PROG_QC">
+              <span class="task-btn-icon">⚖️</span>
+              <div class="task-btn-info">
+                <strong>Double Programming QC</strong>
+                <span>PROC COMPARE independent check</span>
+              </div>
+            </button>
+
+            <button class="task-btn" data-task="SAFETY_SURVEILLANCE">
+              <span class="task-btn-icon">🩺</span>
+              <div class="task-btn-info">
+                <strong>Safety &amp; Hy's Law Screening</strong>
+                <span>ALT/AST/BILI alerts &amp; SAE counts</span>
+              </div>
+            </button>
+
+            <button class="task-btn" data-task="TLF_GENERATION">
+              <span class="task-btn-icon">📊</span>
+              <div class="task-btn-info">
+                <strong>Generate CSR TLF Suite</strong>
+                <span>ICH E3 Table 14-1, 14-2, 14-3</span>
+              </div>
+            </button>
+
+            <button class="task-btn" data-task="DEFINE_XML">
+              <span class="task-btn-icon">📦</span>
+              <div class="task-btn-info">
+                <strong>Define-XML &amp; eCTD Package</strong>
+                <span>Compile submission package</span>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <!-- PC Local File Watcher Integration -->
+        <div class="sidebar-block">
+          <div class="sidebar-heading">PC File Watcher (Zero Mock Data)</div>
+          <div class="pc-sync-card">
+            <div class="pc-sync-header">
+              <span class="pc-folder-icon">📁</span>
+              <div class="pc-folder-meta">
+                <span class="pc-folder-name" id="sidebar-pc-folder">data_inbox/</span>
+                <span class="pc-folder-desc" id="sidebar-pc-status">Auto-watching for new CSV files</span>
+              </div>
+            </div>
+            <div class="pc-file-list" id="sidebar-file-list">
+              <!-- Rendered via JS -->
+              <div class="pc-file-tag">raw_demog.csv</div>
+              <div class="pc-file-tag">raw_ae.csv</div>
+              <div class="pc-file-tag">raw_labs.csv</div>
+            </div>
+            <div class="pc-actions-row">
+              <button class="btn-card-action" id="btn-sidebar-upload">Upload Files</button>
+              <button class="btn-card-action secondary" id="btn-sidebar-scan">Scan Now</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- GitHub Integration Box -->
+        <div class="sidebar-block">
+          <div class="sidebar-heading">GitHub Version Control</div>
+          <div class="gh-sync-card">
+            <div class="gh-info-row">
+              <span class="gh-branch-badge" id="sidebar-gh-branch">branch: main</span>
+              <span class="gh-sync-status" id="sidebar-gh-sync-status">Ready</span>
+            </div>
+            <div class="gh-last-commit" id="sidebar-gh-commit">
+              Last commit: Automated CDISC run
+            </div>
+            <div class="gh-actions-row">
+              <button class="btn-card-action" id="btn-git-push">Push to Git</button>
+              <button class="btn-card-action secondary" id="btn-git-pull">Pull</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Metrics Box -->
+        <div class="sidebar-block">
+          <div class="sidebar-heading">Real Data Metrics</div>
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <span class="metric-val" id="metric-subjects">-</span>
+              <span class="metric-lbl">Total Subjects</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-val" id="metric-saffl">-</span>
+              <span class="metric-lbl">Safety (SAFFL)</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-val" id="metric-teae">-</span>
+              <span class="metric-lbl">Total TEAEs</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-val" id="metric-hyslaw">-</span>
+              <span class="metric-lbl">Hy's Law Cases</span>
+            </div>
+            <div class="metric-card full-span">
+              <span class="metric-val text-green" id="metric-p21">4 / 4 PASS</span>
+              <span class="metric-lbl">P21 Regulatory Assertions</span>
+            </div>
+          </div>
+        </div>
+
+      </aside>
+
+      <!-- =========================================================
+           MAIN WORKSPACE: COMMANDER, PIPELINE & ARTIFACTS
+           ========================================================= -->
+      <main class="agent-main">
+        
+        <!-- 1. Task Commander Input Bar -->
+        <section class="commander-section">
+          <div class="commander-box">
+            <span class="commander-icon">⚡</span>
+            <input type="text" id="commander-input" placeholder="Instruct the AI Agent: e.g. 'Scan PC inbox data', 'Run P21 audit', 'Derive ADLB change from baseline', 'Push deliverables to GitHub'...">
+            <button class="btn-execute" id="btn-execute-cmd">
+              <span>Execute Task</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </button>
+          </div>
+
+          <div class="commander-pills">
+            <span class="pills-label">Quick Directives:</span>
+            <button class="cmd-pill" data-cmd="Run daily full clinical pipeline on real PC data">⚡ Run Daily Pipeline</button>
+            <button class="cmd-pill" data-cmd="Run PC system diagnostics and environment check">🖥️ PC Diagnostics</button>
+            <button class="cmd-pill" data-cmd="Schedule automated daily pipeline on my PC">⏰ Schedule Task</button>
+            <button class="cmd-pill" data-cmd="Run Pinnacle 21 validation audit">🔍 Run P21 Audit</button>
+            <button class="cmd-pill" data-cmd="Check for Hy's Law liver signals and SAEs">🩺 Hy's Law Screening</button>
+            <button class="cmd-pill" data-cmd="Perform independent double programming comparison">⚖️ Double Prog Compare</button>
+            <button class="cmd-pill" data-cmd="Synchronize deliverables to GitHub">🐙 Push to GitHub</button>
+            <button class="cmd-pill" data-cmd="Generate CSR Table 14-1 and Table 14-2">📊 CSR Tables</button>
+          </div>
+        </section>
+
+        <!-- 2. State Machine Visualizer -->
+        <section class="pipeline-section">
+          <div class="pipeline-tracker" id="pipeline-tracker">
+            <div class="pipeline-step active" id="step-ingest">
+              <div class="step-circle">1</div>
+              <div class="step-label">PC Ingest</div>
+            </div>
+            <div class="pipeline-connector"></div>
+            <div class="pipeline-step active" id="step-sdtm">
+              <div class="step-circle">2</div>
+              <div class="step-label">SDTM Map</div>
+            </div>
+            <div class="pipeline-connector"></div>
+            <div class="pipeline-step active" id="step-adam">
+              <div class="step-circle">3</div>
+              <div class="step-label">ADaM Derive</div>
+            </div>
+            <div class="pipeline-connector"></div>
+            <div class="pipeline-step active" id="step-p21">
+              <div class="step-circle">4</div>
+              <div class="step-label">P21 Audit</div>
+            </div>
+            <div class="pipeline-connector"></div>
+            <div class="pipeline-step active" id="step-tlf">
+              <div class="step-circle">5</div>
+              <div class="step-label">CSR TLFs</div>
+            </div>
+            <div class="pipeline-connector"></div>
+            <div class="pipeline-step active" id="step-package">
+              <div class="step-circle">6</div>
+              <div class="step-label">Deliverables &amp; Git</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 3. Real-Time Terminal Log -->
+        <section class="terminal-section">
+          <div class="terminal-header">
+            <div class="terminal-dots">
+              <span class="term-dot red"></span>
+              <span class="term-dot yellow"></span>
+              <span class="term-dot green"></span>
+            </div>
+            <span class="terminal-title">Agent Execution Console &amp; Live Terminal (PC File Watcher &amp; Git Sync)</span>
+            <button class="btn-term-clear" id="btn-clear-logs">Clear Logs</button>
+          </div>
+          <div class="terminal-body" id="terminal-body">
+            <div class="log-row info"><span class="log-ts">[SYSTEM]</span> ClinicalOps AI Agent initialized in Real PC Data &amp; GitHub Sync Mode.</div>
+          </div>
+        </section>
+
+        <!-- 4. Interactive Artifacts & Results Tabs -->
+        <section class="results-section">
+          <div class="results-tabs">
+            <button class="tab-btn active" data-tab="tab-pc-agent">🖥️ PC System Agent</button>
+            <button class="tab-btn" data-tab="tab-qc">🔍 P21 QC Findings</button>
+            <button class="tab-btn" data-tab="tab-safety">🩺 Safety &amp; Hy's Law</button>
+            <button class="tab-btn" data-tab="tab-tlfs">📊 CSR Tables Preview</button>
+            <button class="tab-btn" data-tab="tab-datasets">📁 Dataset Inspector</button>
+            <button class="tab-btn" data-tab="tab-deliverables">📥 Deliverables &amp; Downloads</button>
+          </div>
+
+          <div class="results-tab-content">
+            
+            <!-- TAB 0: PC System Agent -->
+            <div class="tab-pane active" id="tab-pc-agent">
+              <div class="pane-card">
+                <div class="card-title-bar">
+                  <h3>🖥️ PC System Diagnostics, Automation &amp; Script Runner</h3>
+                  <button class="btn-sm" id="btn-refresh-diag">Refresh System Health</button>
+                </div>
+                
+                <!-- System Hardware & Environment Grid -->
+                <div class="pc-diag-grid">
+                  <div class="diag-card">
+                    <span class="diag-val" id="diag-os">Windows 10 64-bit</span>
+                    <span class="diag-lbl">Operating System</span>
+                  </div>
+                  <div class="diag-card">
+                    <span class="diag-val" id="diag-ram">16.0 GB RAM</span>
+                    <span class="diag-lbl">System Memory</span>
+                  </div>
+                  <div class="diag-card">
+                    <span class="diag-val" id="diag-python">Python 3.13</span>
+                    <span class="diag-lbl">Python Environment</span>
+                  </div>
+                  <div class="diag-card">
+                    <span class="diag-val" id="diag-git">Git 2.55</span>
+                    <span class="diag-lbl">Git Version Control</span>
+                  </div>
+                </div>
+
+                <!-- PC Direct Command Runner -->
+                <div class="pc-agent-subpanel" style="margin-top:16px;">
+                  <h4 style="color:var(--text-secondary); font-size:12.5px; margin-bottom:8px;">⚡ Direct PC PowerShell / Python Command Runner</h4>
+                  <div class="pc-cmd-bar">
+                    <select id="pc-exec-type" class="form-select" style="max-width:130px;">
+                      <option value="powershell">PowerShell</option>
+                      <option value="python">Python</option>
+                    </select>
+                    <input type="text" id="input-direct-pc-cmd" class="form-input" placeholder="e.g. Get-Process | Select -First 5, or scripts/cdisc_qc_audit.py" style="flex:1;">
+                    <button class="btn-primary" id="btn-run-pc-cmd">Run on PC</button>
+                  </div>
+                  <pre class="code-output" id="pc-cmd-output" style="max-height:140px; margin-top:8px;">Command output will appear here...</pre>
+                </div>
+
+                <!-- Active Background Schedulers -->
+                <div class="pc-agent-subpanel" style="margin-top:16px;">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <h4 style="color:var(--text-secondary); font-size:12.5px; margin:0;">⏰ Background Autonomous Schedulers</h4>
+                    <button class="btn-sm" id="btn-add-hourly-schedule">+ Schedule 1-Hour Automation</button>
+                  </div>
+                  <div id="pc-schedules-container">
+                    <div style="color:var(--text-muted); font-size:12px; padding:6px 0;">No scheduled background tasks currently active. Click above to schedule.</div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+            
+            <!-- TAB 1: P21 QC Audit -->
+            <div class="tab-pane active" id="tab-qc">
+              <div class="pane-card">
+                <div class="card-title-bar">
+                  <h3>Pinnacle 21 &amp; CDISC Regulatory QC Audit</h3>
+                  <span class="badge-pass" id="qc-summary-badge">ALL CHECKS PASSED</span>
+                </div>
+                <div class="qc-findings-list" id="qc-findings-container">
+                  <!-- Injected via JavaScript -->
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB 2: Safety & Hy's Law -->
+            <div class="tab-pane" id="tab-safety">
+              <div class="pane-card">
+                <div class="card-title-bar">
+                  <h3>Clinical Safety Surveillance &amp; Hy's Law Evaluation</h3>
+                </div>
+                <div class="safety-dashboard">
+                  <div class="safety-stat-row">
+                    <div class="safety-stat-box green">
+                      <strong>Hy's Law Signals</strong>
+                      <span id="safety-hyslaw-val">0 Cases (Normal)</span>
+                      <small>ALT/AST &ge; 3x ULN &amp; TBL &ge; 2x ULN &amp; ALP &lt; 2x ULN</small>
+                    </div>
+                    <div class="safety-stat-box">
+                      <strong>Serious Adverse Events (SAEs)</strong>
+                      <span id="safety-sae-val">0 Events</span>
+                      <small>Adverse events flagged AESER='Y'</small>
+                    </div>
+                    <div class="safety-stat-box">
+                      <strong>Total Treatment-Emergent AEs</strong>
+                      <span id="safety-teae-val">0 Recorded</span>
+                      <small>Adverse events starting on/after first dose (TRTEMFL='Y')</small>
+                    </div>
+                  </div>
+
+                  <h4 style="margin:16px 0 8px; color:var(--text-secondary); font-size:13px;">Adverse Event Frequency by MedDRA System Organ Class (SOC):</h4>
+                  <div class="soc-table-wrapper">
+                    <table class="data-table" id="soc-table">
+                      <thead>
+                        <tr>
+                          <th>MedDRA System Organ Class (SOC)</th>
+                          <th>Recorded Events</th>
+                        </tr>
+                      </thead>
+                      <tbody id="soc-table-body">
+                        <!-- Injected via JS -->
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB 3: CSR Tables -->
+            <div class="tab-pane" id="tab-tlfs">
+              <div class="pane-card">
+                <div class="card-title-bar">
+                  <h3>Clinical Study Report (CSR) Table Suite per ICH E3</h3>
+                  <div class="card-actions">
+                    <button class="btn-sm" id="btn-copy-tlfs">Copy Tables</button>
+                    <a class="btn-sm" href="/api/download/tlf" download>Download tlfs.txt</a>
+                  </div>
+                </div>
+                <pre class="code-output" id="tlf-text-view">Execute task to generate CSR tables...</pre>
+              </div>
+            </div>
+
+            <!-- TAB 4: Dataset Inspector -->
+            <div class="tab-pane" id="tab-datasets">
+              <div class="pane-card">
+                <div class="card-title-bar">
+                  <h3>CDISC Dataset Inspector</h3>
+                  <div class="dataset-pills">
+                    <button class="pill-btn active" data-dset="ADSL">ADSL</button>
+                    <button class="pill-btn" data-dset="ADAE">ADAE</button>
+                    <button class="pill-btn" data-dset="ADLB">ADLB</button>
+                    <button class="pill-btn" data-dset="DM">DM</button>
+                  </div>
+                </div>
+                <div class="table-scroll-box" id="dataset-table-container">
+                  <!-- Data table injected via JS -->
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB 5: Deliverables & Downloads -->
+            <div class="tab-pane" id="tab-deliverables">
+              <div class="pane-card">
+                <div class="card-title-bar">
+                  <h3>eCTD Module 5 Package &amp; Regulatory Deliverables</h3>
+                </div>
+                <div class="deliverables-grid" id="deliverables-grid">
+                  <!-- Injected via JS -->
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+      </main>
+    </div>
+
+    <!-- Upload EDC Files Modal -->
+    <div class="modal-overlay" id="upload-modal" style="display:none;">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>📁 Upload Real EDC Data to PC Inbox</h3>
+          <button class="btn-close-modal" id="btn-close-upload">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p style="color:var(--text-secondary); font-size:13px; margin-bottom:14px;">
+            Select or drag &amp; drop real EDC clinical CSV or JSON files (e.g. <code>raw_demog.csv</code>, <code>raw_ae.csv</code>, <code>raw_labs.csv</code>, <code>raw_vitals.csv</code>). Files will be saved directly into your PC watched directory.
+          </p>
+          <div class="file-drop-area" id="file-drop-zone">
+            <span style="font-size:32px; display:block; margin-bottom:8px;">📥</span>
+            <strong>Drag &amp; Drop CSV files here</strong>
+            <span style="color:var(--text-muted); font-size:12px; display:block; margin:6px 0;">or click to browse your PC</span>
+            <input type="file" id="file-input-element" multiple accept=".csv,.json" style="display:none;">
+          </div>
+          <div id="upload-files-status" style="margin-top:12px; font-size:13px; color:var(--accent-blue);"></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" id="btn-dismiss-upload">Done</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings & GitHub Configuration Modal -->
+    <div class="modal-overlay" id="settings-modal" style="display:none;">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>⚙️ PC Watcher &amp; GitHub Configuration</h3>
+          <button class="btn-close-modal" id="btn-close-settings">&times;</button>
+        </div>
+        <div class="modal-body">
+          
+          <h4 style="color:var(--text-primary); margin-bottom:10px; font-size:14px;">📁 PC Local Directory Watcher</h4>
+          <div class="form-group">
+            <label>Watched Folder Path on Your PC</label>
+            <input type="text" id="input-pc-folder" class="form-input" placeholder="C:\Users\...\data_inbox">
+            <small style="color:var(--text-muted); display:block; margin-top:4px;">The agent watches this directory on your PC and runs tasks automatically when files are modified.</small>
+          </div>
+          <div class="form-group">
+            <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+              <input type="checkbox" id="check-auto-watch" checked>
+              <span>Enable Automatic Task Execution on File Changes</span>
+            </label>
+          </div>
+
+          <hr style="border:0; border-top:1px solid var(--border-color); margin:18px 0;">
+
+          <h4 style="color:var(--text-primary); margin-bottom:10px; font-size:14px;">🐙 GitHub Version Control</h4>
+          <div class="form-group">
+            <label>Remote GitHub Repository URL</label>
+            <input type="text" id="input-gh-url" class="form-input" placeholder="https://github.com/username/clinical-study-repo.git">
+          </div>
+          <div class="form-group">
+            <label>Branch</label>
+            <input type="text" id="input-gh-branch" class="form-input" placeholder="main" value="main">
+          </div>
+          <div class="form-group">
+            <label>Personal Access Token (PAT) - Optional for private repos</label>
+            <input type="password" id="input-gh-token" class="form-input" placeholder="ghp_...">
+          </div>
+          <div class="form-group">
+            <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+              <input type="checkbox" id="check-gh-autopush">
+              <span>Automatically Push Deliverables to GitHub on Pipeline Completion</span>
+            </label>
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button class="btn-primary" id="btn-save-settings">Save Configurations</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="app.js?v=6.0"></script>
+</body>
+</html>

@@ -1,0 +1,127 @@
+﻿/**
+ * CDISC Define-XML v2.1 Metadata Generator
+ * Produces machine-readable XML metadata for FDA eCTD Module 5 submission packages.
+ */
+
+function generateDefineXml(studyId, sdtmResult, adamResult) {
+  const dateStr = new Date().toISOString().split("T")[0];
+
+  const xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
+<ODM xmlns="http://www.cdisc.org/ns/odm/v2.1"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     xmlns:def="http://www.cdisc.org/ns/def/v2.1"
+     FileType="Snapshot"
+     FileOID="DEFINE_${studyId}_${dateStr}"
+     CreationDateTime="${new Date().toISOString()}"
+     ODMVersion="1.3.2">
+  
+  <Study OID="STUDY.${studyId}">
+    <GlobalVariables>
+      <StudyName>${studyId} - Phase II Placebo-Controlled Trial</StudyName>
+      <StudyDescription>Efficacy and Safety Evaluation of Novel Diabetes Therapeutic</StudyDescription>
+      <ProtocolName>PROTOCOL-${studyId}</ProtocolName>
+    </GlobalVariables>
+    
+    <MetaDataVersion OID="MDV.${studyId}.001" Name="CDISC SDTM v3.3 &amp; ADaM v1.2 Submission Package" def:DefineVersion="2.1.0">
+      
+      <!-- STANDARDS SPECIFICATION -->
+      <def:Standards>
+        <def:Standard OID="STD.SDTM" Name="SDTMIG" Version="3.3" Status="Final" Type="IG" PublishingSet="CDISC"/>
+        <def:Standard OID="STD.ADaM" Name="ADaMIG" Version="1.2" Status="Final" Type="IG" PublishingSet="CDISC"/>
+      </def:Standards>
+
+      <!-- ITEM GROUP DEFINITIONS (DATASETS) -->
+      
+      <!-- SDTM DM: Demographics -->
+      <ItemGroupDef OID="IG.DM" Name="DM" Repeating="No" IsReferenceData="No"
+                    Domain="DM" Purpose="Tabulation" Structure="One record per subject"
+                    def:StandardOID="STD.SDTM" def:Comment="Demographics domain as per SDTMIG v3.3">
+        <Description><TranslatedText xml:lang="en">Demographics</TranslatedText></Description>
+        <ItemRef ItemOID="IT.DM.STUDYID" OrderNumber="1" Mandatory="Yes"/>
+        <ItemRef ItemOID="IT.DM.DOMAIN" OrderNumber="2" Mandatory="Yes"/>
+        <ItemRef ItemOID="IT.DM.USUBJID" OrderNumber="3" Mandatory="Yes" KeySequence="1"/>
+        <ItemRef ItemOID="IT.DM.SUBJID" OrderNumber="4" Mandatory="Yes"/>
+        <ItemRef ItemOID="IT.DM.RFSTDTC" OrderNumber="5" Mandatory="No"/>
+        <ItemRef ItemOID="IT.DM.AGE" OrderNumber="6" Mandatory="Yes"/>
+        <ItemRef ItemOID="IT.DM.AGEU" OrderNumber="7" Mandatory="Yes"/>
+        <ItemRef ItemOID="IT.DM.SEX" OrderNumber="8" Mandatory="Yes"/>
+        <ItemRef ItemOID="IT.DM.RACE" OrderNumber="9" Mandatory="Yes"/>
+        <ItemRef ItemOID="IT.DM.ARMCD" OrderNumber="10" Mandatory="Yes"/>
+        <ItemRef ItemOID="IT.DM.ARM" OrderNumber="11" Mandatory="Yes"/>
+      </ItemGroupDef>
+
+      <!-- SDTM AE: Adverse Events -->
+      <ItemGroupDef OID="IG.AE" Name="AE" Repeating="Yes" IsReferenceData="No"
+                    Domain="AE" Purpose="Tabulation" Structure="One record per adverse event per subject"
+                    def:StandardOID="STD.SDTM">
+        <Description><TranslatedText xml:lang="en">Adverse Events</TranslatedText></Description>
+        <ItemRef ItemOID="IT.AE.USUBJID" OrderNumber="1" Mandatory="Yes" KeySequence="1"/>
+        <ItemRef ItemOID="IT.AE.AESEQ" OrderNumber="2" Mandatory="Yes" KeySequence="2"/>
+        <ItemRef ItemOID="IT.AE.AETERM" OrderNumber="3" Mandatory="Yes"/>
+        <ItemRef ItemOID="IT.AE.AEPT" OrderNumber="4" Mandatory="Yes"/>
+        <ItemRef ItemOID="IT.AE.AESOC" OrderNumber="5" Mandatory="Yes"/>
+        <ItemRef ItemOID="IT.AE.AESEV" OrderNumber="6" Mandatory="Yes"/>
+        <ItemRef ItemOID="IT.AE.AEREL" OrderNumber="7" Mandatory="Yes"/>
+        <ItemRef ItemOID="IT.AE.AESER" OrderNumber="8" Mandatory="Yes"/>
+        <ItemRef ItemOID="IT.AE.AESTDTC" OrderNumber="9" Mandatory="No"/>
+      </ItemGroupDef>
+
+      <!-- ADaM ADSL: Subject-Level Analysis Dataset -->
+      <ItemGroupDef OID="IG.ADSL" Name="ADSL" Repeating="No" IsReferenceData="No"
+                    Purpose="Analysis" Structure="One record per subject"
+                    def:StandardOID="STD.ADaM" def:Class="SUBJECT LEVEL ANALYSIS DATASET">
+        <Description><TranslatedText xml:lang="en">Subject-Level Analysis Dataset</TranslatedText></Description>
+        <ItemRef ItemOID="IT.ADSL.USUBJID" OrderNumber="1" Mandatory="Yes" KeySequence="1"/>
+        <ItemRef ItemOID="IT.ADSL.TRT01P" OrderNumber="2" Mandatory="Yes"/>
+        <ItemRef ItemOID="IT.ADSL.TRTSDT" OrderNumber="3" Mandatory="No"/>
+        <ItemRef ItemOID="IT.ADSL.SAFFL" OrderNumber="4" Mandatory="Yes"/>
+        <ItemRef ItemOID="IT.ADSL.ITTFL" OrderNumber="5" Mandatory="Yes"/>
+        <ItemRef ItemOID="IT.ADSL.PPFL" OrderNumber="6" Mandatory="Yes"/>
+        <ItemRef ItemOID="IT.ADSL.COMPLFL" OrderNumber="7" Mandatory="Yes"/>
+      </ItemGroupDef>
+
+      <!-- ITEM DEFINITIONS (VARIABLES) -->
+      <ItemDef OID="IT.DM.USUBJID" Name="USUBJID" DataType="text" Length="40">
+        <Description><TranslatedText xml:lang="en">Unique Subject Identifier</TranslatedText></Description>
+        <def:Origin Type="Derived"/>
+      </ItemDef>
+      <ItemDef OID="IT.DM.AGE" Name="AGE" DataType="integer" Length="8">
+        <Description><TranslatedText xml:lang="en">Age</TranslatedText></Description>
+        <def:Origin Type="CRF"/>
+      </ItemDef>
+      <ItemDef OID="IT.DM.SEX" Name="SEX" DataType="text" Length="1">
+        <Description><TranslatedText xml:lang="en">Sex</TranslatedText></Description>
+        <CodeListRef CodeListOID="CL.SEX"/>
+        <def:Origin Type="CRF"/>
+      </ItemDef>
+      <ItemDef OID="IT.ADSL.SAFFL" Name="SAFFL" DataType="text" Length="1">
+        <Description><TranslatedText xml:lang="en">Safety Population Flag</TranslatedText></Description>
+        <CodeListRef CodeListOID="CL.NY"/>
+        <def:Origin Type="Derived"/>
+      </ItemDef>
+      <ItemDef OID="IT.ADSL.ITTFL" Name="ITTFL" DataType="text" Length="1">
+        <Description><TranslatedText xml:lang="en">Intent-to-Treat Population Flag</TranslatedText></Description>
+        <CodeListRef CodeListOID="CL.NY"/>
+        <def:Origin Type="Derived"/>
+      </ItemDef>
+
+      <!-- CONTROLLED TERMINOLOGY CODELISTS -->
+      <CodeList OID="CL.SEX" Name="Sex" DataType="text">
+        <CodeListItem CodedValue="M"><Decode><TranslatedText xml:lang="en">Male</TranslatedText></Decode></CodeListItem>
+        <CodeListItem CodedValue="F"><Decode><TranslatedText xml:lang="en">Female</TranslatedText></Decode></CodeListItem>
+      </CodeList>
+      <CodeList OID="CL.NY" Name="No Yes Response" DataType="text">
+        <CodeListItem CodedValue="Y"><Decode><TranslatedText xml:lang="en">Yes</TranslatedText></Decode></CodeListItem>
+        <CodeListItem CodedValue="N"><Decode><TranslatedText xml:lang="en">No</TranslatedText></Decode></CodeListItem>
+      </CodeList>
+
+    </MetaDataVersion>
+  </Study>
+</ODM>`;
+
+  return xmlContent;
+}
+
+module.exports = {
+  generateDefineXml
+};
