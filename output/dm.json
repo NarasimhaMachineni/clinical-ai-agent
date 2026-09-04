@@ -184,19 +184,19 @@
     "DOMAIN": "DM",
     "USUBJID": "ONC-2025-001-010",
     "SUBJID": "010",
-    "SITEID": "105",
-    "RFSTDTC": "2025-02-05T09:00:00",
-    "RFENDTC": "2025-07-15T17:00:00",
-    "AGE": 73,
+    "SITEID": "10",
+    "RFSTDTC": "2026-09-04",
+    "RFENDTC": "2026-09-04",
+    "AGE": 50,
     "AGEU": "YEARS",
-    "SEX": "F",
+    "SEX": "M",
     "RACE": "WHITE",
     "ETHNIC": "HISPANIC OR LATINO",
-    "ARMCD": "TRT",
-    "ARM": "Pembrolizumab 200mg",
+    "ARMCD": "ACT",
+    "ARM": "Active Drug",
     "COUNTRY": "USA",
     "_hasDosed": 1,
     "_hasMajorViolation": 0,
-    "_compliance": 93
+    "_compliance": 90
   }
 ]

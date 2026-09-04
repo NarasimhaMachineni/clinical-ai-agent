@@ -135,14 +135,14 @@
     "AESOC": "SKIN AND SUBCUTANEOUS TISSUE DISORDERS",
     "AESTDTC": "2025-03-01T10:00:00",
     "AESTDT": "2025-03-01",
-    "AEDY": 25,
+    "AEDY": -552,
     "AESEV": "MILD",
     "AESEVN": 1,
     "AEREL": "RELATED",
     "AERELFL": "N",
     "AESER": "N",
-    "TRTEMFL": "Y",
-    "TRT01A": "Pembrolizumab 200mg",
+    "TRTEMFL": "N",
+    "TRT01A": "Active Drug",
     "TRT01AN": 2,
     "SAFFL": "Y"
   }
