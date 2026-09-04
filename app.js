@@ -101,7 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // =========================================================
 async function loadInitialState() {
   if (isStaticWeb) {
-    appendTerminalLog('INFO', 'SYSTEM', `ClinicalOps AI Agent Online at ${getFormattedLocalTime()}. Self-driving GxP surveillance active.`);
+    appendTerminalLog('INFO', 'SYSTEM', `ClinicalOps AI Agent is Online at ${getFormattedLocalTime()} — Auto-pilot activated. Checking your data every 15 seconds.`);
     appendTerminalLog('STATE', 'AUTONOMOUS', 'Auto-executing comprehensive clinical check and review on real cohort...');
     executeTask('SDTM_MAPPING');
     return;
@@ -1749,9 +1749,9 @@ async function handleMiniFiles(files) {
   if (!files || files.length === 0) return;
   const miniStatus = document.getElementById('mini-upload-status');
   if (miniStatus) {
-    miniStatus.innerHTML = `📥 Ingesting <strong>${files.length}</strong> PC file(s)... Mapping CDISC domains...`;
+    miniStatus.innerHTML = `📥 Reading <strong>${files.length}</strong> file(s)... Auto-detecting data type...`;
   }
-  appendTerminalLog('STATE', 'EDC_INGEST', `Received ${files.length} real EDC file(s) from PC at ${getFormattedLocalTime()}.`);
+  appendTerminalLog('STATE', 'UPLOAD', `${files.length} file(s) received from your computer at ${getFormattedLocalTime()} — detecting data structure...`);
 
   let loadedFiles = [];
 
@@ -1763,7 +1763,7 @@ async function handleMiniFiles(files) {
         const text = ev.target.result;
         const domain = parseClientSideFile(f.name, text);
         loadedFiles.push({ name: f.name, domain });
-        appendTerminalLog('OK', 'FILE_LOADED', `[PC BRIDGE] ${f.name} ingested -> mapped to CDISC domain: ${domain || 'CUSTOM'}.`);
+        appendTerminalLog('OK', 'FILE_READY', `${f.name} loaded and mapped to ${domain ? 'clinical domain: ' + domain : 'custom dataset'} — ready for analysis.`);
         resolve();
       };
       reader.onerror = () => resolve();
@@ -1775,7 +1775,7 @@ async function handleMiniFiles(files) {
   updateIngestionFilePills();
 
   if (miniStatus) {
-    miniStatus.innerHTML = `✅ <strong>${loadedFiles.length} file(s) ingested &amp; mapped!</strong> Auto-deriving SDTM &amp; ADaM...`;
+    miniStatus.innerHTML = `✅ <strong>${loadedFiles.length} file(s) processed!</strong> Building analysis datasets...`;
   }
 
   // Execute SDTM mapping immediately to update all tables and metrics
@@ -1783,7 +1783,7 @@ async function handleMiniFiles(files) {
 
   if (miniStatus) {
     setTimeout(() => {
-      miniStatus.innerHTML = `✅ CDISC SDTM v3.3 &amp; ADaM v1.2 updated with newly ingested PC data.`;
+      miniStatus.innerHTML = `✅ All datasets updated with your new data — review results in the tabs below.`;
       setTimeout(() => { miniStatus.innerHTML = ''; }, 5000);
     }, 1200);
   }
@@ -1791,13 +1791,31 @@ async function handleMiniFiles(files) {
 
 function parseClientSideFile(name, text) {
   if (!text || typeof text !== 'string') return null;
+  const lower = name.toLowerCase();
+
+  // Detect delimiter: TSV or CSV or pipe-separated
+  let delimiter = ',';
+  if (lower.endsWith('.tsv') || lower.endsWith('.txt')) delimiter = '\t';
+
+  // Try JSON first for .json files
+  if (lower.endsWith('.json')) {
+    try {
+      const json = JSON.parse(text);
+      const rows = Array.isArray(json) ? json : (json.data || json.records || Object.values(json)[0] || []);
+      if (rows.length > 0) {
+        const headers = Object.keys(rows[0]).map(h => h.toUpperCase());
+        return detectAndStoreDomain(name, rows, headers);
+      }
+    } catch(e) { /* not JSON */ }
+  }
+
   const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
   if (lines.length < 2) return null;
 
-  const headers = lines[0].split(',').map(h => h.trim().replace(/^["']|["']$/g, '').toUpperCase());
+  const headers = lines[0].split(delimiter).map(h => h.trim().replace(/^["']|["']$/g, '').toUpperCase());
   const rows = [];
   for (let i = 1; i < lines.length; i++) {
-    const vals = lines[i].split(',');
+    const vals = lines[i].split(delimiter);
     const r = {};
     headers.forEach((h, idx) => {
       r[h] = (vals[idx] || '').trim().replace(/^["']|["']$/g, '');
@@ -1805,40 +1823,38 @@ function parseClientSideFile(name, text) {
     rows.push(r);
   }
 
+  return detectAndStoreDomain(name, rows, headers);
+}
+
+function detectAndStoreDomain(name, rows, headers) {
   const lower = name.toLowerCase();
   let domain = null;
-  if (lower.includes('dm') || lower.includes('demog')) {
-    clientRealData.DM = rows;
-    domain = 'DM';
-  } else if (lower.includes('vs') || lower.includes('vital')) {
-    clientRealData.VS = rows;
-    domain = 'VS';
-  } else if (lower.includes('lb') || lower.includes('lab')) {
-    clientRealData.LB = rows;
-    domain = 'LB';
-  } else if (lower.includes('ae')) {
-    clientRealData.AE = rows;
-    domain = 'AE';
-  } else if (lower.includes('ex') || lower.includes('dose') || lower.includes('dosing')) {
-    clientRealData.EX = rows;
-    domain = 'EX';
-  } else {
-    // Header based fallback
-    if (headers.includes('AGE') || headers.includes('SEX') || headers.includes('ARM')) {
-      clientRealData.DM = rows;
-      domain = 'DM';
-    } else if (headers.includes('VSTEST') || headers.includes('SYSBP') || headers.includes('DIABP')) {
-      clientRealData.VS = rows;
-      domain = 'VS';
-    } else if (headers.includes('LBTEST') || headers.includes('LBTESTCD') || headers.includes('ALT')) {
-      clientRealData.LB = rows;
-      domain = 'LB';
-    } else if (headers.includes('AETERM') || headers.includes('AESOC')) {
-      clientRealData.AE = rows;
-      domain = 'AE';
-    } else if (headers.includes('EXDOSE') || headers.includes('EXTRT')) {
-      clientRealData.EX = rows;
-      domain = 'EX';
+
+  // Filename-based detection (primary)
+  if (/dm|demog|demographic|patient/.test(lower)) { clientRealData.DM = rows; domain = 'DM'; }
+  else if (/vs|vital|blood.pressure|bp|hr|pulse/.test(lower)) { clientRealData.VS = rows; domain = 'VS'; }
+  else if (/lb|lab|laborator|chemistry|hematolog/.test(lower)) { clientRealData.LB = rows; domain = 'LB'; }
+  else if (/ae|adverse|event|side.effect|safety/.test(lower)) { clientRealData.AE = rows; domain = 'AE'; }
+  else if (/ex|dose|dosing|exposure|medication|treatment/.test(lower)) { clientRealData.EX = rows; domain = 'EX'; }
+  else if (/cm|conmed|concomitant/.test(lower)) { clientRealData.CM = rows; domain = 'CM'; }
+  else if (/mh|history|medical.history/.test(lower)) { clientRealData.MH = rows; domain = 'MH'; }
+  else if (/eg|ecg|electro|ekg/.test(lower)) { clientRealData.EG = rows; domain = 'EG'; }
+  else if (/qs|question|questionnaire|survey/.test(lower)) { clientRealData.QS = rows; domain = 'QS'; }
+  else {
+    // Header-based fallback (secondary)
+    const h = new Set(headers);
+    if (h.has('AGE') || h.has('SEX') || h.has('ARM') || h.has('RACE')) { clientRealData.DM = rows; domain = 'DM'; }
+    else if (h.has('VSTEST') || h.has('VSTESTCD') || h.has('SYSBP') || h.has('DIABP') || h.has('PULSE')) { clientRealData.VS = rows; domain = 'VS'; }
+    else if (h.has('LBTEST') || h.has('LBTESTCD') || h.has('ALT') || h.has('AST') || h.has('HBA1C')) { clientRealData.LB = rows; domain = 'LB'; }
+    else if (h.has('AETERM') || h.has('AESOC') || h.has('AESEV') || h.has('AEREL')) { clientRealData.AE = rows; domain = 'AE'; }
+    else if (h.has('EXDOSE') || h.has('EXTRT') || h.has('EXROUTE') || h.has('EXSTDTC')) { clientRealData.EX = rows; domain = 'EX'; }
+    else if (h.has('CMTRT') || h.has('CMDECOD') || h.has('CMINDC')) { clientRealData.CM = rows; domain = 'CM'; }
+    else if (h.has('MHTERM') || h.has('MHDECOD') || h.has('MHSOC')) { clientRealData.MH = rows; domain = 'MH'; }
+    else if (h.has('EGTESTCD') || h.has('QTCF') || h.has('QTCB')) { clientRealData.EG = rows; domain = 'EG'; }
+    else {
+      // Store as raw custom data
+      clientRealData['CUSTOM'] = rows;
+      domain = 'CUSTOM';
     }
   }
   return domain;

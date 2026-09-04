@@ -2797,3 +2797,464 @@ html, body {
   justify-content: flex-end;
   gap: 10px;
 }
+
+/* =========================================================
+   HEADER: CLEAN BRAND-ONLY MODE (v13.0)
+   ========================================================= */
+.agent-header {
+  height: 52px;
+  background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+  border-bottom: 1px solid rgba(56, 189, 248, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  flex-shrink: 0;
+  position: relative;
+  backdrop-filter: blur(10px);
+}
+
+.agent-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(56,189,248,0.4), transparent);
+}
+
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-icon {
+  font-size: 20px;
+  background: linear-gradient(135deg, rgba(56,189,248,0.15), rgba(168,85,247,0.15));
+  border: 1px solid rgba(56,189,248,0.3);
+  border-radius: 10px;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 12px rgba(56,189,248,0.15);
+}
+
+.brand-text h1 {
+  font-size: 16px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.4px;
+  background: linear-gradient(135deg, #fff 40%, var(--primary-blue) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.brand-tag {
+  display: none; /* removed from header per user request */
+}
+
+.header-status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(63, 185, 80, 0.08);
+  border: 1px solid rgba(63, 185, 80, 0.25);
+  padding: 6px 14px;
+  border-radius: 20px;
+  transition: all 0.3s;
+}
+
+.header-badges,
+.header-actions,
+.gh-repo-badge,
+.btn-live-sync.btn-header-sync {
+  /* These are removed from header — no display */
+  display: none !important;
+}
+
+.status-label {
+  font-size: 11.5px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: #3fb950;
+  letter-spacing: 0.3px;
+}
+
+/* =========================================================
+   GLOBAL BUTTON RESPONSIVENESS OVERHAUL (v13.0)
+   ========================================================= */
+button, .btn-card-action, .task-btn, .btn-execute,
+.btn-live-sync, .btn-canvas-action, .tab-btn,
+.btn-term-clear, .btn-inspect-std, .filter-chip,
+.btn-action-primary, .btn-action-secondary,
+.subagent-node, .task-radio-card {
+  cursor: pointer;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:active, .btn-card-action:active, .task-btn:active,
+.btn-execute:active, .btn-live-sync:active,
+.btn-canvas-action:active, .tab-btn:active,
+.pill-btn:active, .task-radio-card:active {
+  transform: scale(0.96) !important;
+}
+
+/* Sidebar task buttons */
+.task-btn {
+  border-radius: 10px;
+  padding: 10px 12px;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+.task-btn:hover {
+  background: rgba(56, 189, 248, 0.08);
+  border-color: rgba(56, 189, 248, 0.35);
+  transform: translateX(3px);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+}
+.task-btn:active {
+  transform: translateX(3px) scale(0.97) !important;
+}
+
+/* Run all now + pause buttons */
+.btn-card-action {
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 7px 12px;
+  cursor: pointer;
+  transition: all 0.15s ease !important;
+}
+.btn-card-action:hover {
+  background: rgba(56, 189, 248, 0.2);
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 14px rgba(56,189,248,0.25);
+  transform: translateY(-1px);
+}
+.btn-card-action.secondary {
+  background: transparent;
+  border-color: var(--border-subtle);
+  color: var(--text-secondary);
+}
+.btn-card-action.secondary:hover {
+  background: rgba(255,255,255,0.05);
+  border-color: var(--border-medium);
+  color: #fff;
+}
+
+/* Execute / Run button */
+.btn-execute {
+  background: linear-gradient(135deg, #1f6feb, #1a7f37);
+  border: none;
+  color: #fff;
+  font-weight: 700;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+  transition: all 0.15s ease !important;
+  box-shadow: 0 2px 8px rgba(31,111,235,0.3);
+}
+.btn-execute:hover {
+  box-shadow: 0 4px 16px rgba(31,111,235,0.5);
+  transform: translateY(-1px);
+  filter: brightness(1.1);
+}
+
+/* Sync to GitHub button */
+.btn-live-sync {
+  background: linear-gradient(135deg, #161b22, #21262d);
+  border: 1px solid rgba(56,189,248,0.4);
+  color: var(--primary-blue);
+  font-weight: 700;
+  border-radius: 8px;
+  padding: 7px 12px;
+  font-size: 12.5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease !important;
+}
+.btn-live-sync:hover {
+  background: linear-gradient(135deg, rgba(56,189,248,0.15), rgba(56,189,248,0.05));
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 16px rgba(56,189,248,0.3);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+/* Tab buttons */
+.tab-btn {
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 12px;
+  padding: 7px 12px;
+  transition: all 0.15s ease !important;
+  border: 1px solid transparent;
+}
+.tab-btn:hover:not(.active) {
+  background: rgba(255,255,255,0.06);
+  border-color: var(--border-subtle);
+}
+.tab-btn.active {
+  background: rgba(56,189,248,0.15);
+  border-color: rgba(56,189,248,0.35);
+  color: var(--primary-blue);
+  box-shadow: 0 0 12px rgba(56,189,248,0.15);
+}
+
+/* Canvas action buttons */
+.btn-canvas-action {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 7px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(56,189,248,0.3);
+  background: rgba(56,189,248,0.1);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease !important;
+}
+.btn-canvas-action:hover {
+  background: rgba(56,189,248,0.2);
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 14px rgba(56,189,248,0.25);
+  transform: translateY(-1px);
+}
+.heal-btn {
+  border-color: rgba(244, 63, 94, 0.4);
+  background: rgba(244, 63, 94, 0.08);
+  color: #fb7185;
+}
+.heal-btn:hover {
+  background: rgba(244, 63, 94, 0.15);
+  border-color: #fb7185;
+  box-shadow: 0 0 14px rgba(244,63,94,0.2);
+}
+
+/* =========================================================
+   UPLOAD ZONE: ALL FILE TYPES FRIENDLY (v13.0)
+   ========================================================= */
+.drop-zone-mini {
+  border: 2px dashed rgba(56, 189, 248, 0.3);
+  border-radius: 12px;
+  padding: 16px 18px;
+  background: rgba(56, 189, 248, 0.03);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+.drop-zone-mini:hover {
+  border-color: var(--primary-blue);
+  background: rgba(56, 189, 248, 0.08);
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.12);
+  transform: translateY(-1px);
+}
+.drop-zone-mini.drag-over {
+  border-color: var(--primary-blue);
+  background: rgba(56, 189, 248, 0.12);
+  box-shadow: 0 0 24px rgba(56, 189, 248, 0.2);
+}
+
+/* =========================================================
+   PILL BUTTONS — DATASET INSPECTOR
+   ========================================================= */
+.pill-btn {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: 11.5px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: all 0.15s ease !important;
+}
+.pill-btn:hover {
+  background: rgba(56,189,248,0.1);
+  border-color: rgba(56,189,248,0.4);
+  color: var(--primary-blue);
+}
+.pill-btn.active {
+  background: rgba(56,189,248,0.18);
+  border-color: var(--primary-blue);
+  color: #fff;
+  box-shadow: 0 0 10px rgba(56,189,248,0.2);
+}
+
+/* =========================================================
+   SUBAGENT CANVAS NODES — RESPONSIVE CLICKS
+   ========================================================= */
+.subagent-node {
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+.subagent-node:hover {
+  transform: translateY(-3px) !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4), 0 0 16px rgba(56,189,248,0.15) !important;
+  border-color: rgba(56,189,248,0.4) !important;
+}
+.subagent-node:active {
+  transform: translateY(-1px) scale(0.98) !important;
+}
+
+/* =========================================================
+   TASK RADIO CARDS — ULTRA-RESPONSIVE
+   ========================================================= */
+.task-radio-card {
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  border: 1.5px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 12px;
+}
+.task-radio-card:hover {
+  border-color: rgba(56,189,248,0.5);
+  background: rgba(56,189,248,0.06);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.3), 0 0 14px rgba(56,189,248,0.12);
+}
+.task-radio-card.active, .task-radio-card input:checked + .radio-card-body {
+  border-color: var(--primary-blue) !important;
+  background: rgba(56,189,248,0.1) !important;
+}
+
+/* =========================================================
+   AUTOMATOR PROGRESS BAR ANIMATION SMOOTH
+   ========================================================= */
+.automator-progress-fill {
+  transition: width 0.5s linear;
+  background: linear-gradient(90deg, #38bdf8, #818cf8, #c084fc);
+  border-radius: 4px;
+  height: 100%;
+}
+
+/* =========================================================
+   FORM INPUT RESPONSIVENESS
+   ========================================================= */
+.form-input {
+  background: rgba(0,0,0,0.3);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  color: #fff;
+  padding: 8px 12px;
+  font-size: 12.5px;
+  outline: none;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+.form-input:focus {
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 3px rgba(56,189,248,0.12);
+  background: rgba(0,0,0,0.5);
+}
+
+/* =========================================================
+   SIDEBAR HEADING — PLAIN ENGLISH STYLE
+   ========================================================= */
+.sidebar-heading {
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+/* =========================================================
+   BRIDGE FILE PILLS — PLAIN ENGLISH COLORS
+   ========================================================= */
+.bridge-file-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  transition: all 0.15s;
+}
+.bridge-file-pill.present {
+  background: rgba(63, 185, 80, 0.08);
+  border-color: rgba(63, 185, 80, 0.3);
+  color: #3fb950;
+}
+.bridge-file-pill.present .pill-dot {
+  color: #3fb950;
+}
+.bridge-file-pill:hover {
+  background: rgba(63, 185, 80, 0.12);
+  transform: translateY(-1px);
+}
+
+/* =========================================================
+   INGESTION BRIDGE CARD
+   ========================================================= */
+.ingestion-bridge-card {
+  border-radius: 12px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border-subtle);
+  padding: 14px 16px;
+  margin-top: 12px;
+}
+
+.ingestion-bridge-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.bridge-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  color: #fff;
+  font-size: 13px;
+}
+
+.bridge-files-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+/* =========================================================
+   SCROLLBAR SMOOTH
+   ========================================================= */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(56,189,248,0.2) transparent;
+}
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(56,189,248,0.2);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(56,189,248,0.4);
+}
