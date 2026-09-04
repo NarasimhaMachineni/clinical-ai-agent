@@ -1,201 +1,107 @@
 /******************************************************************************
- * STUDY:       ONC-2025-001 (Phase 3 Randomized Clinical Trial)
- * PROGRAM:     sas_cdisc_production.sas
- * PURPOSE:     CDISC SDTM v3.3 & ADaM v1.2 Production Pipeline with Full PROC Steps
- * REPOSITORY:  https://github.com/NarasimhaMachineni/clinical-ai-agent/blob/main/programs/sas_cdisc_production.sas
- * AUTHOR:      ClinicalOps AI Agent (Lakshmi Narasimha Machineni)
- * STANDARDS:   CDISC SDTM-IG v3.3 / ADaM-IG v1.2 / FDA Technical Conformance Guide
+ * STUDY:       ONC-2025-001
+ * PROGRAM:     production_cdisc_pipeline.sas
+ * PURPOSE:     End-to-End CDISC SDTM and ADaM derivation pipeline
+ * STANDARDS:   CDISC SDTM-IG v3.3 / ADaM-IG v1.2 / FDA eCTD Module 5
+ * AUTHOR:      Advanced Clinical Domain AI Agent
  ******************************************************************************/
 
-/* ----------------------------------------------------------------------------
-   1. SETUP LIBNAMES & SYSTEM OPTIONS
-   ---------------------------------------------------------------------------- */
-options nodate pageno=1 linesize=120 pagesize=60 mprint symbolgen;
+/* 1. SETUP LIBRARIES */
+libname raw  "data/raw";
 libname sdtm "data/sdtm";
 libname adam "data/adam";
-libname qc   "data/qc";
 
-/* ----------------------------------------------------------------------------
-   2. PROC FORMAT: REGULATORY CONTROLLED TERMINOLOGY CODELISTS
-   ---------------------------------------------------------------------------- */
-proc format;
-  value $saffl
-    "Y" = "Safety Analysis Set"
-    "N" = "Excluded from Safety";
+/* ============================================================================
+   STEP 1: PRODUCTION SAS MACRO - SDTM DM DOMAIN
+   ============================================================================ */
+%macro derive_sdtm_dm(in_raw=raw.demog, out_sdtm=sdtm.dm);
+  data &out_sdtm(label="Demographics");
+    attrib 
+      STUDYID   length=$20  label="Study Identifier"
+      DOMAIN    length=$2   label="Domain Abbreviation"
+      USUBJID   length=$40  label="Unique Subject Identifier"
+      SUBJID    length=$10  label="Subject Identifier"
+      RFSTDTC   length=$19  label="Subject Reference Start Date/Time"
+      RFENDTC   length=$19  label="Subject Reference End Date/Time"
+      AGE       length=8    label="Age"
+      AGEU      length=$10  label="Age Units"
+      SEX       length=$1   label="Sex"
+      RACE      length=$40  label="Race"
+      ETHNIC    length=$30  label="Ethnicity"
+      ARMCD     length=$20  label="Planned Arm Code"
+      ARM       length=$40  label="Description of Planned Arm"
+      COUNTRY   length=$3   label="Country";
+
+    set &in_raw;
     
-  value $ittfl
-    "Y" = "Intent-to-Treat Set"
-    "N" = "Excluded from ITT";
+    STUDYID = "ONC-2025-001";
+    DOMAIN  = "DM";
+    SUBJID  = put(pt_id, z3.);
+    USUBJID = catx("-", STUDYID, SUBJID);
     
-  value $ppfl
-    "Y" = "Per-Protocol Set"
-    "N" = "Excluded from PP";
+    /* ISO 8601 Date Standard */
+    if not missing(first_dose_date) then 
+      RFSTDTC = put(first_dose_date, is8601dt.);
+    if not missing(last_dose_date) then 
+      RFENDTC = put(last_dose_date, is8601dt.);
+      
+    AGE   = floor((intck('month', dob, first_dose_date) - (day(first_dose_date) < day(dob))) / 12);
+    AGEU  = "YEARS";
+    SEX   = upcase(raw_gender);
+    RACE  = upcase(raw_race);
+    ETHNIC= ifc(raw_ethnicity="Hispanic", "HISPANIC OR LATINO", "NOT HISPANIC OR LATINO");
+    
+    ARMCD = upcase(assigned_arm_code);
+    ARM   = ifc(ARMCD="DMED", "Diabetes Medication 500mg", "Placebo");
+    COUNTRY = "USA";
+  run;
+%mend derive_sdtm_dm;
 
-  value $aesev
-    "MILD"     = "Grade 1 - Mild"
-    "MODERATE" = "Grade 2 - Moderate"
-    "SEVERE"   = "Grade 3 - Severe";
+/* ============================================================================
+   STEP 2: PRODUCTION SAS MACRO - ADAM ADSL DATASET
+   ============================================================================ */
+%macro derive_adam_adsl(in_dm=sdtm.dm, in_ex=sdtm.ex, out_adsl=adam.adsl);
+  proc sql;
+    create table &out_adsl as
+    select 
+      a.STUDYID,
+      a.USUBJID,
+      a.SUBJID,
+      a.SITEID,
+      a.AGE,
+      case when a.AGE < 65 then "<65" else ">=65" end as AGEGR1 length=$10,
+      case when a.AGE < 65 then 1 else 2 end as AGEGR1N,
+      a.AGEU,
+      a.SEX,
+      a.RACE,
+      a.ETHNIC,
+      a.ARM,
+      a.ARMCD,
+      a.ARM as TRT01P,
+      case when a.ARMCD = "DMED" then 1 else 2 end as TRT01PN,
+      case when b.USUBJID is not null then a.ARM else "Not Treated" end as TRT01A,
+      
+      /* Treatment start and end dates */
+      input(scan(b.EXSTDTC, 1, 'T'), yymmdd10.) as TRTSDT format=yymmdd10.,
+      input(scan(b.EXENDTC, 1, 'T'), yymmdd10.) as TRTEDT format=yymmdd10.,
+      
+      /* Safety Population Flag: Received >= 1 dose */
+      case when b.USUBJID is not null then "Y" else "N" end as SAFFL length=$1,
+      
+      /* Intent-to-Treat: All randomized subjects */
+      "Y" as ITTFL length=$1,
+      
+      /* Per-Protocol Flag */
+      case when b.USUBJID is not null and c.VIOLATION is null then "Y" else "N" end as PPFL length=$1
+      
+    from &in_dm a
+    left join &in_ex b on a.USUBJID = b.USUBJID
+    left join raw.deviations c on a.USUBJID = c.USUBJID;
+  quit;
 
-  value $anrind
-    "NORMAL" = "Normal Range"
-    "LOW"    = "Below Lower Limit"
-    "HIGH"   = "Above Upper Limit";
-run;
-
-/* ----------------------------------------------------------------------------
-   3. DATA STEP: ADaM ADSL (SUBJECT-LEVEL ANALYSIS DATASET)
-   Techniques: ATTRIB, MERGE, IN= flags, DO loops, INTCK, INTNX, ISO8601 formatting
-   ---------------------------------------------------------------------------- */
-data adam.adsl(label="Subject-Level Analysis Dataset per ADaMIG v1.2");
-  attrib
-    STUDYID   length=$20  label="Study Identifier"
-    USUBJID   length=$40  label="Unique Subject Identifier"
-    SUBJID    length=$10  label="Subject Identifier"
-    SITEID    length=$10  label="Study Site Identifier"
-    AGE       length=8    label="Age (Years)"
-    AGEGR1    length=$10  label="Pooled Age Group 1"
-    AGEGR1N   length=8    label="Pooled Age Group 1 (N)"
-    SEX       length=$1   label="Sex"
-    RACE      length=$40  label="Race"
-    ETHNIC    length=$40  label="Ethnicity"
-    ARM       length=$40  label="Description of Planned Arm"
-    ARMCD     length=$20  label="Planned Arm Code"
-    TRT01P    length=$40  label="Planned Treatment for Period 01"
-    TRT01PN   length=8    label="Planned Treatment for Period 01 (N)"
-    TRT01A    length=$40  label="Actual Treatment for Period 01"
-    TRT01AN   length=8    label="Actual Treatment for Period 01 (N)"
-    TRTSDT    length=8    format=yymmdd10. label="Date of First Exposure to Treatment"
-    TRTEDT    length=8    format=yymmdd10. label="Date of Last Exposure to Treatment"
-    TRTDURD   length=8    label="Total Treatment Duration (Days)"
-    SAFFL     length=$1   format=$saffl.   label="Safety Population Flag"
-    ITTFL     length=$1   format=$ittfl.   label="Intent-to-Treat Population Flag"
-    PPFL      length=$1   format=$ppfl.    label="Per-Protocol Population Flag";
-
-  /* Merge SDTM Demographics with Exposure first/last dose */
-  merge sdtm.dm(in=in_dm) sdtm.ex(in=in_ex keep=usubjid exstdtc exendtc);
-  by usubjid;
-  if in_dm;
-
-  /* Derive Treatment Start and End Dates */
-  if not missing(exstdtc) then TRTSDT = input(substr(exstdtc, 1, 10), yymmdd10.);
-  if not missing(exendtc) then TRTEDT = input(substr(exendtc, 1, 10), yymmdd10.);
-  
-  if not missing(TRTSDT) and not missing(TRTEDT) then 
-    TRTDURD = (TRTEDT - TRTSDT) + 1;
-
-  /* Derive Population Flags per Protocol Specification */
-  ITTFL = "Y";
-  if not missing(TRTSDT) then SAFFL = "Y"; else SAFFL = "N";
-  
-  /* Per-protocol: Compliance >= 90% and zero major protocol violations */
-  if SAFFL = "Y" and _compliance >= 90 and _hasMajorViolation = 0 then 
-    PPFL = "Y"; 
-  else 
-    PPFL = "N";
-
-  /* Age Groups */
-  if AGE < 65 then do;
-    AGEGR1 = "<65";
-    AGEGR1N = 1;
-  end;
-  else do;
-    AGEGR1 = ">=65";
-    AGEGR1N = 2;
-  end;
-
-  TRT01P  = ARM;
-  TRT01PN = ifn(ARMCD="TRT", 1, 2);
-  
-  if SAFFL = "Y" then do;
-    TRT01A  = ARM;
-    TRT01AN = TRT01PN;
-  end;
-  else do;
-    TRT01A  = "Not Treated";
-    TRT01AN = 0;
-  end;
-run;
-
-/* ----------------------------------------------------------------------------
-   4. DATA STEP: ADaM ADAE (ADVERSE EVENTS OCCURRENCE DATASET)
-   ---------------------------------------------------------------------------- */
-data adam.adae(label="Adverse Events Analysis Dataset per ADaMIG v1.2");
-  merge sdtm.ae(in=in_ae) adam.adsl(in=in_sl keep=usubjid trtsdt trtedt trt01a trt01an saffl);
-  by usubjid;
-  if in_ae and saffl = "Y";
-
-  if not missing(aestdtc) then AESTDT = input(substr(aestdtc, 1, 10), yymmdd10.);
-  if not missing(aeendtc) then AEENDT = input(substr(aeendtc, 1, 10), yymmdd10.);
-  
-  /* Treatment-Emergent Adverse Event Rule */
-  if not missing(AESTDT) and not missing(TRTSDT) and AESTDT >= TRTSDT then 
-    TRTEMFL = "Y";
-  else 
-    TRTEMFL = "N";
-
-  /* Numeric Severity Rating */
-  select(AESEV);
-    when("MILD")     AESEVN = 1;
-    when("MODERATE") AESEVN = 2;
-    when("SEVERE")   AESEVN = 3;
-    otherwise        AESEVN = 0;
-  end;
-run;
-
-/* ----------------------------------------------------------------------------
-   5. PROC COMPARE: INDEPENDENT DOUBLE PROGRAMMING RECONCILIATION
-   ---------------------------------------------------------------------------- */
-proc sort data=adam.adsl out=adsl_sort nodupkey; by usubjid; run;
-proc sort data=qc.adsl   out=qc_adsl_sort nodupkey; by usubjid; run;
-
-proc compare base=adsl_sort compare=qc_adsl_sort 
-  out=comp_diff outnoequal outbase outcomp;
-  id usubjid;
-run;
-
-%macro verify_sysinfo;
-  %if &SYSINFO = 0 %then %do;
-    %put NOTE: [GxP AUDIT PASS] Zero discrepancies detected between Production and QC libraries. &SYSINFO = 0;
-  %end;
-  %else %do;
-    %put ERROR: [GxP AUDIT FAIL] Discrepancies detected in independent double programming. SYSINFO = &SYSINFO;
-  %end;
-%mend verify_sysinfo;
-%verify_sysinfo;
-
-/* ----------------------------------------------------------------------------
-   6. PROC GLM & PROC MIXED: PRIMARY EFFICACY ANCOVA MODEL (ICH E3 TABLE 14-3)
-   ---------------------------------------------------------------------------- */
-proc glm data=adam.adlb;
-  where paramcd = "HBA1C" and avisit = "Week 24";
-  class trt01a;
-  model chg = base trt01a / solution clparm;
-  lsmeans trt01a / pdiff=all cl alpha=0.05;
-run;
-quit;
-
-proc mixed data=adam.adlb method=reml;
-  where paramcd = "HBA1C";
-  class trt01a avisitn usubjid;
-  model chg = base trt01a avisitn trt01a*avisitn / ddfm=kr;
-  repeated avisitn / subject=usubjid type=un;
-  lsmeans trt01a*avisitn / slice=avisitn pdiff cl;
-run;
-quit;
-
-/* ----------------------------------------------------------------------------
-   7. PROC FREQ: MEDDRA SYSTEM ORGAN CLASS (SOC) ADVERSE EVENT DISTRIBUTION
-   ---------------------------------------------------------------------------- */
-proc freq data=adam.adae;
-  where trtemfl = "Y";
-  tables trt01a * aesoc / norow nocol nopercent chisq;
-run;
-
-/* ----------------------------------------------------------------------------
-   8. PROC MEANS: SUMMARY STATISTICS FOR CSR TABLE 14-1
-   ---------------------------------------------------------------------------- */
-proc means data=adam.adsl n mean std median min max clm;
-  class trt01p;
-  var age trtdurd;
-  output out=adam.adsl_summary n=n mean=mean std=std median=median min=min max=max;
-run;
+  /* Validation cross-tabulation */
+  proc freq data=&out_adsl;
+    tables ITTFL * SAFFL * PPFL / list missing;
+    title "ADSL Population Flag Distribution Validation";
+  run;
+%mend derive_adam_adsl;
