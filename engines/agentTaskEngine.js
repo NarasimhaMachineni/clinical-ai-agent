@@ -432,10 +432,26 @@ function buildTaskResponse(message) {
     deliverables: agentState.deliverables,
     executionLogs: agentState.executionLogs,
     datasetsPreview: {
-      ADSL: adsl.slice(0, 10),
-      ADAE: adae.slice(0, 10),
-      ADLB: adlb.slice(0, 10),
-      DM: dm.slice(0, 10)
+      ADSL: (agentState.adamData?.datasets?.ADSL || []).slice(0, 10),
+      ADAE: (agentState.adamData?.datasets?.ADAE || []).slice(0, 10),
+      ADLB: (agentState.adamData?.datasets?.ADLB || []).slice(0, 10),
+      ADVS: (agentState.adamData?.datasets?.ADVS || []).slice(0, 10),
+      ADCM: (agentState.adamData?.datasets?.ADCM || []).slice(0, 10),
+      ADMH: (agentState.adamData?.datasets?.ADMH || []).slice(0, 10),
+      ADTTE: (agentState.adamData?.datasets?.ADTTE || []).slice(0, 10),
+      ADEFF: (agentState.adamData?.datasets?.ADEFF || []).slice(0, 10),
+      DM: (agentState.sdtmData?.domains?.DM || []).slice(0, 10),
+      VS: (agentState.sdtmData?.domains?.VS || []).slice(0, 10),
+      LB: (agentState.sdtmData?.domains?.LB || []).slice(0, 10),
+      AE: (agentState.sdtmData?.domains?.AE || []).slice(0, 10),
+      EX: (agentState.sdtmData?.domains?.EX || []).slice(0, 10),
+      CM: (agentState.sdtmData?.domains?.CM || []).slice(0, 10),
+      MH: (agentState.sdtmData?.domains?.MH || []).slice(0, 10),
+      DS: (agentState.sdtmData?.domains?.DS || []).slice(0, 10),
+      EG: (agentState.sdtmData?.domains?.EG || []).slice(0, 10),
+      QS: (agentState.sdtmData?.domains?.QS || []).slice(0, 10),
+      SV: (agentState.sdtmData?.domains?.SV || []).slice(0, 10),
+      TS: (agentState.sdtmData?.domains?.TS || []).slice(0, 10)
     }
   };
 }

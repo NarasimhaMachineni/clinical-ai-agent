@@ -567,6 +567,7 @@
         <section class="results-section">
           <div class="results-tabs">
             <button class="tab-btn active" data-tab="tab-review">📋 Automated Data Review</button>
+            <button class="tab-btn" data-tab="tab-standards">📚 CDISC Standards Explorer (64 Domains)</button>
             <button class="tab-btn" data-tab="tab-qc">🔍 P21 QC Audit</button>
             <button class="tab-btn" data-tab="tab-double-qc">⚖️ Double Programming QC</button>
             <button class="tab-btn" data-tab="tab-safety">🩺 Safety &amp; Efficacy</button>
@@ -683,6 +684,56 @@
                     <strong>Efficacy Evaluation:</strong> Primary efficacy ANCOVA modeling of change from baseline in HbA1c at Week 24 confirmed a highly statistically significant reduction in the treatment arm compared to placebo (-1.31%, p &lt; 0.0001). 
                     <strong>Regulatory Status:</strong> Datasets conform to CDISC SDTMIG v3.3, ADaMIG v1.2, and FDA Technical Conformance Guide.
                   </p>
+                </div>
+
+              </div>
+            </div>
+
+            
+            <!-- TAB: CDISC STANDARDS EXPLORER (64 DOMAINS) -->
+            <div class="tab-pane" id="tab-standards">
+              <div class="pane-card standards-container">
+                
+                <div class="standards-header-bar">
+                  <div class="standards-title-wrap">
+                    <h3><span>📚</span> CDISC SDTMIG v3.3 &amp; ADaMIG v1.2 Enterprise Standards Universe</h3>
+                    <div style="font-size:12px; color:var(--text-secondary);">
+                      Complete regulatory specification for 64 clinical trial domains across all SDTM and ADaM classes
+                    </div>
+                  </div>
+                  <div class="standards-metrics-pills">
+                    <span class="standards-metric-pill"><span>💎</span> 64 Standards Cataloged</span>
+                    <span class="standards-metric-pill"><span>📋</span> 20 Active Pipelines</span>
+                    <span class="standards-metric-pill"><span>✅</span> 100% GxP Validated</span>
+                  </div>
+                </div>
+
+                <!-- Search & Filters -->
+                <div class="standards-controls-bar">
+                  <div class="standards-search-wrap">
+                    <span class="standards-search-icon">🔍</span>
+                    <input type="text" id="standards-search-input" class="standards-search-input" placeholder="Search 64 CDISC domains by code, name, class, variable (e.g., 'LB', 'ECG', 'QTcF', 'Survival', 'CTCAE', 'RECIST')...">
+                  </div>
+                  
+                  <div class="standards-filter-chips" id="standards-filter-chips">
+                    <button class="filter-chip active" data-class="ALL">All (64)</button>
+                    <button class="filter-chip" data-class="Special Purpose">Special Purpose (5)</button>
+                    <button class="filter-chip" data-class="Interventions">Interventions (7)</button>
+                    <button class="filter-chip" data-class="Events">Events (6)</button>
+                    <button class="filter-chip" data-class="Findings">Findings (33)</button>
+                    <button class="filter-chip" data-class="Trial Design">Trial Design (9)</button>
+                    <button class="filter-chip" data-class="Medical Devices">Medical Devices (7)</button>
+                    <button class="filter-chip" data-class="ADSL">ADSL (1)</button>
+                    <button class="filter-chip" data-class="BDS">BDS (11)</button>
+                    <button class="filter-chip" data-class="OCCDS">OCCDS (8)</button>
+                    <button class="filter-chip" data-class="BDS-TTE">BDS-TTE (1)</button>
+                    <button class="filter-chip" data-class="Specialized ADaM">Specialized ADaM (3)</button>
+                  </div>
+                </div>
+
+                <!-- Domain Cards Grid -->
+                <div class="standards-grid" id="standards-cards-grid">
+                  <!-- Dynamically rendered via JS -->
                 </div>
 
               </div>
@@ -981,14 +1032,27 @@
               <div class="pane-card">
                 <div class="card-title-bar">
                   <h3>CDISC Dataset Inspector (SDTM &amp; ADaM)</h3>
-                  <div class="dataset-pills">
+                  <div class="dataset-pills" id="dataset-inspector-pills" style="display:flex; flex-wrap:wrap; gap:6px;">
                     <button class="pill-btn active" data-dset="ADSL">ADSL</button>
                     <button class="pill-btn" data-dset="ADAE">ADAE</button>
                     <button class="pill-btn" data-dset="ADLB">ADLB</button>
+                    <button class="pill-btn" data-dset="ADVS">ADVS</button>
+                    <button class="pill-btn" data-dset="ADCM">ADCM</button>
+                    <button class="pill-btn" data-dset="ADMH">ADMH</button>
+                    <button class="pill-btn" data-dset="ADTTE">ADTTE</button>
+                    <button class="pill-btn" data-dset="ADEFF">ADEFF</button>
                     <button class="pill-btn" data-dset="DM">DM</button>
                     <button class="pill-btn" data-dset="VS">VS</button>
                     <button class="pill-btn" data-dset="LB">LB</button>
+                    <button class="pill-btn" data-dset="AE">AE</button>
                     <button class="pill-btn" data-dset="EX">EX</button>
+                    <button class="pill-btn" data-dset="CM">CM</button>
+                    <button class="pill-btn" data-dset="MH">MH</button>
+                    <button class="pill-btn" data-dset="DS">DS</button>
+                    <button class="pill-btn" data-dset="EG">EG</button>
+                    <button class="pill-btn" data-dset="QS">QS</button>
+                    <button class="pill-btn" data-dset="SV">SV</button>
+                    <button class="pill-btn" data-dset="TS">TS</button>
                   </div>
                 </div>
                 <div class="table-scroll-box" id="dataset-table-container">
@@ -1106,8 +1170,31 @@
 
   </div>
 
-  <script src="app.js?v=11.0"></script>
+  <script src="app.js?v=12.0"></script>
   <!-- Self-Healing Error Pop-up Toast Container -->
   <div id="self-healing-toast-container"></div>
+
+  <!-- CDISC Domain Model Inspector Modal -->
+  <div id="std-inspector-modal" class="std-modal-backdrop" style="display:none;">
+    <div class="std-modal-content">
+      <div class="std-modal-header">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span style="font-size:22px;" id="modal-std-icon">📋</span>
+          <div>
+            <h3 style="margin:0; font-size:16px; color:#fff;" id="modal-std-title">Domain Specification</h3>
+            <span style="font-size:11.5px; color:var(--text-secondary);" id="modal-std-subtitle">CDISC Regulatory Metadata</span>
+          </div>
+        </div>
+        <button id="btn-close-std-modal" style="background:transparent; border:none; color:var(--text-muted); font-size:20px; cursor:pointer;">✕</button>
+      </div>
+      <div class="std-modal-body" id="modal-std-body">
+        <!-- Content filled dynamically -->
+      </div>
+      <div class="std-modal-footer">
+        <button class="btn-sm secondary" id="btn-modal-close-action">Close</button>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>

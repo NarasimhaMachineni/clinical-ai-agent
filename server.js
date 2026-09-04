@@ -8,6 +8,7 @@ const { generateDiabetesTrial } = require("./engines/trialDataGenerator");
 const { transformToSDTM } = require("./engines/sdtmEngine");
 const { deriveADaM } = require("./engines/adamEngine");
 const { generateDefineXml } = require("./engines/defineXmlEngine");
+const { CDISC_STANDARDS_CATALOG } = require("./engines/cdiscStandardsCatalog");
 const { generateSasCode, generateRPharmaverseCode } = require("./engines/codeGenEngine");
 const { generatePharmaResponse } = require("./engines/pharmaBrain");
 const { callExternalLLM } = require("./engines/llmClient");
@@ -93,6 +94,15 @@ function runPythonQcAudit(callback) {
 // ============================================================================
 // API ROUTES
 // ============================================================================
+
+
+// Endpoint: Complete CDISC SDTMIG v3.3 & ADaMIG v1.2 Standards Catalog (64+ domains)
+app.get("/api/cdisc/standards", (req, res) => {
+  res.json({
+    total: CDISC_STANDARDS_CATALOG.length,
+    standards: CDISC_STANDARDS_CATALOG
+  });
+});
 
 // 1. Full State Endpoint
 app.get("/api/trial/state", (req, res) => {

@@ -1,11 +1,11 @@
-﻿/**
- * Clinical Trial Data Generator
- * Generates realistic multi-domain raw clinical trial cohorts (Phase II Diabetes & Phase III Oncology)
- * compliant with CDISC CDASH/SDTM/ADaM ingestion specifications.
+/**
+ * Clinical Trial Data Generator - CDISC Universe Edition
+ * Generates comprehensive multi-domain raw clinical trial cohorts compliant with CDISC CDASH/SDTM/ADaM.
+ * Domains: DM, VS, LB, AE, EX, CM, MH, DS, EG, QS, SV, TS
  */
 
 function generateDiabetesTrial(nSubjects = 150) {
-  const studyId = "DIAB-2024-001";
+  const studyId = "ONC-2025-001";
   const subjects = [];
   const rawRecords = [];
 
@@ -18,6 +18,22 @@ function generateDiabetesTrial(nSubjects = 150) {
     { term: "Fatigue", soc: "GENERAL DISORDERS AND ADMINISTRATION SITE CONDITIONS", pt: "Fatigue", relProb: 0.3, sevWeights: [0.8, 0.18, 0.02] },
     { term: "Nasopharyngitis", soc: "INFECTIONS AND INFESTATIONS", pt: "Nasopharyngitis", relProb: 0.1, sevWeights: [0.9, 0.1, 0.0] },
     { term: "Elevated ALT", soc: "INVESTIGATIONS", pt: "Alanine aminotransferase increased", relProb: 0.7, sevWeights: [0.6, 0.3, 0.1] }
+  ];
+
+  const cmCatalog = [
+    { drug: "Metformin Hydrochloride", decod: "METFORMIN", clas: "BIGUANIDES", dose: 500, dosu: "mg", route: "ORAL", freq: "BID" },
+    { drug: "Lisinopril", decod: "LISINOPRIL", clas: "ACE INHIBITORS", dose: 10, dosu: "mg", route: "ORAL", freq: "QD" },
+    { drug: "Atorvastatin Calcium", decod: "ATORVASTATIN", clas: "HMG-COA REDUCTASE INHIBITORS", dose: 20, dosu: "mg", route: "ORAL", freq: "QD" },
+    { drug: "Omeprazole", decod: "OMEPRAZOLE", clas: "PROTON PUMP INHIBITORS", dose: 20, dosu: "mg", route: "ORAL", freq: "QD" },
+    { drug: "Paracetamol", decod: "PARACETAMOL", clas: "ANALGESICS", dose: 500, dosu: "mg", route: "ORAL", freq: "PRN" }
+  ];
+
+  const mhCatalog = [
+    { term: "Type 2 Diabetes Mellitus", decod: "TYPE 2 DIABETES MELLITUS", soc: "METABOLISM AND NUTRITION DISORDERS" },
+    { term: "Essential Hypertension", decod: "HYPERTENSION", soc: "VASCULAR DISORDERS" },
+    { term: "Hypercholesterolemia", decod: "HYPERCHOLESTEROLAEMIA", soc: "METABOLISM AND NUTRITION DISORDERS" },
+    { term: "Diabetic Peripheral Neuropathy", decod: "DIABETIC NEUROPATHY", soc: "NERVOUS SYSTEM DISORDERS" },
+    { term: "Gastroesophageal Reflux Disease", decod: "GASTRO-OESOPHAGEAL REFLUX DISEASE", soc: "GASTROINTESTINAL DISORDERS" }
   ];
 
   const visits = [
@@ -33,33 +49,31 @@ function generateDiabetesTrial(nSubjects = 150) {
     const ptId = i;
     const siteId = i <= 75 ? (10 + (i % 5)) : (100 + (i % 5));
     const armCd = siteId >= 100 ? "DMED" : "PLAC";
-    const arm = armCd === "DMED" ? "Diabetes Medication 500mg" : "Placebo";
+    const arm = armCd === "DMED" ? "Dexpramipexole 150mg BID" : "Placebo";
     const gender = Math.random() > 0.48 ? "M" : "F";
     const age = Math.floor(40 + Math.random() * 32);
     const race = races[Math.floor(Math.random() * races.length)];
     const ethnicity = race === "Hispanic" ? "Hispanic" : "Non-Hispanic";
 
-    // Protocol deviation simulation (5% rate)
     const hasMajorViolation = Math.random() < 0.05 ? 1 : 0;
-    const hasDosed = Math.random() < 0.98 ? 1 : 0; // 98% receive study drug
+    const hasDosed = Math.random() < 0.98 ? 1 : 0;
     const compliance = hasDosed ? Math.floor(82 + Math.random() * 18) : 0;
 
-    // Dates
-    const baseEnroll = new Date(2024, 0, 15);
-    baseEnroll.setDate(baseEnroll.getDate() + Math.floor(Math.random() * 45));
+    const baseEnroll = new Date(2025, 0, 10);
+    baseEnroll.setDate(baseEnroll.getDate() + Math.floor(Math.random() * 30));
     const enrollDtStr = baseEnroll.toISOString().split("T")[0];
 
-    // Baseline clinical values
-    const baseHbA1c = 7.8 + Math.random() * 2.4;
-    const baseGlucose = 140 + Math.random() * 60;
-    const baseALT = 22 + Math.random() * 25;
-    const baseAST = 20 + Math.random() * 22;
+    const baseHbA1c = 7.8 + Math.random() * 2.2;
+    const baseGlucose = 140 + Math.random() * 50;
+    const baseALT = 22 + Math.random() * 22;
+    const baseAST = 20 + Math.random() * 18;
     const baseCrea = 0.8 + Math.random() * 0.4;
-    const baseSBP = Math.floor(125 + Math.random() * 25);
-    const baseDBP = Math.floor(75 + Math.random() * 15);
-    const baseHR = Math.floor(68 + Math.random() * 16);
+    const baseSBP = Math.floor(122 + Math.random() * 20);
+    const baseDBP = Math.floor(74 + Math.random() * 14);
+    const baseHR = Math.floor(68 + Math.random() * 14);
+    const baseQTcF = Math.floor(405 + Math.random() * 25);
+    const baseQoL = Number((0.72 + Math.random() * 0.18).toFixed(2));
 
-    // Track subject metadata
     subjects.push({
       studyId,
       ptId,
@@ -73,34 +87,38 @@ function generateDiabetesTrial(nSubjects = 150) {
       enrollDt: enrollDtStr,
       hasDosed,
       hasMajorViolation,
-      compliance
+      compliance,
+      cmList: cmCatalog.slice(0, 2 + (i % 3)),
+      mhList: mhCatalog.slice(0, 1 + (i % 3)),
+      baseQTcF,
+      baseQoL
     });
 
-    // Generate visits data
     visits.forEach((v) => {
       const vDate = new Date(baseEnroll);
       vDate.setDate(vDate.getDate() + v.dayOffset);
       const vDateStr = vDate.toISOString().split("T")[0];
 
-      // Treatment effect on labs
       const progress = v.num / 6;
       let curHbA1c = baseHbA1c;
       let curGlucose = baseGlucose;
+      let curQoL = baseQoL;
 
       if (v.num >= 2) {
         if (armCd === "DMED") {
           curHbA1c = baseHbA1c - (progress * 1.4) + (Math.random() * 0.2 - 0.1);
           curGlucose = baseGlucose - (progress * 35) + (Math.random() * 10 - 5);
+          curQoL = Math.min(1.0, baseQoL + (progress * 0.15));
         } else {
-          curHbA1c = baseHbA1c + (Math.random() * 0.3 - 0.1);
+          curHbA1c = baseHbA1c + (Math.random() * 0.2 - 0.1);
           curGlucose = baseGlucose + (Math.random() * 12 - 6);
+          curQoL = baseQoL + (Math.random() * 0.04 - 0.02);
         }
       }
 
-      // Small chance of outlier on liver enzymes
-      const liverSpike = (armCd === "DMED" && Math.random() < 0.04) ? 3.5 : 1.0;
-      const curALT = Number((baseALT * liverSpike + (Math.random() * 8 - 4)).toFixed(1));
-      const curAST = Number((baseAST * liverSpike + (Math.random() * 6 - 3)).toFixed(1));
+      const liverSpike = (armCd === "DMED" && Math.random() < 0.03) ? 3.2 : 1.0;
+      const curALT = Number((baseALT * liverSpike + (Math.random() * 6 - 3)).toFixed(1));
+      const curAST = Number((baseAST * liverSpike + (Math.random() * 5 - 2.5)).toFixed(1));
 
       rawRecords.push({
         STUDY_ID: studyId,
@@ -118,26 +136,30 @@ function generateDiabetesTrial(nSubjects = 150) {
         SBP: baseSBP + Math.floor(Math.random() * 8 - 4),
         DBP: baseDBP + Math.floor(Math.random() * 6 - 3),
         HR: baseHR + Math.floor(Math.random() * 8 - 4),
-        TEMP: Number((36.6 + Math.random() * 0.5).toFixed(1)),
+        TEMP: Number((36.6 + Math.random() * 0.4).toFixed(1)),
         // Labs
         FPG: Number(curGlucose.toFixed(1)),
         HBA1C: Number(curHbA1c.toFixed(2)),
         CREA: Number(baseCrea.toFixed(2)),
         ALT: curALT,
         AST: curAST,
+        // ECG Findings
+        QTCF: baseQTcF + Math.floor(progress * 6 + (Math.random() * 8 - 4)),
+        ECG_INT: "NORMAL",
+        // Quality of Life Questionnaire
+        QOL_INDEX: Number(curQoL.toFixed(2)),
         UNIT: "STANDARD"
       });
     });
 
-    // Generate Adverse Events (25-30% of patients experience AEs)
-    if (Math.random() < 0.32) {
-      const numAe = Math.random() < 0.75 ? 1 : 2;
+    // Adverse Events
+    if (Math.random() < 0.35) {
+      const numAe = Math.random() < 0.8 ? 1 : 2;
       for (let a = 0; a < numAe; a++) {
         const aeItem = aeCatalog[Math.floor(Math.random() * aeCatalog.length)];
         const aeDate = new Date(baseEnroll);
         aeDate.setDate(aeDate.getDate() + 5 + Math.floor(Math.random() * 70));
 
-        // Severity: 1=Mild, 2=Moderate, 3=Severe
         const randSev = Math.random();
         let sev = 1;
         if (randSev > aeItem.sevWeights[0] + aeItem.sevWeights[1]) sev = 3;
@@ -168,7 +190,7 @@ function generateDiabetesTrial(nSubjects = 150) {
 
   return {
     studyId,
-    trialName: "Phase II Placebo-Controlled Diabetes Efficacy & Safety Trial",
+    trialName: "Phase III Randomized Double-Blind Efficacy and Safety Trial of Dexpramipexole vs Placebo",
     nSubjects,
     subjects,
     rawRecords

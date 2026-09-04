@@ -28,7 +28,173 @@ function transformToSDTM(rawTrialData) {
       ? "HISPANIC OR LATINO" 
       : "NOT HISPANIC OR LATINO";
 
-    return {
+    
+  // 6. DOMAIN: CONCOMITANT MEDICATIONS (CM)
+  const cm = [];
+  let cmSeq = 1;
+  subjects.forEach(s => {
+    const padSubjid = String(s.subjid || s.ptId || "001").padStart(3, "0");
+    const usubjid = s.usubjid || `${studyId}-${padSubjid}`;
+    const meds = s.cmList || [
+      { drug: "Metformin Hydrochloride", decod: "METFORMIN", clas: "BIGUANIDES", dose: 500, dosu: "mg", route: "ORAL", freq: "BID" },
+      { drug: "Atorvastatin Calcium", decod: "ATORVASTATIN", clas: "HMG-COA REDUCTASE INHIBITORS", dose: 20, dosu: "mg", route: "ORAL", freq: "QD" }
+    ];
+    meds.forEach(m => {
+      cm.push({
+        STUDYID: studyId,
+        DOMAIN: "CM",
+        USUBJID: usubjid,
+        CMSEQ: cmSeq++,
+        CMTRT: m.drug,
+        CMDECOD: m.decod,
+        CMCLAS: m.clas,
+        CMDOSE: m.dose,
+        CMDOSU: m.dosu,
+        CMROUTE: m.route,
+        CMDOSFRQ: m.freq,
+        CMSTDTC: "2024-06-01",
+        CMENDTC: "",
+        CMENRTP: "ONGOING"
+      });
+    });
+  });
+
+  // 7. DOMAIN: MEDICAL HISTORY (MH)
+  const mh = [];
+  let mhSeq = 1;
+  subjects.forEach(s => {
+    const padSubjid = String(s.subjid || s.ptId || "001").padStart(3, "0");
+    const usubjid = s.usubjid || `${studyId}-${padSubjid}`;
+    const conditions = s.mhList || [
+      { term: "Type 2 Diabetes Mellitus", decod: "TYPE 2 DIABETES MELLITUS", soc: "METABOLISM AND NUTRITION DISORDERS" }
+    ];
+    conditions.forEach(c => {
+      mh.push({
+        STUDYID: studyId,
+        DOMAIN: "MH",
+        USUBJID: usubjid,
+        MHSEQ: mhSeq++,
+        MHTERM: c.term,
+        MHDECOD: c.decod,
+        MHBODSYS: c.soc,
+        MHCAT: "PRIMARY CONDITION",
+        MHSTDTC: "2019-03-15",
+        MHENRTP: "ONGOING"
+      });
+    });
+  });
+
+  // 8. DOMAIN: DISPOSITION (DS)
+  const ds = [];
+  let dsSeq = 1;
+  subjects.forEach(s => {
+    const padSubjid = String(s.subjid || s.ptId || "001").padStart(3, "0");
+    const usubjid = s.usubjid || `${studyId}-${padSubjid}`;
+    const completed = s._compliance >= 80;
+    ds.push({
+      STUDYID: studyId,
+      DOMAIN: "DS",
+      USUBJID: usubjid,
+      DSSEQ: dsSeq++,
+      DSTERM: completed ? "COMPLETED TREATMENT PERIOD" : "ADVERSE EVENT WITHDRAWAL",
+      DSDECOD: completed ? "COMPLETED" : "ADVERSE EVENT",
+      DSCAT: "DISPOSITION EVENT",
+      EPOCH: "TREATMENT",
+      DSSTDTC: completed ? "2025-06-20" : "2025-03-12"
+    });
+  });
+
+  // 9. DOMAIN: ECG RESULTS (EG)
+  const eg = [];
+  let egSeq = 1;
+  subjects.forEach(s => {
+    const padSubjid = String(s.subjid || s.ptId || "001").padStart(3, "0");
+    const usubjid = s.usubjid || `${studyId}-${padSubjid}`;
+    const baseQtcf = s.baseQTcF || 415;
+    [
+      { visit: "Baseline", avisitn: 2, val: baseQtcf, dt: "2025-01-10T09:30:00" },
+      { visit: "Week 12", avisitn: 5, val: baseQtcf + 8, dt: "2025-04-04T10:15:00" }
+    ].forEach(item => {
+      eg.push({
+        STUDYID: studyId,
+        DOMAIN: "EG",
+        USUBJID: usubjid,
+        EGSEQ: egSeq++,
+        EGTESTCD: "QTCF",
+        EGTEST: "QTcF Interval Fridericia",
+        EGORRES: String(item.val),
+        EGSTRESN: item.val,
+        EGSTRESU: "ms",
+        EGSTRESC: item.val > 450 ? "PROLONGED" : "NORMAL",
+        VISIT: item.visit,
+        VISITNUM: item.avisitn,
+        EGDTC: item.dt
+      });
+    });
+  });
+
+  // 10. DOMAIN: QUESTIONNAIRES (QS)
+  const qs = [];
+  let qsSeq = 1;
+  subjects.forEach(s => {
+    const padSubjid = String(s.subjid || s.ptId || "001").padStart(3, "0");
+    const usubjid = s.usubjid || `${studyId}-${padSubjid}`;
+    const baseQol = s.baseQoL || 0.75;
+    [
+      { visit: "Baseline", avisitn: 2, score: baseQol, dt: "2025-01-10" },
+      { visit: "Week 12", avisitn: 5, score: Number((baseQol + 0.12).toFixed(2)), dt: "2025-04-04" }
+    ].forEach(item => {
+      qs.push({
+        STUDYID: studyId,
+        DOMAIN: "QS",
+        USUBJID: usubjid,
+        QSSEQ: qsSeq++,
+        QSTESTCD: "EQ5D01",
+        QSTEST: "EQ-5D-5L Health Index",
+        QSCAT: "QUALITY OF LIFE",
+        QSORRES: String(item.score),
+        QSSTRESN: item.score,
+        VISIT: item.visit,
+        VISITNUM: item.avisitn,
+        QSDTC: item.dt
+      });
+    });
+  });
+
+  // 11. DOMAIN: SUBJECT VISITS (SV)
+  const sv = [];
+  let svSeq = 1;
+  subjects.forEach(s => {
+    const padSubjid = String(s.subjid || s.ptId || "001").padStart(3, "0");
+    const usubjid = s.usubjid || `${studyId}-${padSubjid}`;
+    [
+      { num: 1, name: "Screening", sdt: "2025-01-02T10:00:00", edt: "2025-01-02T13:00:00" },
+      { num: 2, name: "Baseline", sdt: "2025-01-10T08:30:00", edt: "2025-01-10T15:00:00" },
+      { num: 5, name: "Week 12", sdt: "2025-04-04T09:00:00", edt: "2025-04-04T12:30:00" }
+    ].forEach(v => {
+      sv.push({
+        STUDYID: studyId,
+        DOMAIN: "SV",
+        USUBJID: usubjid,
+        SVSEQ: svSeq++,
+        VISITNUM: v.num,
+        VISIT: v.name,
+        SVSTDTC: v.sdt,
+        SVENDTC: v.edt
+      });
+    });
+  });
+
+  // 12. DOMAIN: TRIAL SUMMARY (TS)
+  const ts = [
+    { STUDYID: studyId, DOMAIN: "TS", TSSEQ: 1, TSPARMCD: "TITLE", TSPARM: "Trial Title", TSVAL: "Phase III Efficacy & Safety Trial of Dexpramipexole" },
+    { STUDYID: studyId, DOMAIN: "TS", TSSEQ: 2, TSPARMCD: "PHASE", TSPARM: "Trial Phase", TSVAL: "Phase 3" },
+    { STUDYID: studyId, DOMAIN: "TS", TSSEQ: 3, TSPARMCD: "STUDYTYP", TSPARM: "Study Type", TSVAL: "INTERVENTIONAL" },
+    { STUDYID: studyId, DOMAIN: "TS", TSSEQ: 4, TSPARMCD: "BLIND", TSPARM: "Blinding Schema", TSVAL: "DOUBLE BLIND" },
+    { STUDYID: studyId, DOMAIN: "TS", TSSEQ: 5, TSPARMCD: "INDIC", TSPARM: "Trial Indication", TSVAL: "TYPE 2 DIABETES / ONCOLOGY SURVEILLANCE" }
+  ];
+
+  return {
       STUDYID: studyId,
       DOMAIN: "DM",
       USUBJID: usubjid,
@@ -284,6 +450,152 @@ function transformToSDTM(rawTrialData) {
     });
   }
 
+  // 6. DOMAIN: CONCOMITANT MEDICATIONS (CM)
+  const cm = [];
+  let cmSeq = 1;
+  dm.forEach(d => {
+    const meds = [
+      { drug: "Metformin Hydrochloride", decod: "METFORMIN", clas: "BIGUANIDES", dose: 500, dosu: "mg", freq: "BID" },
+      { drug: "Atorvastatin Calcium", decod: "ATORVASTATIN", clas: "HMG-COA REDUCTASE INHIBITORS", dose: 20, dosu: "mg", freq: "QD" }
+    ];
+    meds.forEach(m => {
+      cm.push({
+        STUDYID: studyId,
+        DOMAIN: "CM",
+        USUBJID: d.USUBJID,
+        CMSEQ: cmSeq++,
+        CMTRT: m.drug,
+        CMDECOD: m.decod,
+        CMCLAS: m.clas,
+        CMDOSE: m.dose,
+        CMDOSU: m.dosu,
+        CMROUTE: "ORAL",
+        CMDOSFRQ: m.freq,
+        CMSTDTC: "2024-06-01",
+        CMENDTC: "",
+        CMENRTP: "ONGOING"
+      });
+    });
+  });
+
+  // 7. DOMAIN: MEDICAL HISTORY (MH)
+  const mh = [];
+  let mhSeq = 1;
+  dm.forEach(d => {
+    mh.push({
+      STUDYID: studyId,
+      DOMAIN: "MH",
+      USUBJID: d.USUBJID,
+      MHSEQ: mhSeq++,
+      MHTERM: "Type 2 Diabetes Mellitus",
+      MHDECOD: "TYPE 2 DIABETES MELLITUS",
+      MHBODSYS: "METABOLISM AND NUTRITION DISORDERS",
+      MHCAT: "PRIMARY CONDITION",
+      MHSTDTC: "2019-03-15",
+      MHENRTP: "ONGOING"
+    });
+  });
+
+  // 8. DOMAIN: DISPOSITION (DS)
+  const ds = [];
+  let dsSeq = 1;
+  dm.forEach(d => {
+    const completed = d._compliance >= 80;
+    ds.push({
+      STUDYID: studyId,
+      DOMAIN: "DS",
+      USUBJID: d.USUBJID,
+      DSSEQ: dsSeq++,
+      DSTERM: completed ? "COMPLETED TREATMENT PERIOD" : "ADVERSE EVENT WITHDRAWAL",
+      DSDECOD: completed ? "COMPLETED" : "ADVERSE EVENT",
+      DSCAT: "DISPOSITION EVENT",
+      EPOCH: "TREATMENT",
+      DSSTDTC: completed ? "2025-06-20" : "2025-03-12"
+    });
+  });
+
+  // 9. DOMAIN: ECG RESULTS (EG)
+  const eg = [];
+  let egSeq = 1;
+  dm.forEach(d => {
+    [
+      { visit: "Baseline", avisitn: 2, val: 412, dt: "2025-01-10T09:30:00" },
+      { visit: "Week 12", avisitn: 5, val: 418, dt: "2025-04-04T10:15:00" }
+    ].forEach(item => {
+      eg.push({
+        STUDYID: studyId,
+        DOMAIN: "EG",
+        USUBJID: d.USUBJID,
+        EGSEQ: egSeq++,
+        EGTESTCD: "QTCF",
+        EGTEST: "QTcF Interval Fridericia",
+        EGORRES: String(item.val),
+        EGSTRESN: item.val,
+        EGSTRESU: "ms",
+        EGSTRESC: item.val > 450 ? "PROLONGED" : "NORMAL",
+        VISIT: item.visit,
+        VISITNUM: item.avisitn,
+        EGDTC: item.dt
+      });
+    });
+  });
+
+  // 10. DOMAIN: QUESTIONNAIRES (QS)
+  const qs = [];
+  let qsSeq = 1;
+  dm.forEach(d => {
+    [
+      { visit: "Baseline", avisitn: 2, score: 0.74, dt: "2025-01-10" },
+      { visit: "Week 12", avisitn: 5, score: 0.88, dt: "2025-04-04" }
+    ].forEach(item => {
+      qs.push({
+        STUDYID: studyId,
+        DOMAIN: "QS",
+        USUBJID: d.USUBJID,
+        QSSEQ: qsSeq++,
+        QSTESTCD: "EQ5D01",
+        QSTEST: "EQ-5D-5L Health Index",
+        QSCAT: "QUALITY OF LIFE",
+        QSORRES: String(item.score),
+        QSSTRESN: item.score,
+        VISIT: item.visit,
+        VISITNUM: item.avisitn,
+        QSDTC: item.dt
+      });
+    });
+  });
+
+  // 11. DOMAIN: SUBJECT VISITS (SV)
+  const sv = [];
+  let svSeq = 1;
+  dm.forEach(d => {
+    [
+      { num: 1, name: "Screening", sdt: "2025-01-02T10:00:00", edt: "2025-01-02T13:00:00" },
+      { num: 2, name: "Baseline", sdt: "2025-01-10T08:30:00", edt: "2025-01-10T15:00:00" },
+      { num: 5, name: "Week 12", sdt: "2025-04-04T09:00:00", edt: "2025-04-04T12:30:00" }
+    ].forEach(v => {
+      sv.push({
+        STUDYID: studyId,
+        DOMAIN: "SV",
+        USUBJID: d.USUBJID,
+        SVSEQ: svSeq++,
+        VISITNUM: v.num,
+        VISIT: v.name,
+        SVSTDTC: v.sdt,
+        SVENDTC: v.edt
+      });
+    });
+  });
+
+  // 12. DOMAIN: TRIAL SUMMARY (TS)
+  const ts = [
+    { STUDYID: studyId, DOMAIN: "TS", TSSEQ: 1, TSPARMCD: "TITLE", TSPARM: "Trial Title", TSVAL: "Phase III Efficacy & Safety Trial of Dexpramipexole" },
+    { STUDYID: studyId, DOMAIN: "TS", TSSEQ: 2, TSPARMCD: "PHASE", TSPARM: "Trial Phase", TSVAL: "Phase 3" },
+    { STUDYID: studyId, DOMAIN: "TS", TSSEQ: 3, TSPARMCD: "STUDYTYP", TSPARM: "Study Type", TSVAL: "INTERVENTIONAL" },
+    { STUDYID: studyId, DOMAIN: "TS", TSSEQ: 4, TSPARMCD: "BLIND", TSPARM: "Blinding Schema", TSVAL: "DOUBLE BLIND" },
+    { STUDYID: studyId, DOMAIN: "TS", TSSEQ: 5, TSPARMCD: "INDIC", TSPARM: "Trial Indication", TSVAL: "TYPE 2 DIABETES / ONCOLOGY SURVEILLANCE" }
+  ];
+
   return {
     studyId,
     domains: {
@@ -291,7 +603,14 @@ function transformToSDTM(rawTrialData) {
       VS: vs,
       LB: lb,
       AE: ae,
-      EX: ex
+      EX: ex,
+      CM: cm,
+      MH: mh,
+      DS: ds,
+      EG: eg,
+      QS: qs,
+      SV: sv,
+      TS: ts
     },
     metrics: {
       dmCount: dm.length,
@@ -299,6 +618,13 @@ function transformToSDTM(rawTrialData) {
       lbCount: lb.length,
       aeCount: ae.length,
       exCount: ex.length,
+      cmCount: cm.length,
+      mhCount: mh.length,
+      dsCount: ds.length,
+      egCount: eg.length,
+      qsCount: qs.length,
+      svCount: sv.length,
+      tsCount: ts.length,
       uniqueSubjects: dm.length
     }
   };
