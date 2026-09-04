@@ -32,7 +32,8 @@ let agentState = {
 };
 
 function logMessage(level, message, detail = '') {
-  const ts = new Date().toISOString().substring(11, 19);
+  const d = new Date();
+  const ts = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}:${String(d.getSeconds()).padStart(2, '0')}`;
   const entry = { timestamp: ts, level, message, detail };
   agentState.executionLogs.push(entry);
   if (agentState.executionLogs.length > 500) agentState.executionLogs.shift();
