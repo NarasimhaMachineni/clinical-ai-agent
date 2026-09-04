@@ -1,0 +1,48 @@
+{
+  "study": "DIAB-2024-001",
+  "duration_sec": 0.36,
+  "audit_trail": [
+    {
+      "timestamp": "2026-09-04T07:19:45.625500+00:00",
+      "from": "IDLE",
+      "to": "INGESTING",
+      "detail": "Ingesting 150 subjects..."
+    },
+    {
+      "timestamp": "2026-09-04T07:19:45.645957+00:00",
+      "from": "INGESTING",
+      "to": "PROFILING_RAW",
+      "detail": "Validating data completeness..."
+    },
+    {
+      "timestamp": "2026-09-04T07:19:45.646458+00:00",
+      "from": "PROFILING_RAW",
+      "to": "SDTM_MAPPING",
+      "detail": "Transforming raw EDC to SDTM v3.3..."
+    },
+    {
+      "timestamp": "2026-09-04T07:19:45.780198+00:00",
+      "from": "SDTM_MAPPING",
+      "to": "ADAM_DERIVATION",
+      "detail": "Deriving ADaM v1.2 (ADSL, ADAE, ADLB)..."
+    },
+    {
+      "timestamp": "2026-09-04T07:19:45.971786+00:00",
+      "from": "ADAM_DERIVATION",
+      "to": "P21_VALIDATION",
+      "detail": "Executing Python CDISC audit assertions..."
+    },
+    {
+      "timestamp": "2026-09-04T07:19:45.974670+00:00",
+      "from": "P21_VALIDATION",
+      "to": "TLF_GENERATION",
+      "detail": "Generating statistical CSR reports..."
+    },
+    {
+      "timestamp": "2026-09-04T07:19:45.981086+00:00",
+      "from": "TLF_GENERATION",
+      "to": "PACKAGING",
+      "detail": "Compiling audit trail & eCTD package..."
+    }
+  ]
+}

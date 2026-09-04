@@ -1,0 +1,62 @@
+[
+  {
+    "STUDYID": "ONC-2025-001",
+    "DOMAIN": "EX",
+    "USUBJID": "ONC-2025-001-001",
+    "EXSEQ": 1,
+    "EXTRT": "Pembrolizumab",
+    "EXDOSE": 200,
+    "EXDOSU": "mg",
+    "EXDOSFRQ": "ONCE DAILY",
+    "EXSTDTC": "2025-01-10T09:00:00",
+    "EXENDTC": "2025-06-15T17:00:00"
+  },
+  {
+    "STUDYID": "ONC-2025-001",
+    "DOMAIN": "EX",
+    "USUBJID": "ONC-2025-001-002",
+    "EXSEQ": 2,
+    "EXTRT": "Pembrolizumab",
+    "EXDOSE": 200,
+    "EXDOSU": "mg",
+    "EXDOSFRQ": "ONCE DAILY",
+    "EXSTDTC": "2025-01-12T09:00:00",
+    "EXENDTC": "2025-06-18T17:00:00"
+  },
+  {
+    "STUDYID": "ONC-2025-001",
+    "DOMAIN": "EX",
+    "USUBJID": "ONC-2025-001-003",
+    "EXSEQ": 3,
+    "EXTRT": "Placebo",
+    "EXDOSE": 0,
+    "EXDOSU": "mg",
+    "EXDOSFRQ": "ONCE DAILY",
+    "EXSTDTC": "2025-01-15T09:00:00",
+    "EXENDTC": "2025-06-20T17:00:00"
+  },
+  {
+    "STUDYID": "ONC-2025-001",
+    "DOMAIN": "EX",
+    "USUBJID": "ONC-2025-001-004",
+    "EXSEQ": 4,
+    "EXTRT": "Placebo",
+    "EXDOSE": 0,
+    "EXDOSU": "mg",
+    "EXDOSFRQ": "ONCE DAILY",
+    "EXSTDTC": "2025-01-18T09:00:00",
+    "EXENDTC": "2025-06-22T17:00:00"
+  },
+  {
+    "STUDYID": "ONC-2025-001",
+    "DOMAIN": "EX",
+    "USUBJID": "ONC-2025-001-005",
+    "EXSEQ": 5,
+    "EXTRT": "Pembrolizumab",
+    "EXDOSE": 200,
+    "EXDOSU": "mg",
+    "EXDOSFRQ": "ONCE DAILY",
+    "EXSTDTC": "2025-01-20T09:00:00",
+    "EXENDTC": "2025-06-25T17:00:00"
+  }
+]

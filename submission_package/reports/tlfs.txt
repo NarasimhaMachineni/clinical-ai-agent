@@ -1,0 +1,16 @@
+================================================================================
+CLINICAL STUDY REPORT (CSR) - ICH E3 SUMMARY TABLES (ONC-2025-001)
+================================================================================
+TABLE 14-1.01: DEMOGRAPHIC AND BASELINE CHARACTERISTICS (ITT POPULATION)
+  * Total Randomized Subjects (ITTFL='Y'): 10
+  * Safety Analysis Set (SAFFL='Y'):       10 (100.0%)
+  * Per-Protocol Population (PPFL='Y'):    10 (100.0%)
+
+TABLE 14-2.01: OVERALL SUMMARY OF TREATMENT-EMERGENT ADVERSE EVENTS (SAFETY SET)
+  * Total Recorded TEAEs: 7
+  * Distribution by MedDRA System Organ Class (SOC):
+    - GASTROINTESTINAL DISORDERS                       2 events (20.0%)
+    - GENERAL DISORDERS AND ADMINISTRATION SITE CONDITIONS    2 events (20.0%)
+    - NERVOUS SYSTEM DISORDERS                         1 events (10.0%)
+    - SKIN AND SUBCUTANEOUS TISSUE DISORDERS           2 events (20.0%)
+================================================================================
