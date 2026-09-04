@@ -1216,4 +1216,25 @@ body {
   font-family: var(--font-mono);
 }
 
+/* Automated Data Review & Audit Styles */
+.review-focus-box {
+  transition: all 0.2s ease;
+}
+.review-focus-box:hover {
+  border-color: var(--primary-blue);
+  background: rgba(56, 189, 248, 0.12);
+}
+
+.review-check-card {
+  transition: all 0.15s ease;
+}
+.review-check-card:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.clinical-review-narrative {
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
 
