@@ -20,9 +20,19 @@
         <div class="brand-icon">🧬</div>
         <div class="brand-text">
           <h1>ClinicalOps AI Agent</h1>
+          <span class="brand-edition-tag">Gem Edition — Production Operations</span>
+        </div>
+      </div>
+      <div class="header-center-controls">
+        <div class="data-source-status-pill" id="data-source-status-pill" title="System Data Source Mode (Section 27)">
+          <span class="source-dot blocked" id="source-dot"></span>
+          <span class="source-text" id="source-indicator-text">DATA SOURCE: 🔴 MOCK DATA BLOCKED (STANDBY — WAITING FOR USER DATA)</span>
         </div>
       </div>
       <div class="header-status-indicator">
+        <button class="btn-validation-report" id="btn-master-validation-report" title="Download Master Validation Workbook with all 12 GxP audit sheets">
+          📥 Master Validation Report (.xlsx)
+        </button>
         <span class="status-dot pulse" id="agent-status-dot"></span>
         <span class="status-label" id="agent-status-label">● Online</span>
       </div>
@@ -572,6 +582,96 @@
                     <strong style="color:var(--primary-blue); font-size:12.5px;" id="review-focus-title">Active Review: Automated GxP Ingestion &amp; Surveillance</strong>
                     <span style="font-size:11px; color:var(--text-muted);" id="review-focus-ts">Continuous Scan Active</span>
                   </div>
+                <!-- Section 15: Daily Automation Tasks Dashboard -->
+                <div class="daily-automation-dashboard-card" style="background:rgba(15, 23, 42, 0.7); border:1px solid var(--border-subtle); border-radius:8px; padding:12px 14px; margin-bottom:16px;">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <div>
+                      <h4 style="color:#fff; font-size:12.5px; margin:0; display:flex; align-items:center; gap:6px;">
+                        <span>⚡</span> Daily Automation Tasks Dashboard
+                        <span class="badge-live-pulse" style="font-size:9px;">Section 15 GxP Telemetry</span>
+                      </h4>
+                      <span style="font-size:11px; color:var(--text-muted); display:block; margin-top:2px;">
+                        Independent execution status across all five daily regulatory workflows
+                      </span>
+                    </div>
+                    <div style="display:flex; gap:8px;">
+                      <button class="btn-sm" id="btn-run-acceptance-tests" style="background:rgba(168,85,247,0.2); border-color:rgba(168,85,247,0.4); color:#c084fc;">
+                        🧪 Run 10 Acceptance Tests
+                      </button>
+                      <button class="btn-sm primary" id="btn-run-all-daily-tasks">
+                        ⚡ Run 5 Daily Tasks
+                      </button>
+                    </div>
+                  </div>
+                  <div class="table-scroll-box" style="border:1px solid rgba(255,255,255,0.08); border-radius:6px; overflow-x:auto;">
+                    <table class="daily-tasks-table" style="width:100%; border-collapse:collapse; font-size:11px; text-align:left;">
+                      <thead>
+                        <tr style="background:rgba(255,255,255,0.04); border-bottom:1px solid rgba(255,255,255,0.08); color:var(--text-secondary);">
+                          <th style="padding:7px 10px;">Daily Task</th>
+                          <th style="padding:7px 10px;">Status</th>
+                          <th style="padding:7px 10px;">Last Run</th>
+                          <th style="padding:7px 10px; text-align:right;">Records Reviewed</th>
+                          <th style="padding:7px 10px; text-align:right;">Errors</th>
+                          <th style="padding:7px 10px; text-align:right;">Auto-Fixed</th>
+                          <th style="padding:7px 10px; text-align:right;">Manual Review</th>
+                          <th style="padding:7px 10px;">Final Status</th>
+                        </tr>
+                      </thead>
+                      <tbody id="daily-tasks-tbody">
+                        <tr>
+                          <td style="padding:8px 10px; font-weight:600;">1. Data Integrity Watch</td>
+                          <td style="padding:8px 10px;"><span class="task-status-pill status-standby">⚪ NOT RUN</span></td>
+                          <td style="padding:8px 10px; color:var(--text-muted);">—</td>
+                          <td style="padding:8px 10px; text-align:right; color:var(--text-muted);">—</td>
+                          <td style="padding:8px 10px; text-align:right; color:var(--text-muted);">0</td>
+                          <td style="padding:8px 10px; text-align:right; color:var(--text-muted);">0</td>
+                          <td style="padding:8px 10px; text-align:right; color:var(--text-muted);">0</td>
+                          <td style="padding:8px 10px;"><span class="final-status-tag tag-standby">STANDBY</span></td>
+                        </tr>
+                        <tr>
+                          <td style="padding:8px 10px; font-weight:600;">2. SDTM Quality Watch</td>
+                          <td style="padding:8px 10px;"><span class="task-status-pill status-standby">⚪ NOT RUN</span></td>
+                          <td style="padding:8px 10px; color:var(--text-muted);">—</td>
+                          <td style="padding:8px 10px; text-align:right; color:var(--text-muted);">—</td>
+                          <td style="padding:8px 10px; text-align:right; color:var(--text-muted);">0</td>
+                          <td style="padding:8px 10px; text-align:right; color:var(--text-muted);">0</td>
+                          <td style="padding:8px 10px; text-align:right; color:var(--text-muted);">0</td>
+                          <td style="padding:8px 10px;"><span class="final-status-tag tag-standby">STANDBY</span></td>
+                        </tr>
+                        <tr>
+                          <td style="padding:8px 10px; font-weight:600;">3. ADaM Derivation &amp; Self-Healing</td>
+                          <td style="padding:8px 10px;"><span class="task-status-pill status-standby">⚪ NOT RUN</span></td>
+                          <td style="padding:8px 10px; color:var(--text-muted);">—</td>
+                          <td style="padding:8px 10px; text-align:right; color:var(--text-muted);">—</td>
+                          <td style="padding:8px 10px; text-align:right; color:var(--text-muted);">0</td>
+                          <td style="padding:8px 10px; text-align:right; color:var(--text-muted);">0</td>
+                          <td style="padding:8px 10px; text-align:right; color:var(--text-muted);">0</td>
+                          <td style="padding:8px 10px;"><span class="final-status-tag tag-standby">STANDBY</span></td>
+                        </tr>
+                        <tr>
+                          <td style="padding:8px 10px; font-weight:600;">4. Safety Surveillance</td>
+                          <td style="padding:8px 10px;"><span class="task-status-pill status-standby">⚪ NOT RUN</span></td>
+                          <td style="padding:8px 10px; color:var(--text-muted);">—</td>
+                          <td style="padding:8px 10px; text-align:right; color:var(--text-muted);">—</td>
+                          <td style="padding:8px 10px; text-align:right; color:var(--text-muted);">0</td>
+                          <td style="padding:8px 10px; text-align:right; color:var(--text-muted);">0</td>
+                          <td style="padding:8px 10px; text-align:right; color:var(--text-muted);">0</td>
+                          <td style="padding:8px 10px;"><span class="final-status-tag tag-standby">STANDBY</span></td>
+                        </tr>
+                        <tr>
+                          <td style="padding:8px 10px; font-weight:600;">5. Regulatory QC &amp; Release Readiness</td>
+                          <td style="padding:8px 10px;"><span class="task-status-pill status-standby">⚪ NOT RUN</span></td>
+                          <td style="padding:8px 10px; color:var(--text-muted);">—</td>
+                          <td style="padding:8px 10px; text-align:right; color:var(--text-muted);">—</td>
+                          <td style="padding:8px 10px; text-align:right; color:var(--text-muted);">0</td>
+                          <td style="padding:8px 10px; text-align:right; color:var(--text-muted);">0</td>
+                          <td style="padding:8px 10px; text-align:right; color:var(--text-muted);">0</td>
+                          <td style="padding:8px 10px;"><span class="final-status-tag tag-standby">STANDBY</span></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
                   <p style="font-size:12px; color:var(--text-primary); margin:0; line-height:1.5;" id="review-focus-desc">
                     System standing by. Upload any ADaM or SDTM dataset to perform keen data verification, detect errors, auto-repair discrepancies, and download clean datasets.
                   </p>
@@ -1036,7 +1136,13 @@
             <div class="tab-pane" id="tab-deliverables">
               <div class="pane-card">
                 <div class="card-title-bar">
-                  <h3>eCTD Module 5 Package &amp; Regulatory Deliverables</h3>
+                  <div>
+                    <h3>eCTD Module 5 Package &amp; Regulatory Deliverables</h3>
+                    <span style="font-size:11.5px; color:var(--text-secondary);">Validated audit workbooks and electronic submission components per Section 33 &amp; 36</span>
+                  </div>
+                  <button class="btn-sm primary" id="btn-tab-download-master-report" style="display:flex; align-items:center; gap:6px;">
+                    <span>📥</span> Download Master Validation Report (.xlsx)
+                  </button>
                 </div>
                 <div class="deliverables-grid" id="deliverables-grid">
                   <!-- Injected via JS -->
