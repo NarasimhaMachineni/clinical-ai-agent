@@ -294,6 +294,49 @@ function autoSwitchTabForTask(task) {
 // ADaM CLINICAL VERIFICATION & SELF-HEALING ENGINE
 // Keenly inspects ADaM tables, flags discrepancies, and repairs them.
 // =========================================================
+function normalizeClinicalDate(rawVal) {
+  if (rawVal === null || rawVal === undefined || rawVal === '') return { isValid: false, formatted: '' };
+  if (rawVal instanceof Date || Object.prototype.toString.call(rawVal) === '[object Date]') {
+    if (isNaN(rawVal.getTime())) return { isValid: false, formatted: '' };
+    const y = rawVal.getFullYear();
+    const m = String(rawVal.getMonth() + 1).padStart(2, '0');
+    const d = String(rawVal.getDate()).padStart(2, '0');
+    return { isValid: true, formatted: `${y}-${m}-${d}`, wasConverted: true };
+  }
+  const s = String(rawVal).trim();
+  if (typeof rawVal === 'number' || (/^\d{5}$/.test(s) && Number(s) > 20000 && Number(s) < 80000)) {
+    const num = Number(rawVal);
+    const utcDays = Math.floor(num - 25569);
+    const dObj = new Date(utcDays * 86400 * 1000);
+    if (!isNaN(dObj.getTime())) {
+      return { isValid: true, formatted: dObj.toISOString().slice(0, 10), wasConverted: true };
+    }
+  }
+  if (/^\d{4}-\d{2}-\d{2}/.test(s)) {
+    return { isValid: true, formatted: s.slice(0, 10), wasConverted: s.length > 10 };
+  }
+  if (/^\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}$/.test(s)) {
+    const parts = s.split(/[\/\-]/);
+    const p0 = parseInt(parts[0], 10);
+    const p1 = parseInt(parts[1], 10);
+    const yr = parts[2];
+    let mm, dd;
+    if (p0 > 12) { dd = String(p0).padStart(2, '0'); mm = String(p1).padStart(2, '0'); }
+    else { mm = String(p0).padStart(2, '0'); dd = String(p1).padStart(2, '0'); }
+    return { isValid: true, formatted: `${yr}-${mm}-${dd}`, wasConverted: true };
+  }
+  const monMatch = s.match(/^(\d{1,2})[\-\s]([A-Za-z]{3})[\-\s](\d{4})$/);
+  if (monMatch) {
+    const months = { jan:'01', feb:'02', mar:'03', apr:'04', may:'05', jun:'06', jul:'07', aug:'08', sep:'09', oct:'10', nov:'11', dec:'12' };
+    const m = months[monMatch[2].toLowerCase()];
+    if (m) {
+      const dd = String(monMatch[1]).padStart(2, '0');
+      return { isValid: true, formatted: `${monMatch[3]}-${m}-${dd}`, wasConverted: true };
+    }
+  }
+  return { isValid: false, formatted: s, wasConverted: false };
+}
+
 function verifyAndRepairADaM(dsetName, rows) {
   if (!rows || !Array.isArray(rows) || rows.length === 0) {
     return { repairedRows: [], totalErrors: 0, rowsWithErrors: 0, auditLog: [] };
@@ -302,6 +345,7 @@ function verifyAndRepairADaM(dsetName, rows) {
   const upperDomain = (dsetName || 'ADAM').toUpperCase();
   let totalErrors = 0;
   const auditLog = [];
+  const seenSubj = new Map();
 
   const repairedRows = rows.map((originalRow, rowIndex) => {
     const r = Object.assign({}, originalRow);
@@ -323,22 +367,333 @@ function verifyAndRepairADaM(dsetName, rows) {
         fix: 'Imputed unique USUBJID from study & row index'
       });
       r.USUBJID = fallbackId;
+    } else {
+      const subjStr = String(r.USUBJID).trim();
+      if (seenSubj.has(subjStr)) {
+        const count = seenSubj.get(subjStr) + 1;
+        seenSubj.set(subjStr, count);
+        const dupId = subjStr + '-DUP' + String(count).padStart(2, '0');
+        rowIssues.push({
+          variable: 'USUBJID',
+          error: 'Duplicate primary identifier USUBJID: ' + subjStr,
+          rule: 'CDISC ADaMIG v1.3 Rule AD0001 (Unique Subject Identifier)',
+          oldVal: subjStr,
+          newVal: dupId,
+          justification: 'ADSL requires exactly one record per unique subject; duplicate USUBJID disambiguated.',
+          method: 'Unique Key Disambiguation',
+          status: 'FIXED',
+          fix: 'Disambiguated duplicate USUBJID to ' + dupId
+        });
+        r.USUBJID = dupId;
+      } else {
+        seenSubj.set(subjStr, 1);
+      }
     }
 
-    // 2. Population Flags (SAFFL, ITTFL, PPFL) Standard Conformance
-    ['SAFFL', 'ITTFL', 'PPFL'].forEach(flag => {
+    if (!r.STUDYID && r.USUBJID && r.USUBJID.includes('-')) {
+      r.STUDYID = r.USUBJID.split('-')[0];
+    }
+    if (!r.SUBJID && r.USUBJID && r.USUBJID.includes('-')) {
+      const parts = r.USUBJID.split('-');
+      r.SUBJID = parts[parts.length - 1];
+    }
+
+    // 2. Demographic & Baseline Variables
+    if (r.SEX !== undefined && r.SEX !== null && String(r.SEX).trim() !== '') {
+      const sVal = String(r.SEX).trim();
+      const sUpper = sVal.toUpperCase();
+      let correctedSex = null;
+      if (sUpper === 'MALE' || sUpper === 'M' || sVal === '1' || sUpper === 'MAN') correctedSex = 'M';
+      else if (sUpper === 'FEMALE' || sUpper === 'F' || sVal === '2' || sUpper === 'WOMAN') correctedSex = 'F';
+      else if (sUpper === 'U' || sUpper === 'UNKNOWN') correctedSex = 'U';
+      else if (sUpper === 'UNDIFFERENTIATED') correctedSex = 'UNDIFFERENTIATED';
+      if (correctedSex && sVal !== correctedSex) {
+        rowIssues.push({
+          variable: 'SEX',
+          error: `Non-standard SEX value "${sVal}" (CDISC requires M, F, U)`,
+          rule: 'CDISC CT Rule CT0002 / SDTMIG DM.SEX',
+          oldVal: sVal,
+          newVal: correctedSex,
+          justification: 'CDISC Controlled Terminology permits only 1-character uppercase codes for sex (M, F, U, UNDIFFERENTIATED).',
+          method: 'Controlled Terminology Standardizer',
+          status: 'FIXED',
+          fix: `Standardized SEX to ${correctedSex}`
+        });
+        r.SEX = correctedSex;
+      }
+    }
+
+    if (r.AGE !== undefined && r.AGE !== null && String(r.AGE).trim() !== '') {
+      let numAge = Number(r.AGE);
+      if (isNaN(numAge)) {
+        const match = String(r.AGE).match(/-?\d+(\.\d+)?/);
+        if (match) numAge = Number(match[0]);
+      }
+      if (!isNaN(numAge)) {
+        if (numAge < 0) {
+          const fixedAge = Math.abs(numAge);
+          rowIssues.push({
+            variable: 'AGE',
+            error: `Negative age value "${r.AGE}" is invalid for human subjects`,
+            rule: 'CDISC Conformance Rule SD0021 (Valid Numeric Age)',
+            oldVal: r.AGE,
+            newVal: fixedAge,
+            justification: 'Subject age must be a non-negative integer representing elapsed time since birth.',
+            method: 'Absolute Magnitude Correction',
+            status: 'FIXED',
+            fix: `Corrected negative age to ${fixedAge}`
+          });
+          r.AGE = fixedAge;
+          numAge = fixedAge;
+        } else if (String(r.AGE).trim() !== String(numAge)) {
+          rowIssues.push({
+            variable: 'AGE',
+            error: `Non-numeric text in AGE field: "${r.AGE}"`,
+            rule: 'CDISC Conformance Rule SD0021',
+            oldVal: r.AGE,
+            newVal: numAge,
+            justification: 'CDISC ADaM AGE must be a clean numeric variable without unit annotations.',
+            method: 'Numeric Extraction',
+            status: 'FIXED',
+            fix: `Cleaned AGE to numeric ${numAge}`
+          });
+          r.AGE = numAge;
+        }
+      }
+    } else if (r.BRTHDTC && (r.TRTSDT || r.RFSTDTC)) {
+      const bDate = new Date(r.BRTHDTC);
+      const refDate = new Date(r.TRTSDT || r.RFSTDTC);
+      if (!isNaN(bDate.getTime()) && !isNaN(refDate.getTime())) {
+        const derivedAge = Math.floor((refDate - bDate) / (365.25 * 86400000));
+        if (derivedAge >= 0 && derivedAge <= 120) {
+          rowIssues.push({
+            variable: 'AGE',
+            error: 'Missing primary variable AGE',
+            rule: 'CDISC ADaMIG v1.3 Rule AD0022 (Subject Age)',
+            oldVal: '(blank)',
+            newVal: derivedAge,
+            justification: 'Age derived deterministically from birth date BRTHDTC and reference start date.',
+            method: 'Chronological Imputation',
+            status: 'FIXED',
+            fix: `Imputed AGE as ${derivedAge} from birth date`
+          });
+          r.AGE = derivedAge;
+        }
+      }
+    }
+
+    if (r.AGE !== undefined && r.AGE !== null && String(r.AGE).trim() !== '') {
+      const ageu = (r.AGEU || '').toString().trim().toUpperCase();
+      if (ageu !== 'YEARS') {
+        rowIssues.push({
+          variable: 'AGEU',
+          error: `Non-standard AGEU "${r.AGEU || '(blank)'}" (CDISC requires YEARS)`,
+          rule: 'CDISC ADaMIG v1.3 Rule AD0024 (AGEU Controlled Terminology)',
+          oldVal: r.AGEU || '(blank)',
+          newVal: 'YEARS',
+          justification: 'Adult clinical trials mandate AGEU standard unit code YEARS.',
+          method: 'Controlled Terminology Imputer',
+          status: 'FIXED',
+          fix: 'Set AGEU to YEARS'
+        });
+        r.AGEU = 'YEARS';
+      }
+
+      const age = Number(r.AGE);
+      if (!isNaN(age)) {
+        const expectedGr1 = age < 65 ? '<65' : '>=65';
+        const currentGr1 = (r.AGEGR1 || '').toString().trim();
+        let isMismatch = false;
+        if (!currentGr1) isMismatch = true;
+        else if (age >= 65 && (currentGr1 === '<65' || currentGr1 === '< 65' || currentGr1.toLowerCase().includes('<65'))) isMismatch = true;
+        else if (age < 65 && (currentGr1 === '>=65' || currentGr1 === '>= 65' || currentGr1.toLowerCase().includes('>=65'))) isMismatch = true;
+
+        if (isMismatch) {
+          rowIssues.push({
+            variable: 'AGEGR1',
+            error: `Age Group Mismatch: Subject AGE is ${age} but AGEGR1 recorded as "${currentGr1 || '(blank)'}"`,
+            rule: 'CDISC ADaMIG v1.3 Rule AD0026 (Age Categorization Consistency)',
+            oldVal: currentGr1 || '(blank)',
+            newVal: expectedGr1,
+            justification: 'Categorical age grouping AGEGR1 must be mathematically consistent with AGE: subjects aged < 65 belong in <65, subjects aged >= 65 belong in >=65.',
+            method: 'Deterministic Categorical Derivation',
+            status: 'FIXED',
+            fix: `Re-derived AGEGR1 to '${expectedGr1}' consistent with AGE (${age})`
+          });
+          r.AGEGR1 = expectedGr1;
+        }
+      }
+    }
+
+    if (r.RACE !== undefined && r.RACE !== null && String(r.RACE).trim() !== '') {
+      const rStr = String(r.RACE).trim().toUpperCase();
+      let stdRace = rStr;
+      if (rStr === 'CAUCASIAN' || rStr === 'WHITE') stdRace = 'WHITE';
+      else if (rStr === 'BLACK' || rStr === 'AFRICAN AMERICAN' || rStr === 'AFRICAN-AMERICAN') stdRace = 'BLACK OR AFRICAN AMERICAN';
+      else if (rStr === 'ASIAN') stdRace = 'ASIAN';
+      else if (rStr === 'AMERICAN INDIAN' || rStr === 'ALASKA NATIVE') stdRace = 'AMERICAN INDIAN OR ALASKA NATIVE';
+      else if (rStr === 'NATIVE HAWAIIAN' || rStr === 'PACIFIC ISLANDER') stdRace = 'NATIVE HAWAIIAN OR OTHER PACIFIC ISLANDER';
+      if (stdRace !== String(r.RACE).trim()) {
+        rowIssues.push({
+          variable: 'RACE',
+          error: `Non-standard RACE terminology "${r.RACE}"`,
+          rule: 'CDISC SDTM/ADaM CT Rule CT0004 (RACE Standard Terminology)',
+          oldVal: r.RACE,
+          newVal: stdRace,
+          justification: 'Regulatory submission requires standardized CDISC Controlled Terminology for demographic reporting.',
+          method: 'Controlled Terminology Standardizer',
+          status: 'FIXED',
+          fix: `Standardized RACE to '${stdRace}'`
+        });
+        r.RACE = stdRace;
+      }
+    }
+
+    // 3. Dates & Chronology
+    const dateVars = ['TRTSDT', 'TRTEDT', 'ASTDT', 'AENDT', 'RANDDT', 'BRTHDTC', 'RFSTDTC', 'RFENDTC', 'EOSDT', 'DTHDT', 'VSDTC', 'LBDTC'];
+    dateVars.forEach(dVar => {
+      if (r[dVar] !== undefined && r[dVar] !== null && String(r[dVar]).trim() !== '') {
+        const norm = normalizeClinicalDate(r[dVar]);
+        if (norm.isValid && norm.wasConverted) {
+          rowIssues.push({
+            variable: dVar,
+            error: `Date "${r[dVar]}" non-compliant with CDISC ISO 8601 YYYY-MM-DD`,
+            rule: 'CDISC ISO 8601 Date Standard Rule SD0004',
+            oldVal: String(r[dVar]),
+            newVal: norm.formatted,
+            justification: 'Regulatory electronic submissions mandate unambiguous ISO 8601 format (YYYY-MM-DD) to prevent day/month transposition.',
+            method: 'Deterministic Date Normalization Engine',
+            status: 'FIXED',
+            fix: `Converted ${dVar} to ISO 8601 standard (${norm.formatted})`
+          });
+          r[dVar] = norm.formatted;
+        }
+      }
+    });
+
+    if (r.TRTSDT && r.TRTEDT && r.TRTSDT.length === 10 && r.TRTEDT.length === 10) {
+      if (r.TRTEDT < r.TRTSDT) {
+        rowIssues.push({
+          variable: 'TRTEDT',
+          error: `Chronology error: TRTEDT (${r.TRTEDT}) is prior to TRTSDT (${r.TRTSDT})`,
+          rule: 'FDA Chronological Logic Rule AD0031',
+          oldVal: r.TRTEDT,
+          newVal: r.TRTSDT,
+          justification: 'Treatment end date cannot precede treatment start date; reconciled to treatment start date.',
+          method: 'Chronological Anchor Reconciliation',
+          status: 'FIXED',
+          fix: `Reconciled TRTEDT to equal TRTSDT (${r.TRTSDT})`
+        });
+        r.TRTEDT = r.TRTSDT;
+      }
+
+      const dStart = new Date(r.TRTSDT);
+      const dEnd = new Date(r.TRTEDT);
+      const calculatedDur = Math.round((dEnd - dStart) / 86400000) + 1;
+      const recordedDur = r.TRTDURD !== undefined && r.TRTDURD !== null && String(r.TRTDURD).trim() !== '' ? Number(r.TRTDURD) : null;
+      if (recordedDur === null || isNaN(recordedDur) || recordedDur !== calculatedDur) {
+        rowIssues.push({
+          variable: 'TRTDURD',
+          error: `Discrepancy in TRTDURD: Recorded ${recordedDur !== null ? recordedDur : '(blank)'} days != expected ${calculatedDur} days (TRTEDT - TRTSDT + 1)`,
+          rule: 'CDISC ADaMIG v1.3 Rule AD0033 (TRTDURD = TRTEDT - TRTSDT + 1)',
+          oldVal: recordedDur !== null ? recordedDur : '(blank)',
+          newVal: calculatedDur,
+          justification: 'Treatment duration must precisely equal (TRTEDT - TRTSDT + 1) per CDISC ADaM standard.',
+          method: 'Deterministic Duration Calculation Engine',
+          status: 'FIXED',
+          fix: `Recalculated TRTDURD to exact duration: ${calculatedDur} days`
+        });
+        r.TRTDURD = calculatedDur;
+      }
+    }
+
+    // 4. Treatment Arm & Codes
+    if (r.ARM || r.ARMCD) {
+      const arm = (r.ARM || '').toString().trim();
+      const armcd = (r.ARMCD || '').toString().trim().toUpperCase();
+
+      if (!armcd && arm) {
+        const dCode = /placebo/i.test(arm) ? 'PBO' : 'ACT';
+        rowIssues.push({
+          variable: 'ARMCD',
+          error: `Missing short code ARMCD for treatment arm "${arm}"`,
+          rule: 'CDISC ADaMIG v1.3 Rule AD0012 (ARMCD Derivation)',
+          oldVal: '(blank)',
+          newVal: dCode,
+          justification: 'Every treatment arm must have a corresponding short identifier code ARMCD.',
+          method: 'Controlled Terminology Short Code Derivation',
+          status: 'FIXED',
+          fix: `Derived ARMCD as '${dCode}' from ARM`
+        });
+        r.ARMCD = dCode;
+      } else if (!arm && armcd) {
+        const dArm = armcd === 'PBO' ? 'Placebo' : 'Active Treatment';
+        rowIssues.push({
+          variable: 'ARM',
+          error: `Missing treatment arm description ARM for code "${armcd}"`,
+          rule: 'CDISC ADaMIG v1.3 Rule AD0012',
+          oldVal: '(blank)',
+          newVal: dArm,
+          justification: 'Full treatment arm name ARM required alongside short code ARMCD.',
+          method: 'Controlled Terminology Decoder',
+          status: 'FIXED',
+          fix: `Populated ARM as '${dArm}' from ARMCD`
+        });
+        r.ARM = dArm;
+      } else if (arm && armcd) {
+        const armIsPbo = /placebo/i.test(arm);
+        const armcdIsPbo = /PBO|PLAC/.test(armcd);
+        const armIsActive = /active|dose|mg|drug/i.test(arm);
+        const armcdIsActive = /ACT|TRT|DOSE/.test(armcd);
+
+        if (armIsPbo && armcdIsActive) {
+          rowIssues.push({
+            variable: 'ARMCD',
+            error: `Conflict: ARM is "${arm}" (Placebo) but ARMCD was recorded as active code "${armcd}"`,
+            rule: 'CDISC ADaMIG v1.3 Rule AD0014 (ARM vs ARMCD Consistency)',
+            oldVal: armcd,
+            newVal: 'PBO',
+            justification: 'Treatment short code ARMCD must correspond to assigned ARM.',
+            method: 'Arm Nomenclature Reconciliation',
+            status: 'FIXED',
+            fix: "Reconciled ARMCD to PBO matching Placebo arm"
+          });
+          r.ARMCD = 'PBO';
+        } else if (armIsActive && armcdIsPbo) {
+          rowIssues.push({
+            variable: 'ARMCD',
+            error: `Conflict: ARM is "${arm}" (Active) but ARMCD was recorded as placebo code "${armcd}"`,
+            rule: 'CDISC ADaMIG v1.3 Rule AD0014 (ARM vs ARMCD Consistency)',
+            oldVal: armcd,
+            newVal: 'ACT',
+            justification: 'Treatment short code ARMCD cannot indicate Placebo when ARM is Active.',
+            method: 'Arm Nomenclature Reconciliation',
+            status: 'FIXED',
+            fix: "Reconciled ARMCD to ACT matching Active treatment"
+          });
+          r.ARMCD = 'ACT';
+        }
+      }
+    }
+
+    if (r.ARM && !r.TRT01P) r.TRT01P = r.ARM;
+    if (r.TRT01P && !r.ARM) r.ARM = r.TRT01P;
+    if (r.TRT01P && !r.TRT01A) r.TRT01A = r.TRT01P;
+
+    // 5. Population Flags
+    ['SAFFL', 'ITTFL', 'PPFL', 'RANDFL'].forEach(flag => {
       if (r[flag] !== undefined && r[flag] !== null && String(r[flag]).trim() !== '') {
         const val = String(r[flag]).trim();
         if (val !== 'Y' && val !== 'N') {
           let corrected = 'Y';
-          if (val.toLowerCase() === 'n' || val === '0' || val.toLowerCase() === 'no') corrected = 'N';
+          if (val.toLowerCase() === 'n' || val === '0' || val.toLowerCase() === 'no' || val.toLowerCase() === 'false') corrected = 'N';
           rowIssues.push({
             variable: flag,
-            error: `Non-standard flag value "${val}" for ${flag} (CDISC requires 'Y' or 'N')`,
+            error: `Non-standard flag value "${val}" for ${flag} (CDISC requires Y or N)`,
             rule: 'CDISC ADaMIG v1.3 Rule AD0018 (Flag Conformance)',
             oldVal: val,
             newVal: corrected,
-            justification: `CDISC ADaM standards strictly require 1-character uppercase 'Y' or 'N' for population indicator flags.`,
+            justification: 'CDISC ADaM standards mandate 1-character uppercase Y or N for population flags.',
             method: 'Controlled Terminology Standardizer',
             status: 'FIXED',
             fix: `Standardized ${flag} to '${corrected}'`
@@ -348,15 +703,21 @@ function verifyAndRepairADaM(dsetName, rows) {
       }
     });
 
-    // Cross-variable logic: Patient dosed / treated but SAFFL='N'
-    if (r.TRT01A && r.TRT01A !== 'Not Treated' && String(r.TRT01A).trim() !== '' && (r.SAFFL === 'N' || r.SAFFL === 'n')) {
+    const isTreated = Boolean(
+      (r.TRTSDT && String(r.TRTSDT).trim() !== '') ||
+      (r.TRT01A && !/screen failure|not treated/i.test(r.TRT01A) && String(r.TRT01A).trim() !== '') ||
+      (r.ARM && !/screen failure|not treated/i.test(r.ARM) && String(r.ARM).trim() !== '') ||
+      (r.EXDOSE && Number(r.EXDOSE) > 0)
+    );
+
+    if (isTreated && (r.SAFFL === 'N' || !r.SAFFL)) {
       rowIssues.push({
         variable: 'SAFFL',
-        error: `Conflict: Patient received ${r.TRT01A} but SAFFL was flagged 'N'`,
+        error: `Safety Population Conflict: Subject received study drug (${r.TRT01A || r.ARM || 'treated'}) but SAFFL was flagged '${r.SAFFL || 'blank'}'`,
         rule: 'FDA Technical Conformance Guide §4.1.2 / ADaM Safety Population Definition',
-        oldVal: r.SAFFL,
+        oldVal: r.SAFFL || '(blank)',
         newVal: 'Y',
-        justification: 'Any subject who received at least one documented dose of investigational or comparator drug must be included in the Safety Population (SAFFL=Y).',
+        justification: 'Any subject who received at least one documented dose of investigational or comparator drug must be included in Safety Population (SAFFL=Y).',
         method: 'Cross-Domain Exposure Adjudication',
         status: 'FIXED',
         fix: "Corrected SAFFL to 'Y' per exposure records"
@@ -364,61 +725,48 @@ function verifyAndRepairADaM(dsetName, rows) {
       r.SAFFL = 'Y';
     }
 
-    // 3. ISO 8601 Date Formatting & Chronology Check
-    ['TRTSDT', 'TRTEDT', 'ASTDT', 'AENDT', 'VSDTC', 'LBDTC', 'RFSTDTC', 'RFENDTC'].forEach(dateVar => {
-      if (r[dateVar] && typeof r[dateVar] === 'string' && r[dateVar].trim() !== '') {
-        const dVal = r[dateVar].trim();
-        if (/^\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}/.test(dVal)) {
-          const parts = dVal.split(/[\/\-]/);
-          let isoDate = dVal;
-          if (parts.length === 3) {
-            const mm = parts[0].padStart(2, '0');
-            const dd = parts[1].padStart(2, '0');
-            const yyyy = parts[2];
-            isoDate = `${yyyy}-${mm}-${dd}`;
-          }
-          rowIssues.push({
-            variable: dateVar,
-            error: `Date "${dVal}" non-compliant with CDISC ISO 8601 YYYY-MM-DD`,
-            rule: 'CDISC ISO 8601 Date Standard Rule SD0004',
-            oldVal: dVal,
-            newVal: isoDate,
-            justification: 'Regulatory electronic submissions mandate unambiguous ISO 8601 format (YYYY-MM-DD) to prevent day/month transposition.',
-            method: 'Deterministic Date Normalization Engine',
-            status: 'FIXED',
-            fix: `Converted ${dateVar} to ISO 8601 standard (${isoDate})`
-          });
-          r[dateVar] = isoDate;
-        }
-      }
-    });
-
-    // Chronology: Treatment End before Treatment Start
-    if (r.TRTSDT && r.TRTEDT && r.TRTSDT.length === 10 && r.TRTEDT.length === 10) {
-      if (r.TRTEDT < r.TRTSDT) {
-        rowIssues.push({
-          variable: 'TRTEDT',
-          error: `Chronology error: TRTEDT (${r.TRTEDT}) is prior to TRTSDT (${r.TRTSDT})`,
-          rule: 'FDA Chronological Logic Rule AD0031',
-          oldVal: r.TRTEDT,
-          newVal: r.TRTSDT,
-          justification: 'Treatment end date cannot precede treatment start date; reconciled to single-day exposure start date.',
-          method: 'Chronological Anchor Reconciliation',
-          status: 'FIXED',
-          fix: 'Reconciled TRTEDT to equal TRTSDT (single-day treatment)'
-        });
-        r.TRTEDT = r.TRTSDT;
-      }
+    const isRandomized = Boolean(
+      (r.RANDDT && String(r.RANDDT).trim() !== '') ||
+      (r.RANDFL === 'Y') ||
+      (r.ARM && !/screen failure|not assigned/i.test(r.ARM))
+    );
+    if (isRandomized && (r.ITTFL === 'N' || !r.ITTFL)) {
+      rowIssues.push({
+        variable: 'ITTFL',
+        error: `Intent-to-Treat Conflict: Subject was randomized into ${r.ARM || 'study arm'} but ITTFL was '${r.ITTFL || 'blank'}'`,
+        rule: 'ICH E9 Statistical Principles / CDISC ADaM ITT Definition',
+        oldVal: r.ITTFL || '(blank)',
+        newVal: 'Y',
+        justification: 'All randomized subjects must be included in Intent-to-Treat (ITTFL=Y) population.',
+        method: 'Deterministic Randomization Adjudication',
+        status: 'FIXED',
+        fix: "Set ITTFL to 'Y' per randomization status"
+      });
+      r.ITTFL = 'Y';
     }
 
-    // 4. BDS Mathematical Precision: CHG = AVAL - BASE
+    if (r.PPFL === 'Y' && (r.SAFFL === 'N' || r.ITTFL === 'N')) {
+      rowIssues.push({
+        variable: 'PPFL',
+        error: `Per-Protocol Hierarchy Violation: Subject has PPFL='Y' but SAFFL='${r.SAFFL}' and ITTFL='${r.ITTFL}'`,
+        rule: 'ICH E9 / CDISC Rule AD0020 (Per-Protocol Hierarchy)',
+        oldVal: 'Y',
+        newVal: 'N',
+        justification: 'Per-Protocol population is a strict subset of Safety and ITT; non-safety or non-ITT subjects cannot be Per-Protocol.',
+        method: 'Hierarchical Population Adjudication',
+        status: 'FIXED',
+        fix: "Set PPFL to 'N' due to non-membership in Safety/ITT"
+      });
+      r.PPFL = 'N';
+    }
+
+    // 6. BDS Mathematical Precision: CHG = AVAL - BASE
     if (r.AVAL !== undefined && r.BASE !== undefined) {
       const avalNum = parseFloat(r.AVAL);
       const baseNum = parseFloat(r.BASE);
       if (!isNaN(avalNum) && !isNaN(baseNum)) {
         const expectedChg = Math.round((avalNum - baseNum) * 10000) / 10000;
         const currentChg = r.CHG !== undefined && r.CHG !== null && String(r.CHG).trim() !== '' ? parseFloat(r.CHG) : null;
-        
         if (currentChg === null || Math.abs(currentChg - expectedChg) > 0.01) {
           rowIssues.push({
             variable: 'CHG',
@@ -426,7 +774,7 @@ function verifyAndRepairADaM(dsetName, rows) {
             rule: 'CDISC BDS v1.1 Derivation Rule AD0040 (CHG = AVAL - BASE)',
             oldVal: currentChg !== null ? currentChg : '(blank)',
             newVal: expectedChg,
-            justification: 'In Basic Data Structure (BDS) datasets, change from baseline must equal analysis value minus baseline value with exact floating-point precision.',
+            justification: 'In BDS datasets, change from baseline must equal analysis value minus baseline value.',
             method: 'Deterministic BDS Math Re-Derivation',
             status: 'FIXED',
             fix: `Recalculated CHG to exact value: ${expectedChg}`
@@ -434,7 +782,6 @@ function verifyAndRepairADaM(dsetName, rows) {
           r.CHG = expectedChg;
         }
 
-        // Percentage Change: PCHG = ((AVAL - BASE) / BASE) * 100
         if (baseNum !== 0) {
           const expectedPchg = Math.round(((avalNum - baseNum) / baseNum) * 1000) / 10;
           const currentPchg = r.PCHG !== undefined && r.PCHG !== null && String(r.PCHG).trim() !== '' ? parseFloat(r.PCHG) : null;
@@ -445,7 +792,7 @@ function verifyAndRepairADaM(dsetName, rows) {
               rule: 'CDISC BDS v1.1 Derivation Rule AD0041 (PCHG Formula)',
               oldVal: currentPchg !== null ? currentPchg : '(blank)',
               newVal: expectedPchg,
-              justification: 'Percent change from baseline must precisely equal ((AVAL - BASE) / BASE) * 100 per CDISC BDS specifications.',
+              justification: 'Percent change from baseline must precisely equal ((AVAL - BASE) / BASE) * 100 per CDISC BDS.',
               method: 'Deterministic BDS Percentage Re-Derivation',
               status: 'FIXED',
               fix: `Recalculated PCHG to exact percentage: ${expectedPchg}%`
@@ -456,7 +803,7 @@ function verifyAndRepairADaM(dsetName, rows) {
       }
     }
 
-    // 5. Reference Range Indicator (ANRIND) vs Reference Limits (ANRLO, ANRHI)
+    // 7. Reference Range Indicator (ANRIND) vs Limits (ANRLO, ANRHI)
     if (r.AVAL !== undefined && r.ANRLO !== undefined && r.ANRHI !== undefined) {
       const val = parseFloat(r.AVAL);
       const lo = parseFloat(r.ANRLO);
@@ -474,7 +821,7 @@ function verifyAndRepairADaM(dsetName, rows) {
             rule: 'CDISC BDS Rule AD0055 (Reference Range Consistency)',
             oldVal: currentInd,
             newVal: expectedInd,
-            justification: `Clinical safety evaluation requires laboratory baseline/post-baseline values to be categorized consistently against documented reference limits [${lo}, ${hi}].`,
+            justification: 'Clinical safety evaluation requires laboratory values to be categorized consistently against documented reference limits.',
             method: 'Laboratory Reference Boundary Logic',
             status: 'FIXED',
             fix: `Updated ANRIND to '${expectedInd}' based on reference limits [${lo}, ${hi}]`
@@ -484,7 +831,7 @@ function verifyAndRepairADaM(dsetName, rows) {
       }
     }
 
-    // 6. OCCDS Event Flag Consistency (ADAE)
+    // 8. OCCDS Event Flag (ADAE)
     if (r.TRTEMFL && (r.ASTDT || r.AESTDTC) && (r.TRTSDT || (typeof clientRealData !== 'undefined' && clientRealData.TRTSDT))) {
       const eventDate = r.ASTDT || r.AESTDTC;
       const trtDate = r.TRTSDT || (typeof clientRealData !== 'undefined' && clientRealData.TRTSDT) || '2025-01-10';
@@ -495,7 +842,7 @@ function verifyAndRepairADaM(dsetName, rows) {
           rule: 'CDISC OCCDS v1.0 Rule AD0062 (Treatment-Emergent AE Logic)',
           oldVal: r.TRTEMFL,
           newVal: 'Y',
-          justification: 'Any adverse event with onset date greater than or equal to first study drug exposure date must be flagged as treatment-emergent (TRTEMFL=Y).',
+          justification: 'Any adverse event on or after first dose must be flagged as treatment-emergent (TRTEMFL=Y).',
           method: 'OCCDS Event Onset Comparison Logic',
           status: 'FIXED',
           fix: "Set TRTEMFL to 'Y' (Treatment-Emergent Adverse Event)"
@@ -504,10 +851,9 @@ function verifyAndRepairADaM(dsetName, rows) {
       }
     }
 
-    // 7. Dedicated Audit Field: ERROR CHECKS & CORRECTION (Section 9 10-Point Audit Diagnosis)
+    // 9. Dedicated Audit Field: ERROR CHECKS & CORRECTION (Section 9 10-Point Audit Diagnosis)
     if (rowIssues.length > 0) {
       totalErrors += rowIssues.length;
-      
       const tenPointAudit = rowIssues.map((iss, idx) => {
         return `[Check ${idx+1}] Checked: ${upperDomain}.${iss.variable} | Error: Yes | Diagnosis: ${iss.error} | Rule: ${iss.rule} | Original: "${iss.oldVal}" | Corrected: "${iss.newVal}" | Justification: ${iss.justification} | Corrected Val: "${iss.newVal}" | Method: ${iss.method} | QC: ${iss.status}`;
       }).join(' || ');
@@ -1224,6 +1570,14 @@ function renderDatasetTable(dsetName) {
   container.innerHTML = html;
 
   // Wire Download Buttons
+  const btnXlsx = document.getElementById('btn-download-corrected-xlsx');
+  if (btnXlsx) {
+    btnXlsx.addEventListener('click', () => {
+      downloadDatasetAsExcel(rows, `${targetName}_corrected_fresh.xlsx`);
+      appendTerminalLog('OK', 'DOWNLOAD', `Downloaded updated fresh ${targetName}_corrected_fresh.xlsx (${rows.length} records with ERROR CHECKS & CORRECTION audit column).`);
+    });
+  }
+
   const btnCsv = document.getElementById('btn-download-corrected-csv');
   if (btnCsv) {
     btnCsv.addEventListener('click', () => {
@@ -1868,7 +2222,40 @@ async function processUploadedClinicalFile(file) {
   let parsed = null;
 
   try {
-    if (lower.endsWith('.xpt')) {
+    if (lower.endsWith('.xlsx') || lower.endsWith('.xls')) {
+      const buffer = await readFileAsArrayBuffer(file);
+      if (typeof XLSX !== 'undefined') {
+        const workbook = XLSX.read(buffer, { type: 'array', cellDates: true });
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        const rawRows = XLSX.utils.sheet_to_json(sheet, { defval: '', raw: false });
+        // Filter out blank rows so exact record count matches data rows
+        const validRows = (rawRows || []).filter(row => {
+          return Object.values(row).some(v => v !== null && v !== undefined && String(v).trim() !== '');
+        });
+        if (validRows.length > 0) {
+          const cleanVars = Object.keys(validRows[0]).map(k => k.trim());
+          const cleanRows = validRows.map(r => {
+            const cleanObj = {};
+            Object.keys(r).forEach(k => {
+              const cleanKey = k.trim().toUpperCase();
+              let val = r[k];
+              if (typeof val === 'string') val = val.trim();
+              cleanObj[cleanKey] = val;
+            });
+            return cleanObj;
+          });
+          parsed = {
+            format: 'EXCEL',
+            domain: sheetName && !/sheet/i.test(sheetName) ? sheetName.toUpperCase() : null,
+            variables: cleanVars,
+            rows: cleanRows
+          };
+        }
+      } else {
+        throw new Error('SheetJS library is initializing. Please retry in a moment.');
+      }
+    } else if (lower.endsWith('.xpt')) {
       const buffer = await readFileAsArrayBuffer(file);
       parsed = parseSasXptBuffer(buffer);
     } else if (lower.endsWith('.sas7bdat')) {

@@ -1,4 +1,4 @@
-﻿{
+{
   "name": "clinical-domain-ai-agent",
   "version": "1.0.0",
   "description": "Autonomous Clinical Domain AI Agent - CDISC SDTM/ADaM, Biostatistics, and GxP Surveillance",
@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "cors": "^2.8.5",
-    "express": "^4.19.2"
+    "express": "^4.19.2",
+    "xlsx": "^0.18.5"
   }
 }

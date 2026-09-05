@@ -1222,7 +1222,15 @@
 
   </div>
 
-  <script src="app.js?v=13.0"></script>
+  <script src="vendor/xlsx.full.min.js"></script>
+  <script>
+    if (typeof XLSX === 'undefined') {
+      const s = document.createElement('script');
+      s.src = 'https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js';
+      document.head.appendChild(s);
+    }
+  </script>
+  <script src="app.js?v=14.0"></script>
   <!-- Self-Healing Error Pop-up Toast Container -->
   <div id="self-healing-toast-container"></div>
 
