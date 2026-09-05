@@ -1,0 +1,112 @@
+[
+  {
+    "STUDYID": "ONC-2025-001",
+    "USUBJID": "ONC-2025-001-001",
+    "MHTERM": "Type 2 Diabetes Mellitus",
+    "MHDECOD": "TYPE 2 DIABETES MELLITUS",
+    "MHBODSYS": "METABOLISM AND NUTRITION DISORDERS",
+    "MHCAT": "PRIMARY CONDITION",
+    "ASTDT": "2019-03-15",
+    "MHONGOFL": "Y",
+    "TRTP": "Pembrolizumab 200mg"
+  },
+  {
+    "STUDYID": "ONC-2025-001",
+    "USUBJID": "ONC-2025-001-002",
+    "MHTERM": "Type 2 Diabetes Mellitus",
+    "MHDECOD": "TYPE 2 DIABETES MELLITUS",
+    "MHBODSYS": "METABOLISM AND NUTRITION DISORDERS",
+    "MHCAT": "PRIMARY CONDITION",
+    "ASTDT": "2019-03-15",
+    "MHONGOFL": "Y",
+    "TRTP": "Pembrolizumab 200mg"
+  },
+  {
+    "STUDYID": "ONC-2025-001",
+    "USUBJID": "ONC-2025-001-003",
+    "MHTERM": "Type 2 Diabetes Mellitus",
+    "MHDECOD": "TYPE 2 DIABETES MELLITUS",
+    "MHBODSYS": "METABOLISM AND NUTRITION DISORDERS",
+    "MHCAT": "PRIMARY CONDITION",
+    "ASTDT": "2019-03-15",
+    "MHONGOFL": "Y",
+    "TRTP": "Placebo"
+  },
+  {
+    "STUDYID": "ONC-2025-001",
+    "USUBJID": "ONC-2025-001-004",
+    "MHTERM": "Type 2 Diabetes Mellitus",
+    "MHDECOD": "TYPE 2 DIABETES MELLITUS",
+    "MHBODSYS": "METABOLISM AND NUTRITION DISORDERS",
+    "MHCAT": "PRIMARY CONDITION",
+    "ASTDT": "2019-03-15",
+    "MHONGOFL": "Y",
+    "TRTP": "Placebo"
+  },
+  {
+    "STUDYID": "ONC-2025-001",
+    "USUBJID": "ONC-2025-001-005",
+    "MHTERM": "Type 2 Diabetes Mellitus",
+    "MHDECOD": "TYPE 2 DIABETES MELLITUS",
+    "MHBODSYS": "METABOLISM AND NUTRITION DISORDERS",
+    "MHCAT": "PRIMARY CONDITION",
+    "ASTDT": "2019-03-15",
+    "MHONGOFL": "Y",
+    "TRTP": "Pembrolizumab 200mg"
+  },
+  {
+    "STUDYID": "ONC-2025-001",
+    "USUBJID": "ONC-2025-001-006",
+    "MHTERM": "Type 2 Diabetes Mellitus",
+    "MHDECOD": "TYPE 2 DIABETES MELLITUS",
+    "MHBODSYS": "METABOLISM AND NUTRITION DISORDERS",
+    "MHCAT": "PRIMARY CONDITION",
+    "ASTDT": "2019-03-15",
+    "MHONGOFL": "Y",
+    "TRTP": "Pembrolizumab 200mg"
+  },
+  {
+    "STUDYID": "ONC-2025-001",
+    "USUBJID": "ONC-2025-001-007",
+    "MHTERM": "Type 2 Diabetes Mellitus",
+    "MHDECOD": "TYPE 2 DIABETES MELLITUS",
+    "MHBODSYS": "METABOLISM AND NUTRITION DISORDERS",
+    "MHCAT": "PRIMARY CONDITION",
+    "ASTDT": "2019-03-15",
+    "MHONGOFL": "Y",
+    "TRTP": "Placebo"
+  },
+  {
+    "STUDYID": "ONC-2025-001",
+    "USUBJID": "ONC-2025-001-008",
+    "MHTERM": "Type 2 Diabetes Mellitus",
+    "MHDECOD": "TYPE 2 DIABETES MELLITUS",
+    "MHBODSYS": "METABOLISM AND NUTRITION DISORDERS",
+    "MHCAT": "PRIMARY CONDITION",
+    "ASTDT": "2019-03-15",
+    "MHONGOFL": "Y",
+    "TRTP": "Pembrolizumab 200mg"
+  },
+  {
+    "STUDYID": "ONC-2025-001",
+    "USUBJID": "ONC-2025-001-009",
+    "MHTERM": "Type 2 Diabetes Mellitus",
+    "MHDECOD": "TYPE 2 DIABETES MELLITUS",
+    "MHBODSYS": "METABOLISM AND NUTRITION DISORDERS",
+    "MHCAT": "PRIMARY CONDITION",
+    "ASTDT": "2019-03-15",
+    "MHONGOFL": "Y",
+    "TRTP": "Placebo"
+  },
+  {
+    "STUDYID": "ONC-2025-001",
+    "USUBJID": "ONC-2025-001-010",
+    "MHTERM": "Type 2 Diabetes Mellitus",
+    "MHDECOD": "TYPE 2 DIABETES MELLITUS",
+    "MHBODSYS": "METABOLISM AND NUTRITION DISORDERS",
+    "MHCAT": "PRIMARY CONDITION",
+    "ASTDT": "2019-03-15",
+    "MHONGOFL": "Y",
+    "TRTP": "Active Drug"
+  }
+]

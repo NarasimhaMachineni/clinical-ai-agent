@@ -1,0 +1,42 @@
+[
+  {
+    "STUDYID": "ONC-2025-001",
+    "DOMAIN": "TS",
+    "TSSEQ": 1,
+    "TSPARMCD": "TITLE",
+    "TSPARM": "Trial Title",
+    "TSVAL": "Phase III Efficacy & Safety Trial of Dexpramipexole"
+  },
+  {
+    "STUDYID": "ONC-2025-001",
+    "DOMAIN": "TS",
+    "TSSEQ": 2,
+    "TSPARMCD": "PHASE",
+    "TSPARM": "Trial Phase",
+    "TSVAL": "Phase 3"
+  },
+  {
+    "STUDYID": "ONC-2025-001",
+    "DOMAIN": "TS",
+    "TSSEQ": 3,
+    "TSPARMCD": "STUDYTYP",
+    "TSPARM": "Study Type",
+    "TSVAL": "INTERVENTIONAL"
+  },
+  {
+    "STUDYID": "ONC-2025-001",
+    "DOMAIN": "TS",
+    "TSSEQ": 4,
+    "TSPARMCD": "BLIND",
+    "TSPARM": "Blinding Schema",
+    "TSVAL": "DOUBLE BLIND"
+  },
+  {
+    "STUDYID": "ONC-2025-001",
+    "DOMAIN": "TS",
+    "TSSEQ": 5,
+    "TSPARMCD": "INDIC",
+    "TSPARM": "Trial Indication",
+    "TSVAL": "TYPE 2 DIABETES / ONCOLOGY SURVEILLANCE"
+  }
+]

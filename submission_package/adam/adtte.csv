@@ -1,0 +1,11 @@
+STUDYID,USUBJID,PARAMCD,PARAM,STARTDT,ADT,AVAL,AVALU,CNSR,EVNTDESC,TRTP
+ONC-2025-001,ONC-2025-001-001,TTF,Time to Treatment Failure / Severe Event (Days),2025-01-10,2025-06-15,162,DAYS,1,Censored at Study Completion,Pembrolizumab 200mg
+ONC-2025-001,ONC-2025-001-002,TTF,Time to Treatment Failure / Severe Event (Days),2025-01-12,2025-06-18,162,DAYS,1,Censored at Study Completion,Pembrolizumab 200mg
+ONC-2025-001,ONC-2025-001-003,TTF,Time to Treatment Failure / Severe Event (Days),2025-01-15,2025-06-20,162,DAYS,1,Censored at Study Completion,Placebo
+ONC-2025-001,ONC-2025-001-004,TTF,Time to Treatment Failure / Severe Event (Days),2025-01-18,2025-06-22,162,DAYS,1,Censored at Study Completion,Placebo
+ONC-2025-001,ONC-2025-001-005,TTF,Time to Treatment Failure / Severe Event (Days),2025-01-20,2025-06-25,162,DAYS,1,Censored at Study Completion,Pembrolizumab 200mg
+ONC-2025-001,ONC-2025-001-006,TTF,Time to Treatment Failure / Severe Event (Days),2025-01-22,2025-06-28,162,DAYS,1,Censored at Study Completion,Pembrolizumab 200mg
+ONC-2025-001,ONC-2025-001-007,TTF,Time to Treatment Failure / Severe Event (Days),2025-01-25,2025-07-01,162,DAYS,1,Censored at Study Completion,Placebo
+ONC-2025-001,ONC-2025-001-008,TTF,Time to Treatment Failure / Severe Event (Days),2025-01-28,2025-07-05,162,DAYS,1,Censored at Study Completion,Pembrolizumab 200mg
+ONC-2025-001,ONC-2025-001-009,TTF,Time to Treatment Failure / Severe Event (Days),2025-02-01,2025-07-10,162,DAYS,1,Censored at Study Completion,Placebo
+ONC-2025-001,ONC-2025-001-010,TTF,Time to Treatment Failure / Severe Event (Days),2026-09-05,2026-09-05,162,DAYS,1,Censored at Study Completion,Active Drug
