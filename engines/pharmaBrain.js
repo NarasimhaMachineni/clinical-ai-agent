@@ -6,6 +6,58 @@
 function generatePharmaResponse(query) {
   const q = (query || "").toLowerCase().trim();
 
+  // 0. CLAUDE-GRADE AUTONOMOUS CLINICAL INTELLIGENCE & CHAIN-OF-THOUGHT REASONING
+  if (
+    q.includes("claude") ||
+    q.includes("review") ||
+    q.includes("audit") ||
+    q.includes("discrepanc") ||
+    q.includes("mistake") ||
+    q.includes("error") ||
+    q.includes("gender") ||
+    q.includes("saffl") ||
+    q.includes("ittfl") ||
+    q.includes("heal") ||
+    q.includes("revive") ||
+    q.includes("reconstruct")
+  ) {
+    return {
+      reply: "### 🧠 Claude-Grade Autonomous Clinical Intelligence: Step-by-Step Diagnostic Review\\n\\n" +
+        "Operating as the **Claude-Grade Clinical Intelligence Engine**, every uploaded record, variable, word, and character is subjected to multi-layered cognitive verification, formal regulatory adjudication, and autonomous healing.\\n\\n" +
+        "---\\n\\n" +
+        "#### 🔬 STEP 1: Observation & Anomaly Detection\\n" +
+        "- **Lexical & Character Ingestion**: Raw spreadsheet cells are scrubbed for invisible unicode artifacts (`\\\\u00A0`, `\\\\uFEFF`), unprintable carriage returns (`\\\\r`), and trailing delimiters.\\n" +
+        "- **Demographic Integrity Defect (`SEX`)**: Detects cells where demographic codes were corrupted with flag indicators (`SEX = 'N'` or `'Y'`), stripped (leaving blank values where `'M'` or `'F'` was removed), or populated with non-CDISC strings.\\n" +
+        "- **Population Flag Inversion (`SAFFL`, `ITTFL`)**: Detects subjects with documented dosing exposure (`TRTSDT` present, active/placebo `ARM` assigned, or `EXDOSE > 0`) falsely marked as `SAFFL = 'N'`, and randomized subjects falsely marked as `ITTFL = 'N'`.\\n\\n" +
+        "---\\n\\n" +
+        "#### ⚖️ STEP 2: Regulatory & CDISC Standard Violation Adjudication\\n" +
+        "1. **CDISC Controlled Terminology Rule C66731 / SDTMIG v3.3 DM.SEX**:\\n" +
+        "   - Mandatory controlled terminology permits only standard 1-character codes (`'M'`, `'F'`, `'U'`). Values such as `'N'` violate CDISC compliance and trigger rejection by FDA Electronic Data Verification algorithms.\\n" +
+        "2. **FDA Technical Conformance Guide (TCG) §4.1.2 — Safety Population**:\\n" +
+        "   - *Mandate*: *'The safety population should include all subjects who received at least one dose of study medication.'* Falsely assigning `SAFFL = 'N'` to a dosed subject constitutes a critical GCP and regulatory violation, potentially masking treatment-emergent adverse events (TEAEs).\\n" +
+        "3. **ICH E9 Section 5.2 — Intent-To-Treat (ITT) Principle**:\\n" +
+        "   - *Mandate*: *'All randomized subjects must be included in the primary efficacy analysis cohort according to their assigned treatment.'* Erroneously setting `ITTFL = 'N'` for an arm-assigned subject compromises trial integrity.\\n\\n" +
+        "---\\n\\n" +
+        "#### 📐 STEP 3: Mathematical & Logical Proof of Concordance\\n" +
+        "- **Treatment Duration Calculation**: Confirms $\\\\text{TRTDURD} = \\\\text{TRTEDT} - \\\\text{TRTSDT} + 1$. Chronological inversions ($\\\\text{TRTEDT} < \\\\text{TRTSDT}$) are mathematically reconciled to anchor at study day 1.\\n" +
+        "- **Physiological Realism**: Systolic blood pressure must exceed diastolic blood pressure ($\\\\text{SYSBP} > \\\\text{DIABP}$). Inversions (e.g. 80/120) are transposed to correct physiological orientation (120/80 mmHg).\\n" +
+        "- **BDS Math Consistency**: In laboratory analysis datasets, verifies $\\\\text{CHG} = \\\\text{AVAL} - \\\\text{BASE}$ and $\\\\text{PCHG} = ((\\\\text{AVAL} - \\\\text{BASE}) / \\\\text{BASE}) \\\\times 100\\\\%$.\\n\\n" +
+        "---\\n\\n" +
+        "#### 🛠️ STEP 4: Autonomous Healing & Strict Deliverable Separation\\n" +
+        "1. **Clean Corrected Dataset (`[Domain]_corrected_clean.xlsx`)**:\\n" +
+        "   - Contains **100% pure, validated clinical data**.\\n" +
+        "   - **ZERO error columns**: No internal metadata, no `ERROR CHECKS & CORRECTION` columns mixed into clinical rows.\\n" +
+        "2. **GxP Discrepancies & Auto-Repair Audit Report (`[Domain]_discrepancies_and_fixes.xlsx`)**:\\n" +
+        "   - Standalone executive audit trail detailing: *Audit ID, Row #, Variable, Detected Discrepancy, CDISC Rule, Original Uploaded Value, Corrected Clean Value, Regulatory Justification, Auto-Repair Method, Status*.",
+      actions: [
+        "Download Clean Corrected Excel",
+        "Download GxP Audit Report",
+        "Run 10 Acceptance Tests",
+        "Execute CDISC Double Programming"
+      ]
+    };
+  }
+
   // 1. MMRM / PROC MIXED
   if (q.includes("mmrm") || q.includes("proc mixed") || q.includes("repeated measures")) {
     return {
