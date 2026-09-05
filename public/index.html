@@ -138,7 +138,7 @@
                     <span>Python Assertions</span>
                   </div>
                 </div>
-                <span class="row-tag" id="row-tag-p21">5/5 PASS</span>
+                <span class="row-tag" id="row-tag-p21">READY</span>
               </div>
 
               <div class="task-automator-row" id="auto-row-double">
@@ -149,7 +149,7 @@
                     <span>PROC COMPARE Check</span>
                   </div>
                 </div>
-                <span class="row-tag" id="row-tag-double">&amp;SYSINFO=0</span>
+                <span class="row-tag" id="row-tag-double">READY</span>
               </div>
 
               <div class="task-automator-row" id="auto-row-safety">
@@ -160,7 +160,7 @@
                     <span>Hy's Law &amp; ANCOVA</span>
                   </div>
                 </div>
-                <span class="row-tag" id="row-tag-safety">NORMAL</span>
+                <span class="row-tag" id="row-tag-safety">READY</span>
               </div>
             </div>
 
@@ -274,7 +274,7 @@
               <div class="radio-card-body">
                 <div class="radio-card-top">
                   <span class="radio-task-icon">🔍</span>
-                  <span class="radio-status-tag">5/5 PASS</span>
+                  <span class="radio-status-tag">READY</span>
                 </div>
                 <strong class="radio-task-title">Pinnacle 21 QC Audit</strong>
                 <span class="radio-task-desc">Run Python regulatory assertions</span>
@@ -286,7 +286,7 @@
               <div class="radio-card-body">
                 <div class="radio-card-top">
                   <span class="radio-task-icon">⚖️</span>
-                  <span class="radio-status-tag">&amp;SYSINFO=0</span>
+                  <span class="radio-status-tag">READY</span>
                 </div>
                 <strong class="radio-task-title">Double Programming QC</strong>
                 <span class="radio-task-desc">PROC COMPARE independent check</span>
@@ -298,7 +298,7 @@
               <div class="radio-card-body">
                 <div class="radio-card-top">
                   <span class="radio-task-icon">🩺</span>
-                  <span class="radio-status-tag">0 HY'S LAW</span>
+                  <span class="radio-status-tag">READY</span>
                 </div>
                 <strong class="radio-task-title">Safety &amp; Efficacy Screening</strong>
                 <span class="radio-task-desc">Auto-screen Safety &amp; Efficacy</span>
@@ -410,12 +410,12 @@
                   </div>
                 </div>
                 <div class="socket-pill-group">
-                  <span class="socket-pill">5 data files loaded</span>
+                  <span class="socket-pill" id="canvas-files-pill">Awaiting Files</span>
                   <span class="socket-pill">ISO 8601</span>
                 </div>
                 <div class="node-status-bar">
                   <span style="color:var(--text-muted);">Status:</span>
-                  <strong style="color:#3fb950;" id="canvas-edc-status">Active (5 Domains)</strong>
+                  <strong style="color:var(--text-secondary);" id="canvas-edc-status">Standing By</strong>
                 </div>
               </div>
 
@@ -430,12 +430,12 @@
                 </div>
                 <div class="socket-pill-group" style="justify-content:center;">
                   <span class="socket-pill model">Engine: Claude AI</span>
-                  <span class="socket-pill memory">Study: ONC-2025-001</span>
+                  <span class="socket-pill memory" id="canvas-study-pill">Study: Awaiting Data</span>
                   <span class="socket-pill tool">Auto: Every 15s</span>
                 </div>
                 <div class="node-status-bar">
                   <span style="color:var(--text-muted);">Currently Running:</span>
-                  <strong style="color:var(--primary-blue);" id="canvas-active-subagent-label">SDTM Ingestion Subagent</strong>
+                  <strong style="color:var(--primary-blue);" id="canvas-active-subagent-label"><span class="live-pulse-beacon"></span>Data Standardizer</strong>
                 </div>
               </div>
 
@@ -449,12 +449,12 @@
                   </div>
                 </div>
                 <div class="socket-pill-group">
-                  <span class="socket-pill">FDA Submission Ready</span>
+                  <span class="socket-pill" id="canvas-fda-pill">Awaiting Verification</span>
                   <span class="socket-pill">GitHub: main</span>
                 </div>
                 <div class="node-status-bar">
                   <span style="color:var(--text-muted);">Concordance:</span>
-                  <strong style="color:#3fb950;">100% GxP Validated</strong>
+                  <strong style="color:var(--text-secondary);" id="canvas-concordance-status">Pending Review</strong>
                 </div>
               </div>
 
@@ -467,7 +467,7 @@
               <div class="subagent-node active-executing" id="subnode-sdtm" data-task="SDTM_MAPPING">
                 <div class="subagent-header">
                   <span class="subagent-icon">🧬</span>
-                  <span class="subagent-badge" id="subnode-badge-sdtm">100% MAPPED</span>
+                  <span class="subagent-badge" id="subnode-badge-sdtm">READY</span>
                 </div>
                 <strong class="subagent-title">Data Standardizer</strong>
                 <span class="subagent-desc">Formats patient, lab, safety &amp; dosing data</span>
@@ -477,7 +477,7 @@
               <div class="subagent-node" id="subnode-adam" data-task="ADAM_DERIVATION">
                 <div class="subagent-header">
                   <span class="subagent-icon">📐</span>
-                  <span class="subagent-badge" id="subnode-badge-adam">ADSL/ADAE</span>
+                  <span class="subagent-badge" id="subnode-badge-adam">READY</span>
                 </div>
                 <strong class="subagent-title">ADaM Checks</strong>
                 <span class="subagent-desc">ADSL, ADAE, ADLB &amp; flags</span>
@@ -487,7 +487,7 @@
               <div class="subagent-node" id="subnode-p21" data-task="PINNACLE21_QC">
                 <div class="subagent-header">
                   <span class="subagent-icon">🔍</span>
-                  <span class="subagent-badge" id="subnode-badge-p21">5/5 PASS</span>
+                  <span class="subagent-badge" id="subnode-badge-p21">READY</span>
                 </div>
                 <strong class="subagent-title">Rule Checker</strong>
                 <span class="subagent-desc">Checks 500+ FDA &amp; EMA data rules</span>
@@ -497,7 +497,7 @@
               <div class="subagent-node" id="subnode-double" data-task="DOUBLE_PROG_QC">
                 <div class="subagent-header">
                   <span class="subagent-icon">⚖️</span>
-                  <span class="subagent-badge" id="subnode-badge-double">&amp;SYSINFO=0</span>
+                  <span class="subagent-badge" id="subnode-badge-double">READY</span>
                 </div>
                 <strong class="subagent-title">Cross-Verifier</strong>
                 <span class="subagent-desc">Compares SAS &amp; R results cell by cell</span>
@@ -507,7 +507,7 @@
               <div class="subagent-node" id="subnode-safety" data-task="SAFETY_SURVEILLANCE">
                 <div class="subagent-header">
                   <span class="subagent-icon">🩺</span>
-                  <span class="subagent-badge" id="subnode-badge-safety">0 HY'S LAW</span>
+                  <span class="subagent-badge" id="subnode-badge-safety">READY</span>
                 </div>
                 <strong class="subagent-title">Safety Monitor</strong>
                 <span class="subagent-desc">Screens for liver toxicity &amp; treatment effects</span>

@@ -2318,7 +2318,7 @@ function simulateSelfHealingAnomaly() {
 }
 
 
-// SVG Connector Curve Renderer (Dynamically links nodes with curved dashed pulses)
+// SVG Connector Curve Renderer (Dynamically links nodes with curved dashed pulses & traveling energy packets)
 function renderCanvasConnectors() {
   const svg = document.getElementById('canvas-svg-lines');
   const container = document.querySelector('.canvas-flow-container');
@@ -2326,8 +2326,31 @@ function renderCanvasConnectors() {
 
   const contRect = container.getBoundingClientRect();
   if (contRect.width === 0 || contRect.height === 0) return;
+
   svg.setAttribute('viewBox', `0 0 ${contRect.width} ${contRect.height}`);
-  svg.innerHTML = '';
+  svg.setAttribute('width', String(contRect.width));
+  svg.setAttribute('height', String(contRect.height));
+  svg.setAttribute('preserveAspectRatio', 'none');
+  svg.style.width = contRect.width + 'px';
+  svg.style.height = contRect.height + 'px';
+  svg.style.overflow = 'visible';
+  svg.style.zIndex = '2';
+
+  while (svg.firstChild) {
+    svg.removeChild(svg.firstChild);
+  }
+
+  const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+  defs.innerHTML = `
+    <filter id="glowFilter" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="2.5" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  `;
+  svg.appendChild(defs);
 
   function getSocket(el, pos) {
     if (!el) return null;
@@ -2341,6 +2364,42 @@ function renderCanvasConnectors() {
     return { x: x + r.width / 2, y: y + r.height / 2 };
   }
 
+  function drawConnection(d, isActive, id) {
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', d);
+    path.setAttribute('fill', 'none');
+    if (id) path.setAttribute('id', id);
+
+    if (isActive) {
+      path.setAttribute('stroke', '#22c55e');
+      path.setAttribute('stroke-width', '3.2');
+      path.setAttribute('stroke-dasharray', '8 6');
+      path.setAttribute('class', 'connector-line pulse-active');
+      path.setAttribute('filter', 'url(#glowFilter)');
+
+      // Live animated traveling particle
+      const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      circle.setAttribute('r', '4.5');
+      circle.setAttribute('fill', '#38bdf8');
+      circle.setAttribute('filter', 'url(#glowFilter)');
+
+      const anim = document.createElementNS('http://www.w3.org/2000/svg', 'animateMotion');
+      anim.setAttribute('path', d);
+      anim.setAttribute('dur', '1.5s');
+      anim.setAttribute('repeatCount', 'indefinite');
+      circle.appendChild(anim);
+
+      svg.appendChild(path);
+      svg.appendChild(circle);
+    } else {
+      path.setAttribute('stroke', 'rgba(56, 189, 248, 0.45)');
+      path.setAttribute('stroke-width', '2');
+      path.setAttribute('stroke-dasharray', '6 4');
+      path.setAttribute('class', 'connector-line');
+      svg.appendChild(path);
+    }
+  }
+
   const edc = document.getElementById('node-edc-source');
   const master = document.getElementById('node-master-agent');
   const pkg = document.getElementById('node-output-pkg');
@@ -2349,20 +2408,14 @@ function renderCanvasConnectors() {
     const p1 = getSocket(edc, 'right');
     const p2 = getSocket(master, 'left');
     const midX = (p1.x + p2.x) / 2;
-    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    path.setAttribute('d', `M ${p1.x} ${p1.y} C ${midX} ${p1.y}, ${midX} ${p2.y}, ${p2.x} ${p2.y}`);
-    path.setAttribute('class', 'connector-line pulse-active');
-    svg.appendChild(path);
+    drawConnection(`M ${p1.x} ${p1.y} C ${midX} ${p1.y}, ${midX} ${p2.y}, ${p2.x} ${p2.y}`, true, 'line-edc-master');
   }
 
   if (master && pkg) {
     const p1 = getSocket(master, 'right');
     const p2 = getSocket(pkg, 'left');
     const midX = (p1.x + p2.x) / 2;
-    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    path.setAttribute('d', `M ${p1.x} ${p1.y} C ${midX} ${p1.y}, ${midX} ${p2.y}, ${p2.x} ${p2.y}`);
-    path.setAttribute('class', 'connector-line pulse-active');
-    svg.appendChild(path);
+    drawConnection(`M ${p1.x} ${p1.y} C ${midX} ${p1.y}, ${midX} ${p2.y}, ${p2.x} ${p2.y}`, true, 'line-master-pkg');
   }
 
   const subIds = ['subnode-sdtm', 'subnode-adam', 'subnode-p21', 'subnode-double', 'subnode-safety'];
@@ -2373,12 +2426,9 @@ function renderCanvasConnectors() {
       if (sub) {
         const pSub = getSocket(sub, 'top');
         const midY = (pTop.y + pSub.y) / 2;
-        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        path.setAttribute('d', `M ${pTop.x} ${pTop.y} C ${pTop.x} ${midY}, ${pSub.x} ${midY}, ${pSub.x} ${pSub.y}`);
+        const d = `M ${pTop.x} ${pTop.y} C ${pTop.x} ${midY}, ${pSub.x} ${midY}, ${pSub.x} ${pSub.y}`;
         const isActive = sub.classList.contains('active-executing');
-        path.setAttribute('class', `connector-line ${isActive ? 'pulse-active' : ''}`);
-        path.setAttribute('id', `line-${id}`);
-        svg.appendChild(path);
+        drawConnection(d, isActive, `line-${id}`);
       }
     });
   }
