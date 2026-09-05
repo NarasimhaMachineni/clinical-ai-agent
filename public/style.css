@@ -3515,3 +3515,34 @@ button:active, .btn-card-action:active, .task-btn:active,
   color: var(--text-muted);
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
+
+
+/* Tech tags for Daily Automation Task buttons */
+.task-tech-tags {
+  display: flex;
+  gap: 4px;
+  margin-top: 5px;
+  flex-wrap: wrap;
+}
+
+.task-badge {
+  font-size: 8.5px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  padding: 1.5px 5px;
+  border-radius: 3px;
+  letter-spacing: 0.2px;
+  line-height: 1.2;
+}
+
+.task-badge.sas {
+  background: rgba(14, 116, 144, 0.25);
+  color: #38bdf8;
+  border: 1px solid rgba(14, 116, 144, 0.5);
+}
+
+.task-badge.r {
+  background: rgba(99, 102, 241, 0.25);
+  color: #a5b4fc;
+  border: 1px solid rgba(99, 102, 241, 0.5);
+}

@@ -181,51 +181,28 @@
           </div>
         </div>
 
-        <!-- GitHub Integration Box -->
-        <div class="sidebar-block">
-          <div class="sidebar-heading">🔄 Save &amp; Sync to GitHub</div>
-          <div class="gh-sync-card">
-            <div class="gh-info-row">
-              <span class="gh-branch-badge" id="sidebar-gh-branch">branch: main</span>
-              <span class="gh-sync-status" id="sidebar-gh-sync-status">Synchronized</span>
-            </div>
-            <div class="gh-last-commit" id="sidebar-gh-commit">
-              Last commit: Automated CDISC run
-            </div>
-            <div class="gh-repo-link" style="margin-top: 6px; font-size: 11px;">
-              <a href="https://github.com/NarasimhaMachineni/clinical-ai-agent" target="_blank" style="color:var(--primary-blue); text-decoration:none; display:flex; align-items:center; gap:4px; font-weight:600;">
-                <span>🐙</span> NarasimhaMachineni/clinical-ai-agent
-              </a>
-            </div>
-            <div class="gh-actions-row" style="margin-top: 10px; display:flex; gap:8px;">
-              <button class="btn-card-action" id="btn-sidebar-git-sync" style="background:linear-gradient(135deg,#1f6feb,#238636); font-weight:700;">🔄 Push to GitHub Now</button>
-              <a href="https://github.com/NarasimhaMachineni/clinical-ai-agent" target="_blank" class="btn-card-action secondary" style="text-decoration:none; text-align:center; min-width:60px;">🐙 Open Repo</a>
-            </div>
-          </div>
-        </div>
-
         <!-- Live Metrics Box -->
         <div class="sidebar-block">
           <div class="sidebar-heading">📊 Live Study Metrics</div>
           <div class="metrics-grid">
             <div class="metric-card">
-              <span class="metric-val" id="metric-subjects">-</span>
+              <span class="metric-val" id="metric-subjects">0</span>
               <span class="metric-lbl">Total Patients</span>
             </div>
             <div class="metric-card">
-              <span class="metric-val" id="metric-saffl">-</span>
+              <span class="metric-val" id="metric-saffl">0</span>
               <span class="metric-lbl">Patients in Safety Analysis</span>
             </div>
             <div class="metric-card">
-              <span class="metric-val" id="metric-teae">-</span>
+              <span class="metric-val" id="metric-teae">0</span>
               <span class="metric-lbl">Side Effects Reported</span>
             </div>
             <div class="metric-card">
-              <span class="metric-val" id="metric-hyslaw">-</span>
+              <span class="metric-val" id="metric-hyslaw">0</span>
               <span class="metric-lbl">Liver Toxicity Alerts</span>
             </div>
             <div class="metric-card full-span">
-              <span class="metric-val text-green" id="metric-p21">—</span>
+              <span class="metric-val text-green" id="metric-p21">⚪ Standby</span>
               <span class="metric-lbl">FDA Rules Checked</span>
             </div>
           </div>
@@ -371,7 +348,7 @@
           <div class="commander-input-row" style="margin-top:12px; display:flex; gap:8px;">
             <input type="text" id="commander-input" class="form-input" style="flex:1; background:rgba(0,0,0,0.3); font-size:12.5px; padding:7px 12px;" placeholder="Type a command: e.g. 'check safety', 'sync to GitHub', 'show lab results', 'run quality check'...">
             <button class="btn-execute" id="btn-execute-cmd" style="padding:7px 14px;">▶ Run</button>
-            <button class="btn-live-sync" id="btn-commander-git-sync">🔄 Save to GitHub</button>
+            
           </div>
         </section>
 
@@ -454,13 +431,13 @@
                 <div class="node-header-row">
                   <div class="node-icon-wrapper" style="background:rgba(63,185,80,0.15); color:#3fb950;">📦</div>
                   <div class="node-label-group">
-                    <strong>Approved Outputs &amp; Reports</strong>
-                    <span>Submission files &amp; summary reports</span>
+                    <strong>Regulatory Deliverables &amp; Reports</strong>
+                    <span>Define-XML v2.1, CSR Tables, Master Report (.xlsx)</span>
                   </div>
                 </div>
                 <div class="socket-pill-group">
                   <span class="socket-pill" id="canvas-fda-pill">Awaiting Verification</span>
-                  <span class="socket-pill">GitHub: main</span>
+                  <span class="socket-pill" style="color:#4ade80;">12-Sheet Master Report</span>
                 </div>
                 <div class="node-status-bar">
                   <span style="color:var(--text-muted);">Concordance:</span>
