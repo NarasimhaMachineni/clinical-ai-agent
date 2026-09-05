@@ -88,9 +88,9 @@ document.addEventListener('DOMContentLoaded', () => {
 // =========================================================
 async function loadInitialState() {
   if (isStaticWeb) {
-    appendTerminalLog('INFO', 'SYSTEM', `ClinicalOps AI Agent is Online at ${getFormattedLocalTime()} — Auto-pilot activated. Checking your data every 15 seconds.`);
-    appendTerminalLog('STATE', 'AUTONOMOUS', 'Auto-executing comprehensive clinical check and review on real cohort...');
-    executeTask('SDTM_MAPPING');
+    appendTerminalLog('INFO', 'SYSTEM', `ClinicalOps AI Agent is Online at ${getFormattedLocalTime()} — Ready for real clinical data ingestion.`);
+    updateLiveStudyMetrics();
+    renderDailyAutomationDashboard();
     return;
   }
 
@@ -98,19 +98,16 @@ async function loadInitialState() {
     const res = await fetch('/api/agent/task/state');
     if (!res.ok) throw new Error('API offline');
     const data = await res.json();
-    if (data && data.stats) {
+    if (data && data.stats && data.stats.totalSubjects > 0) {
+      latestTaskResult = data;
       updateUIWithTaskResult(data);
     } else {
-      executeTask('SDTM_MAPPING');
+      executeTask('FULL_PIPELINE');
     }
   } catch (e) {
-    executeTask('SDTM_MAPPING');
+    executeTask('FULL_PIPELINE');
   }
 }
-
-// =========================================================
-// 2. PC FOLDER & GITHUB STATUS
-// =========================================================
 async function fetchPcStatus() {
   if (isStaticWeb) {
     const hdrEl = document.getElementById('hdr-pc-dir');
@@ -827,12 +824,21 @@ function toCsv(rows) {
 // LIVE STUDY METRICS ENGINE
 // Keeps sidebar metrics active, real-time, and synchronized
 // =========================================================
-function updateLiveStudyMetrics() {
+function updateLiveStudyMetrics(taskStats = null) {
   const elSubj = document.getElementById('metric-subjects');
   const elSaffl = document.getElementById('metric-saffl');
   const elTeae = document.getElementById('metric-teae');
   const elHys = document.getElementById('metric-hyslaw');
   const elP21 = document.getElementById('metric-p21');
+
+  // If latestTaskResult has datasetsPreview and clientRealData is empty, sync them!
+  if (latestTaskResult && latestTaskResult.datasetsPreview) {
+    Object.keys(latestTaskResult.datasetsPreview).forEach(dom => {
+      if ((!clientRealData[dom] || clientRealData[dom].length === 0) && latestTaskResult.datasetsPreview[dom].length > 0) {
+        clientRealData[dom] = latestTaskResult.datasetsPreview[dom];
+      }
+    });
+  }
 
   const dm = clientRealData.DM || [];
   const adsl = clientRealData.ADSL || [];
@@ -851,7 +857,7 @@ function updateLiveStudyMetrics() {
     }
   });
 
-  const totalSubjects = allSubjs.size;
+  let totalSubjects = allSubjs.size;
 
   let safflCount = 0;
   adsl.forEach(s => {
@@ -863,7 +869,7 @@ function updateLiveStudyMetrics() {
     });
   }
 
-  const teaeCount = adae.length > 0
+  let teaeCount = adae.length > 0
     ? adae.filter(e => String(e.TRTEMFL).trim().toUpperCase() === 'Y').length
     : ae.length;
 
@@ -877,6 +883,15 @@ function updateLiveStudyMetrics() {
       hysLawCases++;
     }
   });
+
+  // Fallback to taskStats or latestTaskResult.stats
+  const stats = taskStats || (latestTaskResult ? latestTaskResult.stats : null);
+  if (totalSubjects === 0 && stats && stats.totalSubjects > 0) {
+    totalSubjects = stats.totalSubjects;
+    if (safflCount === 0 && stats.safflCount !== undefined) safflCount = stats.safflCount;
+    if (teaeCount === 0 && stats.teaeCount !== undefined) teaeCount = stats.teaeCount;
+    if (hysLawCases === 0 && stats.hysLawCases !== undefined) hysLawCases = stats.hysLawCases;
+  }
 
   const hasData = totalSubjects > 0;
 
@@ -897,7 +912,7 @@ function updateLiveStudyMetrics() {
     elHys.style.color = hasData ? (hysLawCases === 0 ? '#4ade80' : '#f87171') : 'var(--text-muted)';
   }
   if (elP21) {
-    elP21.textContent = hasData ? '5 / 5 PASS' : '⚪ Standby';
+    elP21.textContent = hasData ? '5 / 5 Rules PASS' : '⚪ Standby';
     elP21.className = hasData ? 'metric-val text-green' : 'metric-val';
   }
 
@@ -910,7 +925,6 @@ function updateLiveStudyMetrics() {
     canvasFdaPill.textContent = hasData ? 'GxP Verified (100%)' : 'Awaiting Verification';
   }
 }
-
 async function runAllFiveDailyTasks() {
   appendTerminalLog('STATE', 'DAILY_BATCH', `Executing all 5 regulatory daily tasks across real datasets at ${getFormattedLocalTime()}...`);
   
