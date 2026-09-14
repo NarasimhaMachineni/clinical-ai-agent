@@ -146,6 +146,16 @@ function generatePharmaResponse(query) {
         "    %put >>> [QC FAILED]: Discrepancies found in &dset (SYSINFO=&sysinfo)! ;\n" +
         "  %end;\n" +
         "%mend qc_compare;\n" +
+        "```\n\n" +
+        "#### R pharmaverse diffdf Independent Validation\n\n" +
+        "```r\n" +
+        "library(diffdf)\n" +
+        "res <- diffdf(prod_adsl, qc_adsl, keys = c('STUDYID', 'USUBJID'), tolerance = 1e-6)\n" +
+        "if (diffdf_has_issues(res)) {\n" +
+        "  print(diffdf_issuerows(res))\n" +
+        "} else {\n" +
+        "  message('PASS: 100% GxP Concordance between Prod and QC datasets')\n" +
+        "}\n" +
         "```",
       actions: ["PROC COMPARE Macro", "R diffdf Package QC", "Validation Report Shell"]
     };

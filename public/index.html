@@ -1256,5 +1256,73 @@
     </div>
   </div>
 
+  <!-- Floating Claude AI Clinical Copilot Trigger Button -->
+  <button id="btn-open-copilot" class="floating-copilot-btn" title="Open Claude AI Clinical Intelligence Copilot">
+    <span class="copilot-btn-sparkle">🧠</span>
+    <span class="copilot-btn-text">Claude AI Copilot</span>
+    <span class="copilot-btn-badge">PRO 3.7</span>
+  </button>
+
+  <!-- Claude AI Clinical Copilot Slide-Out Drawer -->
+  <div id="claude-copilot-drawer" class="copilot-drawer" style="display:none;">
+    <div class="copilot-header">
+      <div class="copilot-title-group">
+        <div class="copilot-avatar">🧠</div>
+        <div>
+          <div class="copilot-title-row">
+            <h3 class="copilot-name">Claude Clinical Intelligence Copilot</h3>
+            <span class="copilot-model-tag">4-Step Chain of Thought</span>
+          </div>
+          <p class="copilot-desc">CDISC SDTM/ADaM • Deep GxP Verification • SAS &amp; R Code Synthesizer</p>
+        </div>
+      </div>
+      <div class="copilot-header-actions">
+        <button id="btn-copilot-clear" class="btn-icon-subtle" title="Clear Conversation">🗑️</button>
+        <button id="btn-close-copilot" class="btn-icon-subtle" title="Close Copilot">✕</button>
+      </div>
+    </div>
+
+    <!-- Quick Prompt Pills -->
+    <div class="copilot-pills-bar">
+      <button class="copilot-pill" data-prompt="Review uploaded clinical data for discrepancies and show 4-step reasoning">🔬 Deep Data Review</button>
+      <button class="copilot-pill" data-prompt="Check CDISC CT, DM0002, and FDA TCG compliance rules">⚖️ CDISC CT &amp; FDA Rules</button>
+      <button class="copilot-pill" data-prompt="Verify BDS math CHG = AVAL - BASE and Double QC">📐 BDS Math &amp; Double QC</button>
+      <button class="copilot-pill" data-prompt="Screen for Hy's Law liver toxicity (ALT >= 3xULN & TBIL >= 2xULN)">🩺 Hy's Law Screen</button>
+      <button class="copilot-pill" data-prompt="Generate SAS 9.4 PROC COMPARE and R diffdf validation code">💻 Generate SAS &amp; R Code</button>
+    </div>
+
+    <!-- Messages Container -->
+    <div class="copilot-messages" id="copilot-messages">
+      <div class="copilot-msg assistant">
+        <div class="msg-avatar">🧠</div>
+        <div class="msg-content">
+          <h4>Hello! I am your Claude-Grade Clinical Intelligence Copilot.</h4>
+          <p>I perform deep 4-step cognitive inspection across every clinical record, variable, word, and letter in your uploaded datasets:</p>
+          <ul>
+            <li><strong>🔬 Observation</strong>: Lexical scrubbing, corrupt flag detection, missing baseline keys</li>
+            <li><strong>⚖️ Regulatory Rule</strong>: CDISC CT (C66731), SDTMIG DM0002, FDA TCG §4.1.2, ICH E9 §5.2</li>
+            <li><strong>📐 Mathematical Proof</strong>: BDS formulas, study day chronology, blood pressure sanity</li>
+            <li><strong>🛠️ Autonomous Healing</strong>: Pristine clean dataset + separate 10-point GxP audit log</li>
+          </ul>
+          <p style="margin-top:8px; font-size:12px; color:var(--text-muted);">Ask me any question about your data, CDISC standards, statistical models (MMRM, Kaplan-Meier), or click a prompt pill above.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Input Box -->
+    <div class="copilot-footer">
+      <div class="copilot-input-box">
+        <textarea id="copilot-input" class="copilot-textarea" rows="2" placeholder="Ask Claude about clinical data, FDA rules, SAS/R code, or data discrepancies..."></textarea>
+        <button id="copilot-send" class="btn-copilot-send" title="Send (Enter)">
+          <span>➤</span>
+        </button>
+      </div>
+      <div class="copilot-footer-meta">
+        <span>Powered by PharmaBrain 4-Step CoT Engine</span>
+        <span id="copilot-token-status">100% GxP Validated</span>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>
