@@ -71,6 +71,17 @@ function verifyAndRepairClinicalData(dsetName, rows) {
     return { cleanRows: [], auditLog: [], totalErrors: 0, rowsWithErrors: 0, dsetName: dsetName || 'DATA', repairedRows: [] };
   }
 
+  // Universal Header Key Trimming & Normalization Matrix
+  rows = rows.map(r => {
+    if (!r || typeof r !== 'object') return {};
+    const cleanR = {};
+    Object.keys(r).forEach(k => {
+      const trimmedKey = String(k || '').trim();
+      if (trimmedKey) cleanR[trimmedKey] = r[k];
+    });
+    return cleanR;
+  });
+
   const upperDomain = (dsetName || 'DATASET').toUpperCase();
   let totalErrors = 0;
   const auditLog = [];
@@ -698,7 +709,7 @@ function verifyAndRepairClinicalData(dsetName, rows) {
       rowIssues.push({ row: rowNum, variable: armKey2, error: `Missing ARM description for code '${cd}'`, rule: 'CDISC ADaMIG v1.3 Rule AD0012', oldVal: '(blank)', newVal: derivedArm, justification: 'ARM derived from ARMCD using empirical study mapping.', method: 'Empirical Study Co-Occurrence Imputation', status: 'FIXED' });
     }
     // ARM -> ARMCD if ARMCD blank
-    if (armcdKey2 && isBlank(r[armcdKey2]) && armKey2 && !isBlank(r[armcdKey2])) {
+    if (armcdKey2 && isBlank(r[armcdKey2]) && armKey2 && !isBlank(r[armKey2])) {
       const armStr = String(r[armKey2]).trim().toUpperCase();
       const derivedCd = armToArmcd.get(armStr) || (/placebo/i.test(armStr) ? 'PBO' : 'ACT');
       r[armcdKey2] = derivedCd;

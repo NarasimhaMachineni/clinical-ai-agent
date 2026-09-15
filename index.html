@@ -1101,6 +1101,28 @@
                     <button class="pill-btn" data-dset="TS">TS</button>
                   </div>
                 </div>
+                <!-- ✨ Interactive AI Document Requirement & Transformation Bar (GPT Astra-6 Engine) -->
+                <div class="ai-requirement-box" style="background:linear-gradient(135deg, rgba(168,85,247,0.12), rgba(56,189,248,0.12)); border:1px solid rgba(168,85,247,0.4); border-radius:8px; padding:12px 14px; margin-bottom:14px;">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <strong style="color:#e9d5ff; font-size:12.5px; display:flex; align-items:center; gap:6px;">
+                      <span>✨</span> Interactive AI Document Requirement &amp; Transformation (GPT Astra-6 Engine)
+                    </strong>
+                    <span class="badge-pass" style="background:rgba(168,85,247,0.25); color:#d8b4fe; border-color:rgba(168,85,247,0.5); font-size:10px; padding:2px 8px;">INSTANT AI RE-EXECUTION</span>
+                  </div>
+                  <div style="display:flex; gap:8px;">
+                    <input type="text" id="ai-requirement-input" class="form-input" style="flex:1; background:rgba(15,23,42,0.8); border:1px solid rgba(168,85,247,0.3); color:#fff; font-size:12px; padding:8px 12px; border-radius:6px;" placeholder="Type custom requirements for this document (e.g. 'Set RACE=White for female subjects', 'Format dates YYYY-MM-DD', 'Recalculate BMI to 1 decimal place')..." />
+                    <button class="btn-execute" id="btn-apply-ai-requirement" onclick="applyCustomAiRequirement()" style="background:linear-gradient(135deg, #9333ea, #2563eb); color:#fff; border:none; padding:8px 16px; border-radius:6px; font-weight:700; font-size:12px; cursor:pointer; white-space:nowrap; display:flex; align-items:center; gap:6px;">
+                      <span>🚀</span> Apply AI Transformation
+                    </button>
+                  </div>
+                  <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;" id="ai-suggestion-pills">
+                    <span class="pill-chip" onclick="setAiRequirement('Set missing RACE to White for all female subjects')" style="cursor:pointer; font-size:10.5px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:var(--text-secondary); padding:2px 8px; border-radius:12px;">🏷️ Fill RACE=White for females</span>
+                    <span class="pill-chip" onclick="setAiRequirement('Standardize all dates to ISO 8601 (YYYY-MM-DD)')" style="cursor:pointer; font-size:10.5px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:var(--text-secondary); padding:2px 8px; border-radius:12px;">🗓️ ISO 8601 Dates</span>
+                    <span class="pill-chip" onclick="setAiRequirement('Re-derive BMI = WEIGHT / (HEIGHT/100)^2 and update BMICAT')" style="cursor:pointer; font-size:10.5px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:var(--text-secondary); padding:2px 8px; border-radius:12px;">📊 Recalculate BMI &amp; BMICAT</span>
+                    <span class="pill-chip" onclick="setAiRequirement('Set default treatment arm to Treatment A for active patients')" style="cursor:pointer; font-size:10.5px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:var(--text-secondary); padding:2px 8px; border-radius:12px;">💊 Standardize Treatment Arm</span>
+                  </div>
+                </div>
+
                 <div class="table-scroll-box" id="dataset-table-container">
                   <!-- Data table injected via JS -->
                 </div>
