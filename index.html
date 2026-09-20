@@ -34,10 +34,6 @@
           <span style="font-size:13px;">🗑️</span>
           <span>Clear / Reset Data</span>
         </button>
-        <div class="header-status-indicator">
-          <span class="status-dot pulse" id="agent-status-dot"></span>
-          <span class="status-label" id="agent-status-label">● Online</span>
-        </div>
       </div>
     </header>
 
@@ -141,25 +137,11 @@
             </div>
           </div>
 
-          <!-- Deep Verification Cohorts & Data Reset Bar -->
-          <div class="quick-cohorts-bar" style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
-            <button class="btn-card-action" id="btn-load-51-adsl" style="background:linear-gradient(135deg, rgba(56,189,248,0.25), rgba(99,102,241,0.25)); border:1px solid rgba(56,189,248,0.6); color:#bae6fd; font-weight:700; padding:8px 14px; box-shadow:0 2px 8px rgba(56,189,248,0.2);">
-              ⚡ 51-Patient ADSL Cohort (Demographics &amp; Flags Auto-Healing)
+          <!-- Data Reset & Operational Bar -->
+          <div class="quick-cohorts-bar" style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap; align-items:center; justify-content:flex-end;">
+            <button class="btn-card-action" id="btn-reset-data-bar" style="background:linear-gradient(135deg, rgba(239,68,68,0.2), rgba(185,28,28,0.2)); border:1px solid rgba(239,68,68,0.5); color:#fca5a5; font-weight:700; padding:8px 16px; cursor:pointer;" title="Clear all datasets and reset agent memory">
+              🗑️ Reset / Clear All Loaded Data
             </button>
-            <button class="btn-card-action" id="btn-load-60-adae" style="background:linear-gradient(135deg, rgba(245,158,11,0.25), rgba(239,68,68,0.25)); border:1px solid rgba(245,158,11,0.6); color:#fed7aa; font-weight:700; padding:8px 14px; box-shadow:0 2px 8px rgba(245,158,11,0.2);">
-              ⚠️ 60-Patient ADAE Safety Cohort (MedDRA &amp; Severity Healing)
-            </button>
-            <button class="btn-card-action" id="btn-load-sample-adam" style="background:linear-gradient(135deg, rgba(234,179,8,0.2), rgba(168,85,247,0.2)); border:1px solid rgba(234,179,8,0.5); color:#fef08a; font-weight:700; padding:8px 14px;">
-              🧪 ADLB Laboratory BDS Cohort (Math &amp; Shift Healing)
-            </button>
-            <button class="btn-card-action" id="btn-reset-data-bar" style="background:linear-gradient(135deg, rgba(239,68,68,0.2), rgba(185,28,28,0.2)); border:1px solid rgba(239,68,68,0.5); color:#fca5a5; font-weight:700; padding:8px 14px;" title="Clear all datasets and reset agent memory">
-              🗑️ Reset / Clear All Data
-            </button>
-          </div>
-
-          <div class="commander-input-row" style="margin-top:12px; display:flex; gap:8px;">
-            <input type="text" id="commander-input" class="form-input" style="flex:1; background:rgba(0,0,0,0.3); font-size:12.5px; padding:7px 12px;" placeholder="Type a command: e.g. 'check safety', 'sync to GitHub', 'show lab results', 'run quality check'...">
-            <button class="btn-execute" id="btn-execute-cmd" style="padding:7px 14px;">▶ Run</button>
           </div>
         </section>
 
@@ -167,9 +149,9 @@
         <!-- 2. Study Pipeline Status Bar -->
         <section class="study-pipeline-bar">
           <div class="pipeline-title">
-            <span class="pipeline-icon">🤖</span>
-            <span>ClinicalOps AI Engine</span>
-            <span class="pipeline-badge">5 Workers Active</span>
+            <span class="pipeline-icon">🧬</span>
+            <span>ClinicalOps Task Engine</span>
+            <span class="pipeline-badge">5 Engine Workers Active</span>
           </div>
           <div class="pipeline-nodes">
             <div class="pipeline-node" id="pnode-sdtm">
