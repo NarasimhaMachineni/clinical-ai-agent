@@ -146,161 +146,66 @@
           </div>
         </section>
 
-        <!-- 2. Multi-Agent Dynamic Flow Canvas (Reference Architecture) -->
-        <section class="agent-canvas-section">
-          
-          <div class="canvas-top-bar">
-            <div class="canvas-main-title">
-              <span style="font-size:20px;">🤖</span>
-              <div>
-                <h2>Clinical Data Science &amp; CDISC Regulatory Submission Operations Center</h2>
-                <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">
-                  Autonomous Multi-Agent Clinical Intelligence: SDTM Mapping, ADaM Derivations, Dual-Track SAS/R Verification, and GxP Submission Readiness
-                </div>
+
+        <!-- 2. Study Pipeline Status Bar -->
+        <section class="study-pipeline-bar">
+          <div class="pipeline-title">
+            <span class="pipeline-icon">🤖</span>
+            <span>ClinicalOps AI Engine</span>
+            <span class="pipeline-badge">5 Workers Active</span>
+          </div>
+          <div class="pipeline-nodes">
+            <div class="pipeline-node" id="pnode-sdtm">
+              <span class="pnode-icon">🧬</span>
+              <div class="pnode-info">
+                <strong>Data Standardizer</strong>
+                <span id="pnode-badge-sdtm" class="pnode-status ready">READY</span>
               </div>
             </div>
-            
-            <div class="canvas-controls">
-              <button class="btn-maximize" onclick="toggleMaximize(this)" title="Maximize / Restore View" style="margin-right:6px;">
-                <span class="max-icon">⛶</span> <span class="max-text">Maximize</span>
-              </button>
-              <button class="btn-canvas-action heal-btn" id="btn-simulate-healing" title="Test automatic error detection and self-healing fix">
-                <span>🔧</span> Test Auto Error Fix
-              </button>
-              <button class="btn-canvas-action" id="btn-canvas-refresh-all">
-                <span>⚡</span> Run All 5 AI Workers
-              </button>
+            <div class="pipeline-arrow">→</div>
+            <div class="pipeline-node" id="pnode-adam">
+              <span class="pnode-icon">📐</span>
+              <div class="pnode-info">
+                <strong>ADaM Checker</strong>
+                <span id="pnode-badge-adam" class="pnode-status ready">READY</span>
+              </div>
+            </div>
+            <div class="pipeline-arrow">→</div>
+            <div class="pipeline-node" id="pnode-p21">
+              <span class="pnode-icon">🔍</span>
+              <div class="pnode-info">
+                <strong>Rule Validator</strong>
+                <span id="pnode-badge-p21" class="pnode-status ready">READY</span>
+              </div>
+            </div>
+            <div class="pipeline-arrow">→</div>
+            <div class="pipeline-node" id="pnode-double">
+              <span class="pnode-icon">⚖️</span>
+              <div class="pnode-info">
+                <strong>Cross-Verifier</strong>
+                <span id="pnode-badge-double" class="pnode-status ready">READY</span>
+              </div>
+            </div>
+            <div class="pipeline-arrow">→</div>
+            <div class="pipeline-node" id="pnode-safety">
+              <span class="pnode-icon">🩺</span>
+              <div class="pnode-info">
+                <strong>Safety Monitor</strong>
+                <span id="pnode-badge-safety" class="pnode-status ready">READY</span>
+              </div>
+            </div>
+            <div class="pipeline-arrow">→</div>
+            <div class="pipeline-node pipeline-node-output" id="pnode-output">
+              <span class="pnode-icon">📦</span>
+              <div class="pnode-info">
+                <strong>Deliverables</strong>
+                <span id="canvas-concordance-status" class="pnode-status ready">Pending</span>
+              </div>
             </div>
           </div>
-
-          <!-- Flow Canvas Nodes Grid -->
-          <div class="canvas-flow-container">
-            
-            <!-- SVG Connectors Overlay -->
-            <svg class="canvas-svg-overlay" id="canvas-svg-lines">
-              <!-- Animated connector curves dynamically updated via JS -->
-            </svg>
-
-            <!-- Top Row: Source EDC -> Master Agent -> Verified Deliverables -->
-            <div class="flow-row-top">
-              
-              <!-- Node 1: EDC Files / PC Watcher -->
-              <div class="flow-node node-input-edc" id="node-edc-source">
-                <div class="node-header-row">
-                  <div class="node-icon-wrapper" style="background:rgba(56,189,248,0.15); color:var(--primary-blue);">📁</div>
-                  <div class="node-label-group">
-                    <strong>Patient Data Input</strong>
-                    <span>Your local data files folder</span>
-                  </div>
-                </div>
-                <div class="socket-pill-group">
-                  <span class="socket-pill" id="canvas-files-pill">Awaiting Files</span>
-                  <span class="socket-pill">ISO 8601</span>
-                </div>
-                <div class="node-status-bar">
-                  <span style="color:var(--text-muted);">Status:</span>
-                  <strong style="color:var(--text-secondary);" id="canvas-edc-status">Standing By</strong>
-                </div>
-              </div>
-
-              <!-- Node 2: Master Orchestrator Agent (Center) -->
-              <div class="flow-node node-master-agent pulse-running" id="node-master-agent">
-                <div class="node-header-row">
-                  <div class="node-icon-wrapper" style="background:rgba(168,85,247,0.15); color:#c084fc; font-size:18px;">🤖</div>
-                  <div class="node-label-group">
-                    <strong style="font-size:14px;">ClinicalOps Orchestrator</strong>
-                    <span>Controls all 5 AI workers in parallel</span>
-                  </div>
-                </div>
-                <div class="socket-pill-group" style="justify-content:center;">
-                  <span class="socket-pill model">Engine: Claude AI</span>
-                  <span class="socket-pill memory" id="canvas-study-pill">Study: Awaiting Data</span>
-                  <span class="socket-pill tool">Auto: Every 15s</span>
-                </div>
-                <div class="node-status-bar">
-                  <span style="color:var(--text-muted);">Currently Running:</span>
-                  <strong style="color:var(--primary-blue);" id="canvas-active-subagent-label"><span class="live-pulse-beacon"></span>Data Standardizer</strong>
-                </div>
-              </div>
-
-              <!-- Node 3: Deliverables & GitHub Output -->
-              <div class="flow-node node-output-pkg" id="node-output-pkg">
-                <div class="node-header-row">
-                  <div class="node-icon-wrapper" style="background:rgba(63,185,80,0.15); color:#3fb950;">📦</div>
-                  <div class="node-label-group">
-                    <strong>Regulatory Deliverables &amp; Reports</strong>
-                    <span>Define-XML v2.1, CSR Tables, GxP Audit Dossier (.xlsx)</span>
-                  </div>
-                </div>
-                <div class="socket-pill-group">
-                  <span class="socket-pill" id="canvas-fda-pill">Awaiting Verification</span>
-                  <span class="socket-pill" style="color:#4ade80;">GxP Audit Dossier</span>
-                </div>
-                <div class="node-status-bar">
-                  <span style="color:var(--text-muted);">Concordance:</span>
-                  <strong style="color:var(--text-secondary);" id="canvas-concordance-status">Pending Review</strong>
-                </div>
-              </div>
-
-            </div>
-
-            <!-- Bottom Row: The 5 Dynamically Called Clinical Subagents -->
-            <div class="flow-row-subagents">
-              
-              <!-- Subagent 1: SDTM -->
-              <div class="subagent-node active-executing" id="subnode-sdtm" data-task="SDTM_MAPPING">
-                <div class="subagent-header">
-                  <span class="subagent-icon">🧬</span>
-                  <span class="subagent-badge" id="subnode-badge-sdtm">READY</span>
-                </div>
-                <strong class="subagent-title">Data Standardizer</strong>
-                <span class="subagent-desc">Formats patient, lab, safety &amp; dosing data</span>
-              </div>
-
-              <!-- Subagent 2: ADaM -->
-              <div class="subagent-node" id="subnode-adam" data-task="ADAM_DERIVATION">
-                <div class="subagent-header">
-                  <span class="subagent-icon">📐</span>
-                  <span class="subagent-badge" id="subnode-badge-adam">READY</span>
-                </div>
-                <strong class="subagent-title">ADaM Checks</strong>
-                <span class="subagent-desc">ADSL, ADAE, ADLB &amp; flags</span>
-              </div>
-
-              <!-- Subagent 3: Pinnacle 21 QC -->
-              <div class="subagent-node" id="subnode-p21" data-task="PINNACLE21_QC">
-                <div class="subagent-header">
-                  <span class="subagent-icon">🔍</span>
-                  <span class="subagent-badge" id="subnode-badge-p21">READY</span>
-                </div>
-                <strong class="subagent-title">Rule Checker</strong>
-                <span class="subagent-desc">Checks 500+ FDA &amp; EMA data rules</span>
-              </div>
-
-              <!-- Subagent 4: Double QC -->
-              <div class="subagent-node" id="subnode-double" data-task="DOUBLE_PROG_QC">
-                <div class="subagent-header">
-                  <span class="subagent-icon">⚖️</span>
-                  <span class="subagent-badge" id="subnode-badge-double">READY</span>
-                </div>
-                <strong class="subagent-title">Cross-Verifier</strong>
-                <span class="subagent-desc">Compares SAS &amp; R results cell by cell</span>
-              </div>
-
-              <!-- Subagent 5: Safety & Efficacy -->
-              <div class="subagent-node" id="subnode-safety" data-task="SAFETY_SURVEILLANCE">
-                <div class="subagent-header">
-                  <span class="subagent-icon">🩺</span>
-                  <span class="subagent-badge" id="subnode-badge-safety">READY</span>
-                </div>
-                <strong class="subagent-title">Safety Monitor</strong>
-                <span class="subagent-desc">Screens for liver toxicity &amp; treatment effects</span>
-              </div>
-
-            </div>
-
-          </div>
-
+          <button class="btn-canvas-action" id="btn-canvas-refresh-all" style="white-space:nowrap; flex-shrink:0;">
+            <span>⚡</span> Run All Workers
+          </button>
         </section>
 
         <!-- 3. Real-Time Terminal Log -->
@@ -612,27 +517,7 @@
                     <button class="pill-btn" data-dset="DX" data-cat="SDTM" title="Device-Subject Relations">DX</button>
                   </div>
                 </div>
-                <!-- ⚡ ClinOps AI Regulatory Transformation Copilot -->
-                <div class="ai-requirement-box" style="background:linear-gradient(135deg, rgba(168,85,247,0.12), rgba(56,189,248,0.12)); border:1px solid rgba(168,85,247,0.4); border-radius:8px; padding:12px 14px; margin-bottom:14px;">
-                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                    <strong style="color:#e9d5ff; font-size:12.5px; display:flex; align-items:center; gap:6px;">
-                      <span>⚡</span> ClinOps AI Regulatory Transformation Copilot
-                    </strong>
-                    <span class="badge-pass" style="background:rgba(168,85,247,0.25); color:#d8b4fe; border-color:rgba(168,85,247,0.5); font-size:10px; padding:2px 8px;">INSTANT AI RE-EXECUTION</span>
-                  </div>
-                  <div style="display:flex; gap:8px;">
-                    <input type="text" id="ai-requirement-input" class="form-input" style="flex:1; background:rgba(15,23,42,0.8); border:1px solid rgba(168,85,247,0.3); color:#fff; font-size:12px; padding:8px 12px; border-radius:6px;" placeholder="Type custom requirements for this document (e.g. 'Set RACE=White for female subjects', 'Format dates YYYY-MM-DD', 'Recalculate BMI to 1 decimal place')..." />
-                    <button class="btn-execute" id="btn-apply-ai-requirement" onclick="applyCustomAiRequirement()" style="background:linear-gradient(135deg, #9333ea, #2563eb); color:#fff; border:none; padding:8px 16px; border-radius:6px; font-weight:700; font-size:12px; cursor:pointer; white-space:nowrap; display:flex; align-items:center; gap:6px;">
-                      <span>🚀</span> Apply ClinOps AI Transformation
-                    </button>
-                  </div>
-                  <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;" id="ai-suggestion-pills">
-                    <span class="pill-chip" onclick="setAiRequirement('Set missing RACE to White for all female subjects')" style="cursor:pointer; font-size:10.5px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:var(--text-secondary); padding:2px 8px; border-radius:12px;">🏷️ Fill RACE=White for females</span>
-                    <span class="pill-chip" onclick="setAiRequirement('Standardize all dates to ISO 8601 (YYYY-MM-DD)')" style="cursor:pointer; font-size:10.5px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:var(--text-secondary); padding:2px 8px; border-radius:12px;">🗓️ ISO 8601 Dates</span>
-                    <span class="pill-chip" onclick="setAiRequirement('Re-derive BMI = WEIGHT / (HEIGHT/100)^2 and update BMICAT')" style="cursor:pointer; font-size:10.5px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:var(--text-secondary); padding:2px 8px; border-radius:12px;">📊 Recalculate BMI &amp; BMICAT</span>
-                    <span class="pill-chip" onclick="setAiRequirement('Set default treatment arm to Treatment A for active patients')" style="cursor:pointer; font-size:10.5px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:var(--text-secondary); padding:2px 8px; border-radius:12px;">💊 Standardize Treatment Arm</span>
-                  </div>
-                </div>
+
 
                 <div class="table-scroll-box" id="dataset-table-container">
                   <!-- Data table injected via JS -->
