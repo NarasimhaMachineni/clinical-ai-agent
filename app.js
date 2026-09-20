@@ -1406,31 +1406,35 @@ function verifyAndRepairClinicalData(dsetName, rows) {
       const armcd = (r.ARMCD || '').toString().trim().toUpperCase();
       if (!armcd && arm) {
         const dCode = /placebo/i.test(arm) ? 'PBO' : 'ACT';
-        rowIssues.push({
-          row: rowNum,
-          variable: 'ARMCD',
-          error: `Missing short code ARMCD for arm "${arm}"`,
-          rule: 'CDISC ADaMIG v1.3 Rule AD0012 (ARMCD Derivation)',
-          oldVal: '(blank)',
-          newVal: dCode,
-          justification: 'Every treatment arm must have a corresponding short identifier code ARMCD.',
-          method: 'Controlled Terminology Short Code Derivation',
-          status: 'FIXED'
-        });
+        if (colSet.has('ARMCD')) {
+          rowIssues.push({
+            row: rowNum,
+            variable: 'ARMCD',
+            error: `Missing short code ARMCD for arm "${arm}"`,
+            rule: 'CDISC ADaMIG v1.3 Rule AD0012 (ARMCD Derivation)',
+            oldVal: '(blank)',
+            newVal: dCode,
+            justification: 'Every treatment arm must have a corresponding short identifier code ARMCD.',
+            method: 'Controlled Terminology Short Code Derivation',
+            status: 'FIXED'
+          });
+        }
         r.ARMCD = dCode;
       } else if (!arm && armcd) {
         const dArm = armcd === 'PBO' ? 'Placebo' : 'Active Treatment';
-        rowIssues.push({
-          row: rowNum,
-          variable: 'ARM',
-          error: `Missing treatment arm description ARM for code "${armcd}"`,
-          rule: 'CDISC ADaMIG v1.3 Rule AD0012',
-          oldVal: '(blank)',
-          newVal: dArm,
-          justification: 'Full treatment arm name ARM required alongside short code ARMCD.',
-          method: 'Controlled Terminology Decoder',
-          status: 'FIXED'
-        });
+        if (colSet.has('ARM')) {
+          rowIssues.push({
+            row: rowNum,
+            variable: 'ARM',
+            error: `Missing treatment arm description ARM for code "${armcd}"`,
+            rule: 'CDISC ADaMIG v1.3 Rule AD0012',
+            oldVal: '(blank)',
+            newVal: dArm,
+            justification: 'Full treatment arm name ARM required alongside short code ARMCD.',
+            method: 'Controlled Terminology Decoder',
+            status: 'FIXED'
+          });
+        }
         r.ARM = dArm;
       } else if (arm && armcd) {
         const armIsPbo = /placebo/i.test(arm);
@@ -1594,7 +1598,7 @@ function verifyAndRepairClinicalData(dsetName, rows) {
       const dEnd = new Date(r.TRTEDT);
       const calculatedDur = Math.round((dEnd - dStart) / 86400000) + 1;
       const recordedDur = r.TRTDURD !== undefined && r.TRTDURD !== null && String(r.TRTDURD).trim() !== '' ? Number(r.TRTDURD) : null;
-      if (recordedDur === null || isNaN(recordedDur) || recordedDur !== calculatedDur) {
+      if (colSet.has('TRTDURD') && (recordedDur === null || isNaN(recordedDur) || recordedDur !== calculatedDur)) {
         rowIssues.push({
           row: rowNum,
           variable: 'TRTDURD',
@@ -1606,8 +1610,8 @@ function verifyAndRepairClinicalData(dsetName, rows) {
           method: 'Deterministic Duration Calculation Engine',
           status: 'FIXED'
         });
-        r.TRTDURD = calculatedDur;
       }
+      r.TRTDURD = calculatedDur;
     }
 
     // ------------------------------------------------------------------------
@@ -1733,7 +1737,7 @@ function verifyAndRepairClinicalData(dsetName, rows) {
           }
 
           if (matchedMed) {
-            if (rawDecod !== matchedMed.pt) {
+            if (rawDecod.toUpperCase() !== matchedMed.pt.toUpperCase()) {
               rowIssues.push({
                 row: rowNum,
                 variable: targetDecodKey,
@@ -1746,12 +1750,14 @@ function verifyAndRepairClinicalData(dsetName, rows) {
                 status: 'FIXED'
               });
               r[targetDecodKey] = matchedMed.pt;
+            } else if (rawDecod !== matchedMed.pt) {
+              r[targetDecodKey] = matchedMed.pt;
             }
 
-            // SOC Mapping
+            // SOC Mapping - case-insensitive
             if (targetSocKey) {
               const rawSoc = isBlank(r[targetSocKey]) ? '' : String(r[targetSocKey]).trim();
-              if (rawSoc !== matchedMed.soc) {
+              if (rawSoc.toUpperCase() !== matchedMed.soc.toUpperCase()) {
                 rowIssues.push({
                   row: rowNum,
                   variable: targetSocKey,
@@ -1763,6 +1769,8 @@ function verifyAndRepairClinicalData(dsetName, rows) {
                   method: 'MedDRA SOC Hierarchy Mapping',
                   status: 'FIXED'
                 });
+                r[targetSocKey] = matchedMed.soc;
+              } else if (rawSoc !== matchedMed.soc) {
                 r[targetSocKey] = matchedMed.soc;
               }
             }
@@ -1776,13 +1784,10 @@ function verifyAndRepairClinicalData(dsetName, rows) {
               rule: 'CDISC SDTM AE.AEDECOD Standard',
               oldVal: '(blank)',
               newVal: titleCased,
-              justification: 'Preferred term AEDECOD derived from verbatim term for 100% CDISC completeness.',
-              method: 'Deterministic Verbatim-to-PT Imputer',
+              justification: 'Every reported event must possess a coded Preferred Term.',
+              method: 'Synthesized Title-Case Decode',
               status: 'FIXED'
             });
-            if (targetSocKey && isBlank(r[targetSocKey])) {
-              r[targetSocKey] = 'General disorders and administration site conditions';
-            }
           }
         }
       }
@@ -1791,7 +1796,7 @@ function verifyAndRepairClinicalData(dsetName, rows) {
       const aesevKey = allColumns.find(c => c.toUpperCase() === 'AESEV' || c.toUpperCase() === 'ASEV');
       const aesevnKey = allColumns.find(c => c.toUpperCase() === 'AESEVN' || c.toUpperCase() === 'ASEVN');
       const targetSevKey = aesevKey || (upperDomain === 'ADAE' ? 'AESEV' : null);
-      const targetSevnKey = aesevnKey || (upperDomain === 'ADAE' ? 'AESEVN' : null);
+      const targetSevnKey = aesevnKey; // Only check AESEVN discrepancy if column existed in uploaded dataset
 
       let currentSev = targetSevKey && !isBlank(r[targetSevKey]) ? String(r[targetSevKey]).trim().toUpperCase() : null;
       let currentSevn = targetSevnKey && !isBlank(r[targetSevnKey]) ? parseInt(r[targetSevnKey], 10) : null;
@@ -1845,11 +1850,11 @@ function verifyAndRepairClinicalData(dsetName, rows) {
 
       if (targetSevnKey) {
         const rawSevn = r[targetSevnKey];
-        if (rawSevn !== stdSevn) {
+        if (rawSevn !== stdSevn && rawSevn !== String(stdSevn)) {
           rowIssues.push({
             row: rowNum,
             variable: targetSevnKey,
-            error: `Numeric severity AESEVN mismatch or missing: Recorded "${rawSevn !== undefined && rawSevn !== null ? rawSevn : '(blank)'}" != ${stdSevn}`,
+            error: `Numeric severity AESEVN mismatch or missing: Recorded "${rawSevn !== undefined && rawSevn !== null && rawSevn !== '' ? rawSevn : '(blank)'}" != ${stdSevn}`,
             rule: 'CDISC ADaM ADAE.AESEVN Standard (1=MILD, 2=MODERATE, 3=SEVERE)',
             oldVal: rawSevn !== undefined && rawSevn !== null && rawSevn !== '' ? rawSevn : '(blank)',
             newVal: stdSevn,
@@ -1859,36 +1864,57 @@ function verifyAndRepairClinicalData(dsetName, rows) {
           });
           r[targetSevnKey] = stdSevn;
         }
+      } else if (upperDomain === 'ADAE') {
+        r.AESEVN = stdSevn;
       }
 
-      // 8.3: AESER Serious Adverse Event Flag
+      // 8.3: AESER Serious Adverse Event Flag (ICH E2A Seriousness vs Severity distinction)
       const aeserKey = allColumns.find(c => c.toUpperCase() === 'AESER');
       const targetSerKey = aeserKey || (upperDomain === 'ADAE' ? 'AESER' : null);
       if (targetSerKey) {
         const rawSer = isBlank(r[targetSerKey]) ? '' : String(r[targetSerKey]).trim().toUpperCase();
         const aeoutVal = String(r.AEOUT || '').trim().toUpperCase();
+        const hasHardSeriousnessCriteria = aeoutVal.includes('FATAL') || aeoutVal.includes('DIED') || String(r.AESHOSP || '').toUpperCase() === 'Y' || String(r.AESLIFE || '').toUpperCase() === 'Y';
+        
         let expectedSer = 'N';
-        if (stdSev === 'SEVERE' || stdSevn >= 3 || aeoutVal.includes('FATAL') || String(r.AESHOSP || '').toUpperCase() === 'Y' || String(r.AESLIFE || '').toUpperCase() === 'Y') {
+        if (hasHardSeriousnessCriteria) {
           expectedSer = 'Y';
         } else if (rawSer === 'Y' || rawSer === 'YES' || rawSer === '1' || rawSer === 'TRUE') {
           expectedSer = 'Y';
         } else if (rawSer === 'N' || rawSer === 'NO' || rawSer === '0' || rawSer === 'FALSE') {
           expectedSer = 'N';
+        } else if (isBlank(rawSer)) {
+          expectedSer = (stdSev === 'SEVERE' || stdSevn >= 3) ? 'Y' : 'N';
         }
 
-        if (rawSer !== expectedSer) {
+        if (rawSer !== 'Y' && rawSer !== 'N') {
           rowIssues.push({
             row: rowNum,
             variable: targetSerKey,
-            error: `Serious AE flag ${targetSerKey} non-standard or missing: Recorded "${r[targetSerKey] || '(blank)'}" != expected '${expectedSer}'`,
+            error: `Serious AE flag ${targetSerKey} non-standard or missing: Recorded "${r[targetSerKey] || '(blank)'}"`,
             rule: 'CDISC SDTM AE.AESER Conformance (1-char Y/N)',
             oldVal: r[targetSerKey] || '(blank)',
             newVal: expectedSer,
-            justification: `Severe/hospitalized/fatal events must have ${targetSerKey}='Y' per ICH E2A safety criteria.`,
-            method: 'Deterministic Safety Severity-Seriousness Adjudicator',
+            justification: isBlank(rawSer) 
+              ? (expectedSer === 'Y' ? 'Missing AESER imputed to "Y" for severe adverse event.' : 'Missing AESER defaulted to "N" for non-severe event.')
+              : 'AESER must be a 1-character CDISC flag (Y or N).',
+            method: 'Controlled Terminology Standardizer',
             status: 'FIXED'
           });
           r[targetSerKey] = expectedSer;
+        } else if (hasHardSeriousnessCriteria && rawSer === 'N') {
+          rowIssues.push({
+            row: rowNum,
+            variable: targetSerKey,
+            error: `Serious AE flag conflict: Fatal or hospitalized event recorded with ${targetSerKey}='N'`,
+            rule: 'ICH E2A / FDA Safety Seriousness Criteria',
+            oldVal: 'N',
+            newVal: 'Y',
+            justification: 'Fatal or hospitalized adverse events are medically defined as Serious Adverse Events (SAEs) and require AESER="Y".',
+            method: 'Deterministic Safety Seriousness Adjudicator',
+            status: 'FIXED'
+          });
+          r[targetSerKey] = 'Y';
         }
       }
 
@@ -1896,14 +1922,19 @@ function verifyAndRepairClinicalData(dsetName, rows) {
       const aerelKey = allColumns.find(c => c.toUpperCase() === 'AEREL');
       if (aerelKey) {
         const rawRel = isBlank(r[aerelKey]) ? '' : String(r[aerelKey]).trim().toUpperCase();
-        let stdRel = 'NOT RELATED';
-        if (/^RELATED$|^DEFINITE$|^PROBABLE$|^POSSIBLE$|^YES$|^Y$/i.test(rawRel)) {
-          stdRel = rawRel === 'Y' || rawRel === 'YES' ? 'RELATED' : rawRel;
-        } else if (/^NONE$|^NO$|^N$|^UNRELATED$|^UNLIKELY$|^NOT RELATED$/i.test(rawRel)) {
-          stdRel = 'NOT RELATED';
-        }
+        const validRelTerms = new Set([
+          'RELATED', 'NOT RELATED', 'POSSIBLE', 'POSSIBLY RELATED', 'POSSIBLE RELATED',
+          'PROBABLE', 'PROBABLY RELATED', 'PROBABLE RELATED',
+          'UNLIKELY', 'UNLIKELY RELATED', 'DEFINITE', 'DEFINITELY', 'DEFINITELY RELATED',
+          'CONDITIONAL', 'NOT ASSESSABLE'
+        ]);
 
-        if (rawRel !== stdRel) {
+        if (!validRelTerms.has(rawRel)) {
+          let stdRel = 'NOT RELATED';
+          if (/^Y$|^YES$|^SUSPECT$/i.test(rawRel)) stdRel = 'RELATED';
+          else if (/^N$|^NO$|^NONE$|^UNRELATED$|^NOT SUSPECT$/i.test(rawRel)) stdRel = 'NOT RELATED';
+          else if (/^REMOTE$|^DOUBTFUL$/i.test(rawRel)) stdRel = 'UNLIKELY RELATED';
+
           rowIssues.push({
             row: rowNum,
             variable: aerelKey,
@@ -1911,7 +1942,7 @@ function verifyAndRepairClinicalData(dsetName, rows) {
             rule: 'CDISC SDTM AE.AEREL Controlled Terminology (C66768)',
             oldVal: r[aerelKey] || '(blank)',
             newVal: stdRel,
-            justification: 'Causality must conform to CDISC Controlled Terminology (RELATED, NOT RELATED, POSSIBLE, PROBABLE).',
+            justification: 'Causality must conform to CDISC Controlled Terminology (RELATED, NOT RELATED, POSSIBLE, PROBABLE, UNLIKELY RELATED).',
             method: 'Controlled Terminology Standardizer',
             status: 'FIXED'
           });
