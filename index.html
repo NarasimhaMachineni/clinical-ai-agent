@@ -138,66 +138,7 @@
         </section>
 
 
-        <!-- 2. Study Pipeline Status Bar -->
-        <section class="study-pipeline-bar">
-          <div class="pipeline-title">
-            <span class="pipeline-icon">🧬</span>
-            <span>ClinicalOps Task Engine</span>
-            <span class="pipeline-badge">5 Engine Workers Active</span>
-          </div>
-          <div class="pipeline-nodes">
-            <div class="pipeline-node" id="pnode-sdtm">
-              <span class="pnode-icon">🧬</span>
-              <div class="pnode-info">
-                <strong>Data Standardizer</strong>
-                <span id="pnode-badge-sdtm" class="pnode-status ready">READY</span>
-              </div>
-            </div>
-            <div class="pipeline-arrow">→</div>
-            <div class="pipeline-node" id="pnode-adam">
-              <span class="pnode-icon">📐</span>
-              <div class="pnode-info">
-                <strong>ADaM Checker</strong>
-                <span id="pnode-badge-adam" class="pnode-status ready">READY</span>
-              </div>
-            </div>
-            <div class="pipeline-arrow">→</div>
-            <div class="pipeline-node" id="pnode-p21">
-              <span class="pnode-icon">🔍</span>
-              <div class="pnode-info">
-                <strong>Rule Validator</strong>
-                <span id="pnode-badge-p21" class="pnode-status ready">READY</span>
-              </div>
-            </div>
-            <div class="pipeline-arrow">→</div>
-            <div class="pipeline-node" id="pnode-double">
-              <span class="pnode-icon">⚖️</span>
-              <div class="pnode-info">
-                <strong>Cross-Verifier</strong>
-                <span id="pnode-badge-double" class="pnode-status ready">READY</span>
-              </div>
-            </div>
-            <div class="pipeline-arrow">→</div>
-            <div class="pipeline-node" id="pnode-safety">
-              <span class="pnode-icon">🩺</span>
-              <div class="pnode-info">
-                <strong>Safety Monitor</strong>
-                <span id="pnode-badge-safety" class="pnode-status ready">READY</span>
-              </div>
-            </div>
-            <div class="pipeline-arrow">→</div>
-            <div class="pipeline-node pipeline-node-output" id="pnode-output">
-              <span class="pnode-icon">📦</span>
-              <div class="pnode-info">
-                <strong>Deliverables</strong>
-                <span id="canvas-concordance-status" class="pnode-status ready">Pending</span>
-              </div>
-            </div>
-          </div>
-          <button class="btn-canvas-action" id="btn-canvas-refresh-all" style="white-space:nowrap; flex-shrink:0;">
-            <span>⚡</span> Run All Workers
-          </button>
-        </section>
+
 
         <!-- 3. Real-Time Terminal Log -->
         <section class="terminal-section">
