@@ -8,4 +8,4 @@ ONC-2025-001,ONC-2025-001-006,TTF,Time to Treatment Failure / Severe Event (Days
 ONC-2025-001,ONC-2025-001-007,TTF,Time to Treatment Failure / Severe Event (Days),2025-01-25,2025-07-01,162,DAYS,1,Censored at Study Completion,Placebo
 ONC-2025-001,ONC-2025-001-008,TTF,Time to Treatment Failure / Severe Event (Days),2025-01-28,2025-07-05,162,DAYS,1,Censored at Study Completion,Pembrolizumab 200mg
 ONC-2025-001,ONC-2025-001-009,TTF,Time to Treatment Failure / Severe Event (Days),2025-02-01,2025-07-10,162,DAYS,1,Censored at Study Completion,Placebo
-ONC-2025-001,ONC-2025-001-010,TTF,Time to Treatment Failure / Severe Event (Days),2026-09-15,2026-09-15,162,DAYS,1,Censored at Study Completion,Active Drug
+ONC-2025-001,ONC-2025-001-010,TTF,Time to Treatment Failure / Severe Event (Days),2026-09-20,2026-09-20,162,DAYS,1,Censored at Study Completion,Active Drug
