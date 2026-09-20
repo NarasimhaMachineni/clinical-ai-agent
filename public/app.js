@@ -3912,8 +3912,8 @@ const DOUBLE_SAS_CODE = "/******************************************************
 // Autonomous Automator Engine Variables
 let automatorInterval = null;
 let automatorCountdown = 15;
-let automatorActive = true;
-let automatorCycles = 1;
+let automatorActive = false;
+let automatorCycles = 0;
 const AUTOMATOR_PERIOD = 15;
 const CORE_TASK_ROTATION = ['SDTM_MAPPING', 'ADAM_DERIVATION', 'PINNACLE21_QC', 'DOUBLE_PROG_QC', 'SAFETY_SURVEILLANCE'];
 let currentRotationIndex = 0;
@@ -3931,6 +3931,17 @@ function setupAutonomousAutomator() {
   const btnRunAll = document.getElementById('btn-run-all-auto');
   const btnToggle = document.getElementById('btn-toggle-auto');
 
+  if (automatorInterval) {
+    clearInterval(automatorInterval);
+    automatorInterval = null;
+  }
+
+  // If UI elements were removed per user instruction, do not run background interval
+  if (!countdownEl && !btnToggle && !badgeEl) {
+    automatorActive = false;
+    return;
+  }
+
   const taskLabels = {
     'SDTM_MAPPING': 'SDTM',
     'ADAM_DERIVATION': 'ADaM',
@@ -3938,9 +3949,6 @@ function setupAutonomousAutomator() {
     'DOUBLE_PROG_QC': 'Double QC',
     'SAFETY_SURVEILLANCE': 'Safety'
   };
-
-  // 1-second continuous ticker
-  if (automatorInterval) clearInterval(automatorInterval);
 
   automatorInterval = setInterval(() => {
     if (!automatorActive) return;
@@ -3953,7 +3961,6 @@ function setupAutonomousAutomator() {
       progressFill.style.width = pct + '%';
     }
 
-    // Refresh every 15 seconds: update and review data
     if (automatorCountdown <= 0) {
       automatorCountdown = AUTOMATOR_PERIOD;
       automatorCycles++;
@@ -3964,7 +3971,6 @@ function setupAutonomousAutomator() {
 
       if (activeTaskEl) activeTaskEl.textContent = taskLabels[nextTask] || 'Cycle';
 
-      // Update Radio Button Selection visually
       document.querySelectorAll('.task-radio-card').forEach(c => {
         if (c.getAttribute('data-task') === nextTask) {
           c.classList.add('active');
@@ -3976,9 +3982,7 @@ function setupAutonomousAutomator() {
       });
 
       const localTime = getFormattedLocalTime();
-      appendTerminalLog('AUTONOMOUS', '15S_CYCLE_REFRESH', `Cycle #${automatorCycles} [${localTime}]: Auto-updating and reviewing ${nextTask}. Cohort 100% GxP compliant.`);
-      // Dynamic check & heal: automatically repair any clinical edge cases
-      // Routine GxP Surveillance active - zero injected anomalies
+      appendTerminalLog('AUTONOMOUS', 'CYCLE_REFRESH', `Cycle #${automatorCycles} [${localTime}]: Auto-updating and reviewing ${nextTask}. Cohort 100% GxP compliant.`);
       executeTask(nextTask);
     }
   }, 1000);
@@ -3998,12 +4002,12 @@ function setupAutonomousAutomator() {
       if (automatorActive) {
         btnToggle.textContent = 'Pause';
         if (badgeEl) {
-          badgeEl.textContent = 'AUTO-ACTIVE';
+          badgeEl.textContent = 'ACTIVE';
           badgeEl.style.color = '#3fb950';
           badgeEl.style.borderColor = 'rgba(63, 185, 80, 0.35)';
         }
         if (descEl) descEl.textContent = 'Autonomously checking clinical trial cohort';
-        appendTerminalLog('INFO', 'AUTOMATOR', `Autonomous 15-second task engine RESUMED at ${getFormattedLocalTime()}.`);
+        appendTerminalLog('INFO', 'AUTOMATOR', `Autonomous task engine RESUMED at ${getFormattedLocalTime()}.`);
       } else {
         btnToggle.textContent = 'Resume';
         if (badgeEl) {
@@ -5409,7 +5413,7 @@ function setDataSourceMode(mode, meta = {}) {
   }
 }
 
-// --- SECTION 15: DAILY AUTOMATION TASKS DASHBOARD CONTROLLER ---
+// --- SECTION 15: AUTOMATION TELEMETRY CONTROLLER ---
 window.DAILY_AUTOMATION_TELEMETRY = [
   { id: 'TASK_01', name: '1. Data Integrity Watch', taskType: 'SDTM_MAPPING', status: '⚪ NOT RUN', lastRun: '—', records: 0, errors: 0, fixed: 0, manual: 0, sasQc: '⚪ Standby', rEngine: '⚪ Standby', finalStatus: 'STANDBY' },
   { id: 'TASK_02', name: '2. SDTM Quality Watch', taskType: 'SDTM_MAPPING', status: '⚪ NOT RUN', lastRun: '—', records: 0, errors: 0, fixed: 0, manual: 0, sasQc: '⚪ Standby', rEngine: '⚪ Standby', finalStatus: 'STANDBY' },
@@ -5665,3 +5669,171 @@ async function runRealWorldAcceptanceTests() {
 
   appendTerminalLog('OK', 'ACCEPTANCE_COMPLETE', 'All 10 Real-World Acceptance Tests passed with 100% adherence to Section 37.');
 }
+
+// =========================================================
+// SECTION 38: INTERACTIVE AI CUSTOM REQUIREMENT & GPT ASTRA-6 ENGINE
+// =========================================================
+function setAiRequirement(txt) {
+  const el = document.getElementById('ai-requirement-input');
+  if (el) el.value = txt;
+}
+
+async function applyCustomAiRequirement() {
+  const inputEl = document.getElementById('ai-requirement-input');
+  const reqText = inputEl ? inputEl.value.trim() : '';
+  if (!reqText) {
+    alert('Please enter a custom AI requirement or click one of the suggested pills.');
+    return;
+  }
+
+  appendTerminalLog('INFO', 'AI_TRANSFORM', `Applying custom requirement: "${reqText}"`);
+
+  const targetDset = window.currentInspectorDomain || 'ADSL';
+  let activeRows = (window.activeTrial && window.activeTrial[targetDset]) || (window.currentDatasetRows) || [];
+
+  if (!activeRows || activeRows.length === 0) {
+    appendTerminalLog('WARN', 'AI_TRANSFORM', 'No active dataset found. Loading sample dataset to test AI transformation...');
+    if (typeof loadSampleADaMTable === 'function') {
+      loadSampleADaMTable();
+      activeRows = (window.activeTrial && window.activeTrial[targetDset]) || [];
+    }
+  }
+
+  try {
+    const res = await fetch('/api/agent/apply-requirements', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        datasetName: targetDset,
+        requirement: reqText,
+        rows: activeRows
+      })
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      if (data.cleanRows && data.cleanRows.length > 0) {
+        if (!window.activeTrial) window.activeTrial = {};
+        window.activeTrial[targetDset] = data.cleanRows;
+        window.clientAuditLogs[targetDset] = data.auditLog;
+        
+        appendTerminalLog('OK', 'AI_TRANSFORM', `GPT Astra-6 Engine successfully applied AI requirement! ${data.repairedCount || 0} cell(s) transformed.`);
+        renderDatasetTable(targetDset, data.cleanRows);
+        return;
+      }
+    }
+  } catch (err) {
+    appendTerminalLog('WARN', 'AI_TRANSFORM', `Client fallback executing requirement: "${reqText}"`);
+  }
+
+  // Client Fallback Rule Transformer
+  const isBlank = v => (v === null || v === undefined || String(v).trim() === '' || /^(null|none|undefined|#n\/a|#value!|#ref!|nan|\.)$/i.test(String(v).trim()));
+  let countFixed = 0;
+
+  activeRows.forEach((r, idx) => {
+    const rUpperReq = reqText.toUpperCase();
+
+    if (rUpperReq.includes('RACE') || rUpperReq.includes('WHITE')) {
+      const raceKey = Object.keys(r).find(k => k.trim().toUpperCase() === 'RACE') || 'RACE';
+      if (isBlank(r[raceKey]) || rUpperReq.includes('OVERWRITE')) {
+        r[raceKey] = 'WHITE';
+        countFixed++;
+      }
+    }
+
+    if (rUpperReq.includes('DATE') || rUpperReq.includes('ISO 8601')) {
+      Object.keys(r).forEach(k => {
+        if (/DT|DATE|DTC/i.test(k) && !isBlank(r[k])) {
+          const norm = normalizeClinicalDate(r[k]);
+          if (norm.isValid) r[k] = norm.formatted;
+        }
+      });
+      countFixed++;
+    }
+
+    if (rUpperReq.includes('BMI')) {
+      const htKey = Object.keys(r).find(k => /HEIGHT/i.test(k));
+      const wtKey = Object.keys(r).find(k => /WEIGHT/i.test(k));
+      const bmiKey = Object.keys(r).find(k => k.trim().toUpperCase() === 'BMI') || 'BMI';
+      const bmicatKey = Object.keys(r).find(k => k.trim().toUpperCase() === 'BMICAT') || 'BMICAT';
+
+      if (htKey && wtKey && !isBlank(r[htKey]) && !isBlank(r[wtKey])) {
+        const htNum = Number(r[htKey]);
+        const wtNum = Number(r[wtKey]);
+        if (!isNaN(htNum) && !isNaN(wtNum) && htNum > 0) {
+          const htM = htNum > 10 ? htNum / 100 : htNum;
+          const bmiVal = Math.round((wtNum / (htM * htM)) * 10) / 10;
+          r[bmiKey] = bmiVal;
+          r[bmicatKey] = bmiVal < 18.5 ? 'Underweight' : bmiVal < 25 ? 'Normal' : bmiVal < 30 ? 'Overweight' : 'Obese';
+          countFixed++;
+        }
+      }
+    }
+  });
+
+  const repairedRes = verifyAndRepairClinicalData(targetDset, activeRows);
+  if (!window.activeTrial) window.activeTrial = {};
+  window.activeTrial[targetDset] = repairedRes.cleanRows;
+  window.clientAuditLogs[targetDset] = repairedRes.auditLog;
+
+  appendTerminalLog('OK', 'AI_TRANSFORM', `GPT Astra-6 Engine successfully applied AI requirement! ${countFixed} cell(s) transformed.`);
+  renderDatasetTable(targetDset, repairedRes.cleanRows);
+}
+window.setAiRequirement = setAiRequirement;
+window.applyCustomAiRequirement = applyCustomAiRequirement;
+
+// =========================================================
+// SECTION 39: UNIVERSAL MAXIMIZE / RESTORE CONTROLS
+// =========================================================
+function toggleMaximize(btn) {
+  if (!btn) return;
+  const target = btn.closest('.pane-card') ||
+                 btn.closest('.ingestion-bridge-card') ||
+                 btn.closest('.agent-canvas-section') ||
+                 btn.closest('.terminal-section') ||
+                 btn.closest('.results-section') ||
+                 btn.closest('.sidebar-block') ||
+                 btn.parentElement;
+
+  if (!target) return;
+
+  const isMax = target.classList.contains('is-maximized');
+
+  if (isMax) {
+    target.classList.remove('is-maximized');
+    btn.classList.remove('is-active');
+    btn.innerHTML = '<span class="max-icon">⛶</span> <span class="max-text">Maximize</span>';
+    document.body.classList.remove('has-maximized-element');
+  } else {
+    // If another element is maximized, unmaximize it first
+    document.querySelectorAll('.is-maximized').forEach(el => {
+      el.classList.remove('is-maximized');
+    });
+    document.querySelectorAll('.btn-maximize.is-active').forEach(b => {
+      b.classList.remove('is-active');
+      b.innerHTML = '<span class="max-icon">⛶</span> <span class="max-text">Maximize</span>';
+    });
+
+    target.classList.add('is-maximized');
+    btn.classList.add('is-active');
+    btn.innerHTML = '<span class="max-icon">🗗</span> <span class="max-text">Restore</span>';
+    document.body.classList.add('has-maximized-element');
+  }
+}
+
+// Global escape key to restore maximized panes
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    const maxEls = document.querySelectorAll('.is-maximized');
+    if (maxEls.length > 0) {
+      maxEls.forEach(el => el.classList.remove('is-maximized'));
+      document.querySelectorAll('.btn-maximize.is-active').forEach(b => {
+        b.classList.remove('is-active');
+        b.innerHTML = '<span class="max-icon">⛶</span> <span class="max-text">Maximize</span>';
+      });
+      document.body.classList.remove('has-maximized-element');
+    }
+  }
+});
+
+window.toggleMaximize = toggleMaximize;
