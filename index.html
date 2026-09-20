@@ -115,13 +115,30 @@
               </div>
             </div>
 
-            <!-- In-Page Drag & Drop Upload Zone -->
-            <div class="drop-zone-mini" id="mini-drop-zone" style="cursor:pointer;" title="Click to browse your PC or drag SAS / CSV data files here">
-              <span style="font-size:18px;">📥</span>
-              <span><div style="display:flex; flex-direction:column; gap:3px; text-align:left;"><strong style="font-size:13px; color:#fff;">Drag &amp; Drop clinical data files here — or click to browse your PC</strong><span style="font-size:11.5px; color:var(--text-muted);">Supports: SAS (.sas7bdat, .xpt, .sas), Excel (.xlsx, .xls), CSV, TSV, TXT, JSON — auto-detects structure &amp; opens domain immediately</span></div></span>
+            <!-- Side-by-Side Dual Ingestion: Clinical Data Files & ADaM/SDTM Specifications -->
+            <div class="ingestion-zones-grid">
+              <!-- Zone 1: Clinical Data Files -->
+              <div class="drop-zone-mini" id="mini-drop-zone" style="cursor:pointer;" title="Click to browse your PC or drag SAS / CSV / Excel data files here">
+                <span style="font-size:20px; flex-shrink:0;">📥</span>
+                <div style="display:flex; flex-direction:column; gap:2px; text-align:left; flex:1;">
+                  <strong style="font-size:12.5px; color:#fff;">Drag &amp; Drop clinical data files here — or click to browse</strong>
+                  <span style="font-size:11px; color:var(--text-muted);">Supports: SAS (.sas7bdat, .xpt), Excel (.xlsx, .xls), CSV, TSV, JSON</span>
+                  <div id="mini-upload-status" style="font-size:11px; color:var(--blue-bright); font-weight:600;"></div>
+                </div>
+                <input type="file" id="mini-file-input" multiple accept="*,.sas7bdat,.xpt,.sas,.csv,.xlsx,.xls,.tsv,.txt,.json" style="display:none;">
+              </div>
+
+              <!-- Zone 2: Clinical Specifications (ADaM & SDTM) -->
+              <div class="drop-zone-spec" id="spec-drop-zone" style="cursor:pointer;" title="Click to browse your PC or drag ADaM/SDTM specifications here">
+                <span style="font-size:20px; flex-shrink:0;">📐</span>
+                <div style="display:flex; flex-direction:column; gap:2px; text-align:left; flex:1;">
+                  <strong style="font-size:12.5px; color:#e9d5ff;">Drag &amp; Drop ADaM &amp; SDTM specifications here — or click to browse</strong>
+                  <span style="font-size:11px; color:var(--text-muted);">Supports: Define-XML (.xml), Excel Specs (.xlsx, .xls), Spec CSV, JSON</span>
+                  <div id="spec-upload-status" style="font-size:11px; color:#c084fc; font-weight:600;"></div>
+                </div>
+                <input type="file" id="spec-file-input" multiple accept="*,.xml,.xlsx,.xls,.csv,.tsv,.json" style="display:none;">
+              </div>
             </div>
-            <input type="file" id="mini-file-input" multiple accept="*,.sas7bdat,.xpt,.sas,.csv,.xlsx,.xls,.tsv,.txt,.json" style="display:none;">
-            <div id="mini-upload-status" style="margin-top:6px; font-size:11.5px; color:var(--primary-blue); font-weight:600;"></div>
           </div>
 
           <!-- Deep Verification Cohorts & Data Reset Bar -->
