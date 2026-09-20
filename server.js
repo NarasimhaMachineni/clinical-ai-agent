@@ -104,7 +104,7 @@ app.get("/api/cdisc/standards", (req, res) => {
   });
 });
 
-// Endpoint: Interactive Custom AI Requirement Transformation (GPT Astra-6 Engine)
+// Endpoint: Interactive Custom AI Requirement Transformation (ClinOps Regulatory Engine)
 app.post("/api/agent/apply-requirements", (req, res) => {
   try {
     const { datasetName, requirement, rows } = req.body;
@@ -135,7 +135,7 @@ app.post("/api/agent/apply-requirements", (req, res) => {
             const oldVal = r[raceKey] || '(blank)';
             r[raceKey] = 'WHITE';
             countFixed++;
-            auditLog.push({ row: idx + 1, variable: raceKey, error: `User AI Requirement: "${reqText}"`, rule: 'User Custom AI Requirement (GPT Astra-6 Engine)', oldVal: String(oldVal), newVal: 'WHITE', justification: `Applied custom user requirement: ${reqText}`, method: 'GPT Astra-6 User Requirement Engine', status: 'FIXED' });
+            auditLog.push({ row: idx + 1, variable: raceKey, error: `User AI Requirement: "${reqText}"`, rule: 'User Custom AI Requirement (ClinOps Regulatory Engine)', oldVal: String(oldVal), newVal: 'WHITE', justification: `Applied custom user requirement: ${reqText}`, method: 'ClinOps Regulatory Requirement Engine', status: 'FIXED' });
           }
         }
 
@@ -149,7 +149,7 @@ app.post("/api/agent/apply-requirements", (req, res) => {
                 const oldV = r[k];
                 r[k] = norm.formatted;
                 countFixed++;
-                auditLog.push({ row: idx + 1, variable: k, error: `User AI Requirement: Date formatting`, rule: 'User Custom AI Requirement (ISO 8601 Standard)', oldVal: String(oldV), newVal: norm.formatted, justification: `Applied user date standardization: ${reqText}`, method: 'GPT Astra-6 User Date Standardizer', status: 'FIXED' });
+                auditLog.push({ row: idx + 1, variable: k, error: `User AI Requirement: Date formatting`, rule: 'User Custom AI Requirement (ISO 8601 Standard)', oldVal: String(oldV), newVal: norm.formatted, justification: `Applied user date standardization: ${reqText}`, method: 'ClinOps Regulatory Date Standardizer', status: 'FIXED' });
               }
             }
           });
@@ -172,7 +172,7 @@ app.post("/api/agent/apply-requirements", (req, res) => {
               r[bmiKey] = bmiVal;
               r[bmicatKey] = bmiCat;
               countFixed++;
-              auditLog.push({ row: idx + 1, variable: bmiKey, error: `User AI Requirement: Recalculate BMI`, rule: 'User Custom AI Requirement (BMI Derivation)', oldVal: '(blank)', newVal: bmiVal, justification: `Recalculated BMI=${bmiVal} (${bmiCat}) per user directive`, method: 'GPT Astra-6 Math Engine', status: 'FIXED' });
+              auditLog.push({ row: idx + 1, variable: bmiKey, error: `User AI Requirement: Recalculate BMI`, rule: 'User Custom AI Requirement (BMI Derivation)', oldVal: '(blank)', newVal: bmiVal, justification: `Recalculated BMI=${bmiVal} (${bmiCat}) per user directive`, method: 'ClinOps Regulatory Math Engine', status: 'FIXED' });
             }
           }
         }

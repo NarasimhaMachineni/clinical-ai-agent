@@ -4012,3 +4012,46 @@ body.has-maximized-element {
   min-height: calc(100vh - 160px) !important;
 }
 
+/* CDISC Dataset Suite Category Filters & Search */
+.dset-category-filters {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.dset-filter-chip {
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.dset-filter-chip:hover {
+  background: rgba(255, 255, 255, 0.12) !important;
+  color: #fff !important;
+}
+
+.dset-filter-chip.active {
+  background: var(--primary-blue) !important;
+  color: #fff !important;
+  border-color: var(--primary-blue) !important;
+  box-shadow: 0 2px 8px rgba(56, 189, 248, 0.35);
+}
+
+#dset-search-input:focus {
+  outline: none;
+  border-color: var(--primary-blue) !important;
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.25);
+}
+
+.pill-btn[data-cat="ADAM"] {
+  border-left: 2px solid #a855f7;
+}
+
+.pill-btn[data-cat="SDTM"] {
+  border-left: 2px solid #38bdf8;
+}
+
+.pill-btn.hidden-by-filter {
+  display: none !important;
+}
+
+

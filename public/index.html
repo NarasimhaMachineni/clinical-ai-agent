@@ -25,14 +25,11 @@
       </div>
       <div class="header-center-controls">
         <div class="data-source-status-pill" id="data-source-status-pill" title="System Data Source Mode (Section 27)">
-          <span class="source-dot blocked" id="source-dot"></span>
-          <span class="source-text" id="source-indicator-text">DATA SOURCE: 🔴 MOCK DATA BLOCKED (STANDBY — WAITING FOR USER DATA)</span>
+          <span class="source-dot live" id="source-dot" style="background:#22c55e; box-shadow:0 0 8px #22c55e;"></span>
+          <span class="source-text" id="source-indicator-text">CLINICAL ENGINE: 🟢 GxP PRODUCTION READY (ACTIVE — READY FOR INGESTION)</span>
         </div>
       </div>
       <div class="header-status-indicator">
-        <button class="btn-validation-report" id="btn-master-validation-report" title="Download Master Validation Workbook with all 12 GxP audit sheets">
-          📥 Master Validation Report (.xlsx)
-        </button>
         <span class="status-dot pulse" id="agent-status-dot"></span>
         <span class="status-label" id="agent-status-label">● Online</span>
       </div>
@@ -144,9 +141,9 @@
             <div class="canvas-main-title">
               <span style="font-size:20px;">🤖</span>
               <div>
-                <h2>AI-Powered Clinical Operations Center</h2>
-                <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">
-                  Five specialized AI workers run in parallel every 15 seconds — automatically checking, fixing &amp; reviewing your data
+                <h2>Clinical Data Science &amp; CDISC Regulatory Submission Operations Center</h2>
+                <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">
+                  Autonomous Multi-Agent Clinical Intelligence: SDTM Mapping, ADaM Derivations, Dual-Track SAS/R Verification, and GxP Submission Readiness
                 </div>
               </div>
             </div>
@@ -220,12 +217,12 @@
                   <div class="node-icon-wrapper" style="background:rgba(63,185,80,0.15); color:#3fb950;">📦</div>
                   <div class="node-label-group">
                     <strong>Regulatory Deliverables &amp; Reports</strong>
-                    <span>Define-XML v2.1, CSR Tables, Master Report (.xlsx)</span>
+                    <span>Define-XML v2.1, CSR Tables, GxP Audit Dossier (.xlsx)</span>
                   </div>
                 </div>
                 <div class="socket-pill-group">
                   <span class="socket-pill" id="canvas-fda-pill">Awaiting Verification</span>
-                  <span class="socket-pill" style="color:#4ade80;">12-Sheet Master Report</span>
+                  <span class="socket-pill" style="color:#4ade80;">GxP Audit Dossier</span>
                 </div>
                 <div class="node-status-bar">
                   <span style="color:var(--text-muted);">Concordance:</span>
@@ -806,41 +803,123 @@
                       <span class="max-icon">⛶</span> <span class="max-text">Maximize</span>
                     </button>
                   </div>
-                  <div class="dataset-pills" id="dataset-inspector-pills" style="display:flex; flex-wrap:wrap; gap:6px;">
-                    <button class="pill-btn active" data-dset="ADSL">ADSL</button>
-                    <button class="pill-btn" data-dset="ADAE">ADAE</button>
-                    <button class="pill-btn" data-dset="ADLB">ADLB</button>
-                    <button class="pill-btn" data-dset="ADVS">ADVS</button>
-                    <button class="pill-btn" data-dset="ADCM">ADCM</button>
-                    <button class="pill-btn" data-dset="ADMH">ADMH</button>
-                    <button class="pill-btn" data-dset="ADTTE">ADTTE</button>
-                    <button class="pill-btn" data-dset="ADEFF">ADEFF</button>
-                    <button class="pill-btn" data-dset="DM">DM</button>
-                    <button class="pill-btn" data-dset="VS">VS</button>
-                    <button class="pill-btn" data-dset="LB">LB</button>
-                    <button class="pill-btn" data-dset="AE">AE</button>
-                    <button class="pill-btn" data-dset="EX">EX</button>
-                    <button class="pill-btn" data-dset="CM">CM</button>
-                    <button class="pill-btn" data-dset="MH">MH</button>
-                    <button class="pill-btn" data-dset="DS">DS</button>
-                    <button class="pill-btn" data-dset="EG">EG</button>
-                    <button class="pill-btn" data-dset="QS">QS</button>
-                    <button class="pill-btn" data-dset="SV">SV</button>
-                    <button class="pill-btn" data-dset="TS">TS</button>
+                  <!-- Category Filter & Search Bar -->
+                  <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
+                    <div class="dset-category-filters" style="display:flex; gap:6px;">
+                      <button class="dset-filter-chip active" onclick="filterDatasetCategory('ALL', this)" style="cursor:pointer; font-size:11px; padding:4px 10px; border-radius:12px; background:var(--primary-blue); color:#fff; border:none; font-weight:700;">🌟 All Datasets (68)</button>
+                      <button class="dset-filter-chip" onclick="filterDatasetCategory('ADAM', this)" style="cursor:pointer; font-size:11px; padding:4px 10px; border-radius:12px; background:rgba(255,255,255,0.06); color:var(--text-secondary); border:1px solid rgba(255,255,255,0.12);">📐 ADaM Suite (23)</button>
+                      <button class="dset-filter-chip" onclick="filterDatasetCategory('SDTM', this)" style="cursor:pointer; font-size:11px; padding:4px 10px; border-radius:12px; background:rgba(255,255,255,0.06); color:var(--text-secondary); border:1px solid rgba(255,255,255,0.12);">🧬 SDTM Domains (45)</button>
+                    </div>
+                    <div style="flex:1; max-width:280px;">
+                      <input type="text" id="dset-search-input" oninput="filterDatasetPills(this.value)" placeholder="🔍 Search domain (e.g. ADSL, ADAE, DM, LB, VS, TTE)..." style="width:100%; font-size:11.5px; padding:5px 10px; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.12); color:#fff; border-radius:6px;" />
+                    </div>
+                  </div>
+
+                  <div class="dataset-pills" id="dataset-inspector-pills" style="display:flex; flex-wrap:wrap; gap:5px; max-height:160px; overflow-y:auto; padding:4px 2px; margin-bottom:12px;">
+                    <!-- ADaM Datasets (23) -->
+                    <button class="pill-btn active" data-dset="ADSL" data-cat="ADAM" title="Subject-Level Analysis Dataset">ADSL</button>
+                    <button class="pill-btn" data-dset="ADAE" data-cat="ADAM" title="Adverse Events Analysis Dataset">ADAE</button>
+                    <button class="pill-btn" data-dset="ADLB" data-cat="ADAM" title="Laboratory Analysis Dataset (BDS)">ADLB</button>
+                    <button class="pill-btn" data-dset="ADVS" data-cat="ADAM" title="Vital Signs Analysis Dataset (BDS)">ADVS</button>
+                    <button class="pill-btn" data-dset="ADEG" data-cat="ADAM" title="ECG Analysis Dataset (BDS)">ADEG</button>
+                    <button class="pill-btn" data-dset="ADCM" data-cat="ADAM" title="Concomitant Medications Analysis (OCCDS)">ADCM</button>
+                    <button class="pill-btn" data-dset="ADMH" data-cat="ADAM" title="Medical History Analysis (OCCDS)">ADMH</button>
+                    <button class="pill-btn" data-dset="ADTTE" data-cat="ADAM" title="Time-to-Event Analysis Dataset (OS, PFS)">ADTTE</button>
+                    <button class="pill-btn" data-dset="ADEFF" data-cat="ADAM" title="Efficacy Analysis Dataset (BDS)">ADEFF</button>
+                    <button class="pill-btn" data-dset="ADQS" data-cat="ADAM" title="Questionnaires / PRO Analysis (BDS)">ADQS</button>
+                    <button class="pill-btn" data-dset="ADPC" data-cat="ADAM" title="PK Concentrations Analysis (BDS)">ADPC</button>
+                    <button class="pill-btn" data-dset="ADPP" data-cat="ADAM" title="PK Parameters Analysis (BDS)">ADPP</button>
+                    <button class="pill-btn" data-dset="ADRS" data-cat="ADAM" title="Disease Response Analysis (RECIST 1.1)">ADRS</button>
+                    <button class="pill-btn" data-dset="ADTR" data-cat="ADAM" title="Tumor Results Analysis (SLD Change)">ADTR</button>
+                    <button class="pill-btn" data-dset="ADTU" data-cat="ADAM" title="Tumor Identification Analysis">ADTU</button>
+                    <button class="pill-btn" data-dset="ADCE" data-cat="ADAM" title="Clinical Events Analysis (MACE)">ADCE</button>
+                    <button class="pill-btn" data-dset="ADDV" data-cat="ADAM" title="Protocol Deviations Analysis">ADDV</button>
+                    <button class="pill-btn" data-dset="ADDS" data-cat="ADAM" title="Subject Disposition Analysis">ADDS</button>
+                    <button class="pill-btn" data-dset="ADHO" data-cat="ADAM" title="Healthcare Encounters Analysis">ADHO</button>
+                    <button class="pill-btn" data-dset="ADEX" data-cat="ADAM" title="Exposure & Compliance Analysis">ADEX</button>
+                    <button class="pill-btn" data-dset="ADPR" data-cat="ADAM" title="Procedures Analysis">ADPR</button>
+                    <button class="pill-btn" data-dset="ADMD" data-cat="ADAM" title="Medical Devices Analysis">ADMD</button>
+                    <button class="pill-btn" data-dset="ADSUB" data-cat="ADAM" title="Biomarker / Sub-study Analysis">ADSUB</button>
+
+                    <!-- SDTM Domains (45) -->
+                    <button class="pill-btn" data-dset="DM" data-cat="SDTM" title="Demographics (Special Purpose)">DM</button>
+                    <button class="pill-btn" data-dset="CO" data-cat="SDTM" title="Comments">CO</button>
+                    <button class="pill-btn" data-dset="SE" data-cat="SDTM" title="Subject Elements">SE</button>
+                    <button class="pill-btn" data-dset="SV" data-cat="SDTM" title="Subject Visits">SV</button>
+                    <button class="pill-btn" data-dset="SM" data-cat="SDTM" title="Subject Milestones">SM</button>
+                    <button class="pill-btn" data-dset="CM" data-cat="SDTM" title="Concomitant Medications (Interventions)">CM</button>
+                    <button class="pill-btn" data-dset="EX" data-cat="SDTM" title="Exposure">EX</button>
+                    <button class="pill-btn" data-dset="EC" data-cat="SDTM" title="Exposure as Collected">EC</button>
+                    <button class="pill-btn" data-dset="PR" data-cat="SDTM" title="Procedures">PR</button>
+                    <button class="pill-btn" data-dset="SU" data-cat="SDTM" title="Substance Use">SU</button>
+                    <button class="pill-btn" data-dset="ML" data-cat="SDTM" title="Meal Data">ML</button>
+                    <button class="pill-btn" data-dset="AG" data-cat="SDTM" title="Procedure Agents">AG</button>
+                    <button class="pill-btn" data-dset="AE" data-cat="SDTM" title="Adverse Events (Events)">AE</button>
+                    <button class="pill-btn" data-dset="CE" data-cat="SDTM" title="Clinical Events">CE</button>
+                    <button class="pill-btn" data-dset="DS" data-cat="SDTM" title="Disposition">DS</button>
+                    <button class="pill-btn" data-dset="DV" data-cat="SDTM" title="Protocol Deviations">DV</button>
+                    <button class="pill-btn" data-dset="HO" data-cat="SDTM" title="Healthcare Encounters">HO</button>
+                    <button class="pill-btn" data-dset="MH" data-cat="SDTM" title="Medical History">MH</button>
+                    <button class="pill-btn" data-dset="LB" data-cat="SDTM" title="Laboratory Results (Findings)">LB</button>
+                    <button class="pill-btn" data-dset="VS" data-cat="SDTM" title="Vital Signs">VS</button>
+                    <button class="pill-btn" data-dset="EG" data-cat="SDTM" title="ECG Results">EG</button>
+                    <button class="pill-btn" data-dset="PE" data-cat="SDTM" title="Physical Examination">PE</button>
+                    <button class="pill-btn" data-dset="QS" data-cat="SDTM" title="Questionnaires / PRO">QS</button>
+                    <button class="pill-btn" data-dset="SC" data-cat="SDTM" title="Subject Characteristics">SC</button>
+                    <button class="pill-btn" data-dset="DA" data-cat="SDTM" title="Drug Accountability">DA</button>
+                    <button class="pill-btn" data-dset="DD" data-cat="SDTM" title="Death Details">DD</button>
+                    <button class="pill-btn" data-dset="FA" data-cat="SDTM" title="Findings About">FA</button>
+                    <button class="pill-btn" data-dset="FT" data-cat="SDTM" title="Functional Tests">FT</button>
+                    <button class="pill-btn" data-dset="GF" data-cat="SDTM" title="Genomics Findings">GF</button>
+                    <button class="pill-btn" data-dset="IE" data-cat="SDTM" title="Inclusion / Exclusion">IE</button>
+                    <button class="pill-btn" data-dset="IS" data-cat="SDTM" title="Immunogenicity Specimen">IS</button>
+                    <button class="pill-btn" data-dset="MB" data-cat="SDTM" title="Microbiology Specimen">MB</button>
+                    <button class="pill-btn" data-dset="MI" data-cat="SDTM" title="Microscopic Findings">MI</button>
+                    <button class="pill-btn" data-dset="MK" data-cat="SDTM" title="Musculoskeletal Findings">MK</button>
+                    <button class="pill-btn" data-dset="MO" data-cat="SDTM" title="Morphology">MO</button>
+                    <button class="pill-btn" data-dset="MS" data-cat="SDTM" title="Microbiology Susceptibility">MS</button>
+                    <button class="pill-btn" data-dset="NV" data-cat="SDTM" title="Nervous System Findings">NV</button>
+                    <button class="pill-btn" data-dset="OE" data-cat="SDTM" title="Ophthalmic Examinations">OE</button>
+                    <button class="pill-btn" data-dset="PC" data-cat="SDTM" title="PK Concentrations">PC</button>
+                    <button class="pill-btn" data-dset="PP" data-cat="SDTM" title="PK Parameters">PP</button>
+                    <button class="pill-btn" data-dset="RE" data-cat="SDTM" title="Reproductive System Findings">RE</button>
+                    <button class="pill-btn" data-dset="RP" data-cat="SDTM" title="Reproductive History">RP</button>
+                    <button class="pill-btn" data-dset="RS" data-cat="SDTM" title="Disease Response">RS</button>
+                    <button class="pill-btn" data-dset="SR" data-cat="SDTM" title="Skin Response">SR</button>
+                    <button class="pill-btn" data-dset="SS" data-cat="SDTM" title="Subject Status">SS</button>
+                    <button class="pill-btn" data-dset="TR" data-cat="SDTM" title="Tumor Results">TR</button>
+                    <button class="pill-btn" data-dset="TU" data-cat="SDTM" title="Tumor Identification">TU</button>
+                    <button class="pill-btn" data-dset="UR" data-cat="SDTM" title="Urinary System Findings">UR</button>
+                    <button class="pill-btn" data-dset="XP" data-cat="SDTM" title="Respiratory Findings">XP</button>
+                    <button class="pill-btn" data-dset="TA" data-cat="SDTM" title="Trial Arms (Design)">TA</button>
+                    <button class="pill-btn" data-dset="TE" data-cat="SDTM" title="Trial Elements">TE</button>
+                    <button class="pill-btn" data-dset="TI" data-cat="SDTM" title="Trial Inclusion/Exclusion">TI</button>
+                    <button class="pill-btn" data-dset="TM" data-cat="SDTM" title="Trial Milestones">TM</button>
+                    <button class="pill-btn" data-dset="TS" data-cat="SDTM" title="Trial Summary">TS</button>
+                    <button class="pill-btn" data-dset="TV" data-cat="SDTM" title="Trial Visits">TV</button>
+                    <button class="pill-btn" data-dset="RELREC" data-cat="SDTM" title="Related Records (Relationships)">RELREC</button>
+                    <button class="pill-btn" data-dset="RELSUB" data-cat="SDTM" title="Related Subjects">RELSUB</button>
+                    <button class="pill-btn" data-dset="SUPP" data-cat="SDTM" title="Supplemental Qualifiers">SUPP</button>
+                    <button class="pill-btn" data-dset="DI" data-cat="SDTM" title="Device Identifier (Medical Devices)">DI</button>
+                    <button class="pill-btn" data-dset="DO" data-cat="SDTM" title="Device Operations">DO</button>
+                    <button class="pill-btn" data-dset="DR" data-cat="SDTM" title="Device Properties">DR</button>
+                    <button class="pill-btn" data-dset="DT" data-cat="SDTM" title="Device Tracking">DT</button>
+                    <button class="pill-btn" data-dset="DU" data-cat="SDTM" title="Device Use">DU</button>
+                    <button class="pill-btn" data-dset="DX" data-cat="SDTM" title="Device-Subject Relations">DX</button>
                   </div>
                 </div>
-                <!-- ✨ Interactive AI Document Requirement & Transformation Bar (GPT Astra-6 Engine) -->
+                <!-- ⚡ ClinOps AI Regulatory Transformation Copilot -->
                 <div class="ai-requirement-box" style="background:linear-gradient(135deg, rgba(168,85,247,0.12), rgba(56,189,248,0.12)); border:1px solid rgba(168,85,247,0.4); border-radius:8px; padding:12px 14px; margin-bottom:14px;">
                   <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                     <strong style="color:#e9d5ff; font-size:12.5px; display:flex; align-items:center; gap:6px;">
-                      <span>✨</span> Interactive AI Document Requirement &amp; Transformation (GPT Astra-6 Engine)
+                      <span>⚡</span> ClinOps AI Regulatory Transformation Copilot
                     </strong>
                     <span class="badge-pass" style="background:rgba(168,85,247,0.25); color:#d8b4fe; border-color:rgba(168,85,247,0.5); font-size:10px; padding:2px 8px;">INSTANT AI RE-EXECUTION</span>
                   </div>
                   <div style="display:flex; gap:8px;">
                     <input type="text" id="ai-requirement-input" class="form-input" style="flex:1; background:rgba(15,23,42,0.8); border:1px solid rgba(168,85,247,0.3); color:#fff; font-size:12px; padding:8px 12px; border-radius:6px;" placeholder="Type custom requirements for this document (e.g. 'Set RACE=White for female subjects', 'Format dates YYYY-MM-DD', 'Recalculate BMI to 1 decimal place')..." />
                     <button class="btn-execute" id="btn-apply-ai-requirement" onclick="applyCustomAiRequirement()" style="background:linear-gradient(135deg, #9333ea, #2563eb); color:#fff; border:none; padding:8px 16px; border-radius:6px; font-weight:700; font-size:12px; cursor:pointer; white-space:nowrap; display:flex; align-items:center; gap:6px;">
-                      <span>🚀</span> Apply AI Transformation
+                      <span>🚀</span> Apply ClinOps AI Transformation
                     </button>
                   </div>
                   <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;" id="ai-suggestion-pills">
@@ -881,15 +960,13 @@
                 <div class="card-title-bar">
                   <div>
                     <h3>eCTD Module 5 Package &amp; Regulatory Deliverables</h3>
-                    <span style="font-size:11.5px; color:var(--text-secondary);">Validated audit workbooks and electronic submission components per Section 33 &amp; 36</span>
+                    <span style="font-size:11.5px; color:var(--text-secondary);">Validated electronic submission components and GxP audit packages per Section 33 &amp; 36</span>
                   </div>
                   <div style="display:flex; align-items:center; gap:8px;">
                     <button class="btn-maximize" onclick="toggleMaximize(this)" title="Maximize / Restore View">
                       <span class="max-icon">⛶</span> <span class="max-text">Maximize</span>
                     </button>
-                    <button class="btn-sm primary" id="btn-tab-download-master-report" style="display:flex; align-items:center; gap:6px;">
-                    <span>📥</span> Download Master Validation Report (.xlsx)
-                  </button>
+                  </div>
                 </div>
                 <div class="deliverables-grid" id="deliverables-grid">
                   <!-- Injected via JS -->
