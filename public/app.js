@@ -3389,7 +3389,7 @@ function renderDatasetTable(dsetName) {
 
   if (currentSubView === 'CLEAN') {
     // SECTION 1: Clean Corrected Dataset (Pure data ONLY)
-    html += '<div class="table-wrapper" style="overflow-x:auto;"><table class="data-table"><thead><tr>';
+    html += '<div class="table-scroll-box"><table class="data-table"><thead><tr>';
     cleanHeaders.forEach(h => {
       html += `<th style="text-transform:uppercase; font-size:11.5px; padding:9px 12px;">${escapeHtml(h)}</th>`;
     });
@@ -3425,7 +3425,7 @@ function renderDatasetTable(dsetName) {
             Showing all <strong>${auditLog.length}</strong> flagged &amp; auto-repaired discrepancies across <strong>${new Set(auditLog.map(a => a.row)).size}</strong> unique row(s):
           </div>
         </div>
-        <div class="table-wrapper" style="overflow-x:auto;">
+        <div class="table-scroll-box">
           <table class="data-table">
             <thead>
               <tr style="background:rgba(234,179,8,0.06);">
