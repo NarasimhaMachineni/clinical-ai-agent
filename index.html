@@ -87,51 +87,7 @@
            ========================================================= -->
       <main class="agent-main">
         
-        <!-- 0. Hero Metrics Command HUD (Live High-Impact Biopharma Dashboard) -->
-        <section class="hero-command-hud">
-          <div class="hud-metric-card" title="Total unique enrolled subjects across study">
-            <div class="hud-metric-icon" style="background:rgba(56,189,248,0.12); color:#38bdf8;">👥</div>
-            <div class="hud-metric-info">
-              <span class="hud-metric-val" id="hud-metric-subjects">0</span>
-              <span class="hud-metric-lbl">Total Subjects</span>
-            </div>
-          </div>
-          <div class="hud-metric-card" title="Safety Analysis Set (SAFFL='Y')">
-            <div class="hud-metric-icon" style="background:rgba(52,211,153,0.12); color:#34d399;">🛡️</div>
-            <div class="hud-metric-info">
-              <span class="hud-metric-val" id="hud-metric-saffl">0</span>
-              <span class="hud-metric-lbl">Safety Population</span>
-            </div>
-          </div>
-          <div class="hud-metric-card" title="Treatment-Emergent Adverse Events documented">
-            <div class="hud-metric-icon" style="background:rgba(251,191,36,0.12); color:#fbbf24;">⚠️</div>
-            <div class="hud-metric-info">
-              <span class="hud-metric-val" id="hud-metric-teae">0</span>
-              <span class="hud-metric-lbl">Reported TEAEs</span>
-            </div>
-          </div>
-          <div class="hud-metric-card" title="Potential Hy's Law hepatotoxicity signals">
-            <div class="hud-metric-icon" style="background:rgba(244,63,94,0.12); color:#f43f5e;">🧪</div>
-            <div class="hud-metric-info">
-              <span class="hud-metric-val" id="hud-metric-hyslaw">0</span>
-              <span class="hud-metric-lbl">Liver Safety Alerts</span>
-            </div>
-          </div>
-          <div class="hud-metric-card" title="Total clinical data cells audited pin-to-pin">
-            <div class="hud-metric-icon" style="background:rgba(168,85,247,0.12); color:#c084fc;">🔬</div>
-            <div class="hud-metric-info">
-              <span class="hud-metric-val" id="hud-metric-cells">0</span>
-              <span class="hud-metric-lbl">Audited Cells</span>
-            </div>
-          </div>
-          <div class="hud-metric-card" title="CDISC SDTM/ADaM & FDA 21 CFR Part 11 Rule Conformance">
-            <div class="hud-metric-icon" style="background:rgba(34,197,94,0.12); color:#4ade80;">⚖️</div>
-            <div class="hud-metric-info">
-              <span class="hud-metric-val text-green" id="hud-metric-p21">⚪ Standby</span>
-              <span class="hud-metric-lbl">CDISC / FDA Conformance</span>
-            </div>
-          </div>
-        </section>
+
 
         <!-- 1. Instant Task Radio Selector & Clinical Data Bridge -->
         <section class="task-radio-section">
@@ -350,11 +306,7 @@
         <!-- 3. Real-Time Terminal Log -->
         <section class="terminal-section">
           <div class="terminal-header">
-            <div class="terminal-dots">
-              <span class="term-dot red"></span>
-              <span class="term-dot yellow"></span>
-              <span class="term-dot green"></span>
-            </div>
+
             <span class="terminal-title">Live Activity Log — All Automated Steps Shown Here</span>
             <div style="display:flex; align-items:center; gap:6px;">
               <button class="btn-maximize" onclick="toggleMaximize(this)" title="Maximize / Restore View">
@@ -371,21 +323,17 @@
         <!-- 4. Interactive Artifacts & Results Tabs -->
         <section class="results-section">
           <div class="results-tabs">
-            <button class="tab-btn active" data-tab="tab-review">📋 Data Review Report</button>
-            <button class="tab-btn" data-tab="tab-standards">📚 Clinical Standards Library</button>
-            <button class="tab-btn" data-tab="tab-qc">🔍 Quality Check Results</button>
-            <button class="tab-btn" data-tab="tab-double-qc">⚖️ Cross-Verification</button>
-            <button class="tab-btn" data-tab="tab-safety">🩺 Safety &amp; Treatment</button>
-            <button class="tab-btn" data-tab="tab-code-workbench">💻 Code Workbench</button>
-            <button class="tab-btn" data-tab="tab-datasets">📁 Browse Datasets</button>
+            <button class="tab-btn active" data-tab="tab-datasets">📁 Browse Datasets &amp; Audit Trail</button>
+            <button class="tab-btn" data-tab="tab-review">📋 Data Review Report</button>
             <button class="tab-btn" data-tab="tab-tlfs">📊 Summary Tables</button>
+            <button class="tab-btn" data-tab="tab-qc">🔍 Quality Check Results</button>
             <button class="tab-btn" data-tab="tab-deliverables">📥 Download Reports</button>
           </div>
 
           <div class="results-tab-content">
             
             <!-- TAB 1: AUTOMATED DATA REVIEW -->
-            <div class="tab-pane active" id="tab-review">
+            <div class="tab-pane" id="tab-review">
               <div class="pane-card">
                 <div class="card-title-bar">
                   <div>
@@ -527,57 +475,7 @@
               </div>
             </div>
 
-            <!-- TAB: CDISC STANDARDS EXPLORER (64 DOMAINS) -->
-            <div class="tab-pane" id="tab-standards">
-              <div class="pane-card standards-container">
-                
-                <div class="standards-header-bar">
-                  <div class="standards-title-wrap">
-                    <h3><span>📚</span> CDISC SDTMIG v3.3 &amp; ADaMIG v1.2 Enterprise Standards Universe</h3>
-                    <div style="font-size:12px; color:var(--text-secondary);">
-                      Complete regulatory specification for 64 clinical trial domains across all SDTM and ADaM classes
-                    </div>
-                  </div>
-                  <div class="standards-metrics-pills">
-                    <button class="btn-maximize" onclick="toggleMaximize(this)" title="Maximize / Restore View">
-                      <span class="max-icon">⛶</span> <span class="max-text">Maximize</span>
-                    </button>
-                    <span class="standards-metric-pill"><span>💎</span> 64 Standards Cataloged</span>
-                    <span class="standards-metric-pill"><span>📋</span> 20 Active Pipelines</span>
-                    <span class="standards-metric-pill"><span>✅</span> 100% GxP Validated</span>
-                  </div>
-                </div>
 
-                <!-- Search & Filters -->
-                <div class="standards-controls-bar">
-                  <div class="standards-search-wrap">
-                    <span class="standards-search-icon">🔍</span>
-                    <input type="text" id="standards-search-input" class="standards-search-input" placeholder="Search 64 CDISC domains by code, name, class, variable (e.g., 'LB', 'ECG', 'QTcF', 'Survival', 'CTCAE', 'RECIST')...">
-                  </div>
-                  
-                  <div class="standards-filter-chips" id="standards-filter-chips">
-                    <button class="filter-chip active" data-class="ALL">All (64)</button>
-                    <button class="filter-chip" data-class="Special Purpose">Special Purpose (5)</button>
-                    <button class="filter-chip" data-class="Interventions">Interventions (7)</button>
-                    <button class="filter-chip" data-class="Events">Events (6)</button>
-                    <button class="filter-chip" data-class="Findings">Findings (33)</button>
-                    <button class="filter-chip" data-class="Trial Design">Trial Design (9)</button>
-                    <button class="filter-chip" data-class="Medical Devices">Medical Devices (7)</button>
-                    <button class="filter-chip" data-class="ADSL">ADSL (1)</button>
-                    <button class="filter-chip" data-class="BDS">BDS (11)</button>
-                    <button class="filter-chip" data-class="OCCDS">OCCDS (8)</button>
-                    <button class="filter-chip" data-class="BDS-TTE">BDS-TTE (1)</button>
-                    <button class="filter-chip" data-class="Specialized ADaM">Specialized ADaM (3)</button>
-                  </div>
-                </div>
-
-                <!-- Domain Cards Grid -->
-                <div class="standards-grid" id="standards-cards-grid">
-                  <!-- Dynamically rendered via JS -->
-                </div>
-
-              </div>
-            </div>
 
             <!-- TAB 2: P21 QC AUDIT -->
             <div class="tab-pane" id="tab-qc">
@@ -599,290 +497,8 @@
               </div>
             </div>
 
-            <!-- TAB 3: DOUBLE PROGRAMMING QC -->
-            <div class="tab-pane" id="tab-double-qc">
-              <div class="pane-card">
-                <div class="card-title-bar">
-                  <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
-                    <h3 style="margin-bottom:0;">⚖️ Independent Double Programming Reconciliation</h3>
-                    <div style="display:flex; align-items:center; gap:8px;">
-                      <span class="badge-pass">&amp;SYSINFO = 0 (100% Concordance)</span>
-                      <button class="btn-maximize" onclick="toggleMaximize(this)" title="Maximize / Restore View">
-                        <span class="max-icon">⛶</span> <span class="max-text">Maximize</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-                <div style="background:rgba(255,255,255,0.02); border:1px solid var(--border-subtle); border-radius:6px; padding:12px; margin-bottom:14px;">
-                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                    <strong style="color:#fff; font-size:12.5px;">Independent Dual Track Architecture</strong>
-                    <span class="status-tag pass">ZERO DISCREPANCIES</span>
-                  </div>
-                  <p style="font-size:12px; color:var(--text-secondary); margin:0; line-height:1.5;">
-                    Production track executed via <strong>SAS 9.4</strong> macros; validation track independently derived via <strong>R pharmaverse (admiral)</strong>. Automated cell-by-cell PROC COMPARE confirms zero variable, type, or value divergences across the clinical cohort.
-                  </p>
-                </div>
-
-                <div class="qc-findings-list" id="double-qc-findings-container">
-                  <!-- Injected via JS -->
-                </div>
-              </div>
-            </div>
-
-            <!-- TAB 4: SAFETY & EFFICACY SCREENING -->
-            <div class="tab-pane" id="tab-safety">
-              <div class="pane-card">
-                <div class="card-title-bar">
-                  <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
-                    <h3 style="margin-bottom:0;">🩺 Clinical Safety Surveillance &amp; Efficacy Screening</h3>
-                    <div style="display:flex; align-items:center; gap:8px;">
-                      <span class="badge-pass">SAFETY &amp; EFFICACY VERIFIED</span>
-                      <button class="btn-maximize" onclick="toggleMaximize(this)" title="Maximize / Restore View">
-                        <span class="max-icon">⛶</span> <span class="max-text">Maximize</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-                <div class="safety-dashboard">
-                  <div class="safety-stat-row">
-                    <div class="safety-stat-box green">
-                      <strong>Hy's Law Signals</strong>
-                      <span id="safety-hyslaw-val">0 Cases (Normal)</span>
-                      <small>ALT/AST &ge; 3x ULN &amp; TBL &ge; 2x ULN &amp; ALP &lt; 2x ULN</small>
-                    </div>
-                    <div class="safety-stat-box">
-                      <strong>Serious Adverse Events (SAEs)</strong>
-                      <span id="safety-sae-val">0 Events</span>
-                      <small>Adverse events flagged AESER='Y'</small>
-                    </div>
-                    <div class="safety-stat-box">
-                      <strong>Total Treatment-Emergent AEs</strong>
-                      <span id="safety-teae-val">—</span>
-                      <small>Adverse events starting on/after first dose (TRTEMFL='Y')</small>
-                    </div>
-                  </div>
-
-                  <!-- Primary Efficacy Card -->
-                  <!-- Primary Efficacy Card -->
-                  <div style="background:rgba(255,255,255,0.02); border:1px solid var(--border-subtle); border-radius:8px; padding:12px 14px; margin-top:14px;" id="efficacy-summary-box">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                      <strong style="color:var(--primary-blue); font-size:12.5px;">Primary Efficacy Analysis &amp; Inferential Models</strong>
-                      <span class="status-tag" id="efficacy-status-pill" style="background:rgba(255,255,255,0.05); color:var(--text-muted);">Awaiting Data</span>
-                    </div>
-                    <div id="efficacy-metrics-grid" style="font-size:11.5px; color:var(--text-secondary); line-height:1.5;">
-                      Upload an efficacy dataset (e.g. ADEFF, ADLB with baseline/post-baseline values) to automatically compute least-squares mean changes, treatment group differences, 95% confidence intervals, and inferential p-values.
-                    </div>
-                  </div>
-
-                  <h4 style="margin:16px 0 8px; color:var(--text-secondary); font-size:13px;">Adverse Event Frequency by MedDRA System Organ Class (SOC):</h4>
-                  <div class="soc-table-wrapper">
-                    <table class="data-table" id="soc-table">
-                      <thead>
-                        <tr>
-                          <th>MedDRA System Organ Class (SOC)</th>
-                          <th>Recorded Events</th>
-                        </tr>
-                      </thead>
-                      <tbody id="soc-table-body">
-                        <!-- Injected via JS -->
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- TAB: R & SAS CODE WORKBENCH LINKED TO GITHUB -->
-            <div class="tab-pane" id="tab-code-workbench">
-              <div class="pane-card">
-                
-                <!-- Workbench Header Banner -->
-                <div class="workbench-header-banner">
-                  <div class="workbench-meta">
-                    <h3>
-                      <span>💻</span> Clinical R &amp; SAS Production Code Workbench
-                      <span class="badge-pass" style="font-size:10.5px; padding:2px 8px; margin-left:8px;">GxP PROD SUITE</span>
-                    </h3>
-                    <p>
-                      Directly connected to GitHub repository. Full R pharmaverse implementations and SAS 9.4 DATA steps with all clinical PROCs.
-                    </p>
-                  </div>
-                  <div class="gh-links-badge-group">
-                    <button class="btn-maximize" onclick="toggleMaximize(this)" title="Maximize / Restore View">
-                      <span class="max-icon">⛶</span> <span class="max-text">Maximize</span>
-                    </button>
-                    <a href="https://github.com/NarasimhaMachineni/clinical-ai-agent/blob/main/programs/r_pharmaverse_production.R" target="_blank" class="gh-pill-link">
-                      <span>🐙</span> r_pharmaverse_production.R
-                    </a>
-                    <a href="https://github.com/NarasimhaMachineni/clinical-ai-agent/blob/main/programs/sas_cdisc_production.sas" target="_blank" class="gh-pill-link">
-                      <span>🐙</span> sas_cdisc_production.sas
-                    </a>
-                    <a href="https://github.com/NarasimhaMachineni/clinical-ai-agent/blob/main/programs/double_programming_validation.sas" target="_blank" class="gh-pill-link">
-                      <span>🐙</span> double_programming_validation.sas
-                    </a>
-                    <a href="https://github.com/NarasimhaMachineni/clinical-ai-agent/tree/main/programs" target="_blank" class="gh-pill-link" style="border-color:var(--primary-blue); color:var(--primary-blue);">
-                      <span>📂</span> View All in GitHub
-                    </a>
-                  </div>
-                </div>
-
-                <!-- Subtab Navigation -->
-                <div class="workbench-subtabs">
-                  <button class="wb-subtab-btn active" data-wb="wb-r">🔵 R Pharmaverse (admiral, rtables, tern)</button>
-                  <button class="wb-subtab-btn" data-wb="wb-sas">🔴 SAS 9.4 DATA Steps &amp; PROCs</button>
-                  <button class="wb-subtab-btn" data-wb="wb-double">🟢 Double Programming (PROC COMPARE)</button>
-                  <button class="wb-subtab-btn" data-wb="wb-specs">📚 R Packages &amp; SAS PROCs Reference</button>
-                </div>
-
-                <!-- Subpane 1: R Script -->
-                <div class="wb-subpane active" id="wb-r">
-                  <div class="code-viewer-container">
-                    <div class="code-viewer-toolbar">
-                      <span class="code-file-label">
-                        <span>📄</span> programs/r_pharmaverse_production.R
-                        <span class="badge-live-pulse" style="font-size:9px;">R 4.3+</span>
-                      </span>
-                      <div class="code-viewer-actions">
-                        <button class="btn-code-action" id="btn-copy-r">📋 Copy Script</button>
-                        <a href="programs/r_pharmaverse_production.R" download="r_pharmaverse_production.R" class="btn-code-action">⬇️ Download .R</a>
-                        <a href="https://github.com/NarasimhaMachineni/clinical-ai-agent/blob/main/programs/r_pharmaverse_production.R" target="_blank" class="btn-code-action">🐙 GitHub Permalink</a>
-                      </div>
-                    </div>
-                    <pre class="code-viewer-pre" id="r-code-display">Loading R pharmaverse production script...</pre>
-                  </div>
-                </div>
-
-                <!-- Subpane 2: SAS Script -->
-                <div class="wb-subpane" id="wb-sas" style="display:none;">
-                  <div class="code-viewer-container">
-                    <div class="code-viewer-toolbar">
-                      <span class="code-file-label">
-                        <span>📄</span> programs/sas_cdisc_production.sas
-                        <span class="badge-live-pulse" style="font-size:9px; background:rgba(248,113,113,0.15); color:#f87171; border-color:rgba(248,113,113,0.35);">SAS 9.4 / Viya</span>
-                      </span>
-                      <div class="code-viewer-actions">
-                        <button class="btn-code-action" id="btn-copy-sas">📋 Copy Script</button>
-                        <a href="programs/sas_cdisc_production.sas" download="sas_cdisc_production.sas" class="btn-code-action">⬇️ Download .sas</a>
-                        <a href="https://github.com/NarasimhaMachineni/clinical-ai-agent/blob/main/programs/sas_cdisc_production.sas" target="_blank" class="btn-code-action">🐙 GitHub Permalink</a>
-                      </div>
-                    </div>
-                    <pre class="code-viewer-pre" id="sas-code-display">Loading SAS production pipeline script...</pre>
-                  </div>
-                </div>
-
-                <!-- Subpane 3: Double Programming QC -->
-                <div class="wb-subpane" id="wb-double" style="display:none;">
-                  <div class="code-viewer-container">
-                    <div class="code-viewer-toolbar">
-                      <span class="code-file-label">
-                        <span>📄</span> programs/double_programming_validation.sas
-                        <span class="badge-live-pulse" style="font-size:9px;">PROC COMPARE</span>
-                      </span>
-                      <div class="code-viewer-actions">
-                        <button class="btn-code-action" id="btn-copy-double">📋 Copy Script</button>
-                        <a href="programs/double_programming_validation.sas" download="double_programming_validation.sas" class="btn-code-action">⬇️ Download .sas</a>
-                        <a href="https://github.com/NarasimhaMachineni/clinical-ai-agent/blob/main/programs/double_programming_validation.sas" target="_blank" class="btn-code-action">🐙 GitHub Permalink</a>
-                      </div>
-                    </div>
-                    <pre class="code-viewer-pre" id="double-code-display">Loading SAS double programming validation script...</pre>
-                  </div>
-                </div>
-
-                <!-- Subpane 4: Packages & PROCs Reference Directory -->
-                <div class="wb-subpane" id="wb-specs" style="display:none;">
-                  <div class="spec-cards-grid">
-                    
-                    <div class="spec-card">
-                      <h4><span>📦</span> R pharmaverse: admiral</h4>
-                      <div class="spec-badge-list">
-                        <span class="spec-badge r-pkg">derive_vars_merged()</span>
-                        <span class="spec-badge r-pkg">derive_var_trtsdt()</span>
-                        <span class="spec-badge r-pkg">derive_var_trtedt()</span>
-                        <span class="spec-badge r-pkg">derive_var_trtdurd()</span>
-                        <span class="spec-badge r-pkg">derive_var_base()</span>
-                        <span class="spec-badge r-pkg">derive_var_chg()</span>
-                        <span class="spec-badge r-pkg">derive_var_pchg()</span>
-                        <span class="spec-badge r-pkg">derive_var_extreme_flag()</span>
-                        <span class="spec-badge r-pkg">restrict_derivation()</span>
-                      </div>
-                      <p>Automates standard CDISC ADaM derivations for BDS and OCCDS according to FDA &amp; PMDA guidance.</p>
-                    </div>
-
-                    <div class="spec-card">
-                      <h4><span>📦</span> R pharmaverse: rtables &amp; tern</h4>
-                      <div class="spec-badge-list">
-                        <span class="spec-badge r-pkg">basic_table()</span>
-                        <span class="spec-badge r-pkg">split_cols_by()</span>
-                        <span class="spec-badge r-pkg">split_rows_by()</span>
-                        <span class="spec-badge r-pkg">analyze()</span>
-                        <span class="spec-badge r-pkg">build_table()</span>
-                        <span class="spec-badge r-pkg">fit_ancova()</span>
-                        <span class="spec-badge r-pkg">stat_mean_ci()</span>
-                        <span class="spec-badge r-pkg">count_occurrences()</span>
-                      </div>
-                      <p>Generates submission-ready ICH E3 clinical study report tables, demographic summaries, and ANCOVA models.</p>
-                    </div>
-
-                    <div class="spec-card">
-                      <h4><span>📦</span> R Tidyverse &amp; Data Transport</h4>
-                      <div class="spec-badge-list">
-                        <span class="spec-badge r-pkg">dplyr::mutate()</span>
-                        <span class="spec-badge r-pkg">dplyr::case_when()</span>
-                        <span class="spec-badge r-pkg">dplyr::left_join()</span>
-                        <span class="spec-badge r-pkg">tidyr::pivot_longer()</span>
-                        <span class="spec-badge r-pkg">haven::read_sas()</span>
-                        <span class="spec-badge r-pkg">haven::write_xpt()</span>
-                      </div>
-                      <p>High-performance data manipulation and SAS Transport v5 (XPT) export for FDA eCTD Module 5 dossiers.</p>
-                    </div>
-
-                    <div class="spec-card">
-                      <h4><span>📊</span> SAS 9.4 DATA Steps</h4>
-                      <div class="spec-badge-list">
-                        <span class="spec-badge sas-proc">ATTRIB</span>
-                        <span class="spec-badge sas-proc">LENGTH</span>
-                        <span class="spec-badge sas-proc">MERGE BY USUBJID</span>
-                        <span class="spec-badge sas-proc">IN=A / IN=B</span>
-                        <span class="spec-badge sas-proc">ARRAY DO OVER</span>
-                        <span class="spec-badge sas-proc">INTCK / INTNX</span>
-                        <span class="spec-badge sas-proc">PUT / INPUT</span>
-                        <span class="spec-badge sas-proc">IS8601DT</span>
-                      </div>
-                      <p>Robust, production-grade CDISC dataset generation with variable lengths, ISO 8601 date parsing, and audit metadata.</p>
-                    </div>
-
-                    <div class="spec-card">
-                      <h4><span>📊</span> SAS PROCs: Validation &amp; Modeling</h4>
-                      <div class="spec-badge-list">
-                        <span class="spec-badge sas-proc">PROC COMPARE</span>
-                        <span class="spec-badge sas-proc">&amp;SYSINFO = 0</span>
-                        <span class="spec-badge sas-proc">PROC GLM (ANCOVA)</span>
-                        <span class="spec-badge sas-proc">PROC MIXED (MMRM)</span>
-                        <span class="spec-badge sas-proc">PROC FREQ (Chisq)</span>
-                      </div>
-                      <p>Double programming validation asserting zero record differences, and primary inferential efficacy models.</p>
-                    </div>
-
-                    <div class="spec-card">
-                      <h4><span>📊</span> SAS PROCs: Reporting &amp; Formats</h4>
-                      <div class="spec-badge-list">
-                        <span class="spec-badge sas-proc">PROC MEANS</span>
-                        <span class="spec-badge sas-proc">PROC REPORT</span>
-                        <span class="spec-badge sas-proc">PROC FORMAT</span>
-                        <span class="spec-badge sas-proc">PROC TRANSPOSE</span>
-                        <span class="spec-badge sas-proc">PROC SQL</span>
-                      </div>
-                      <p>ICH E3 CSR Table 14.1/14.2 generation, controlled terminology enforcement, and longitudinal data transposition.</p>
-                    </div>
-
-                  </div>
-                </div>
-
-              </div>
-            </div>
-
-            <!-- TAB 5: DATASET INSPECTOR -->
-            <div class="tab-pane" id="tab-datasets">
+            <!-- TAB: DATASET INSPECTOR & AUDIT TRAIL -->
+            <div class="tab-pane active" id="tab-datasets">
               <div class="pane-card">
                 <div class="card-title-bar">
                   <div style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom:8px;">
