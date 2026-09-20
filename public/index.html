@@ -29,9 +29,15 @@
           <span class="source-text" id="source-indicator-text">CLINICAL ENGINE: 🟢 GxP PRODUCTION READY (ACTIVE — READY FOR INGESTION)</span>
         </div>
       </div>
-      <div class="header-status-indicator">
-        <span class="status-dot pulse" id="agent-status-dot"></span>
-        <span class="status-label" id="agent-status-label">● Online</span>
+      <div class="header-right-actions" style="display:flex; align-items:center; gap:12px;">
+        <button class="btn-header-clear" id="btn-clear-all-data" title="Purge all loaded datasets and reset agent to clean standby state">
+          <span style="font-size:13px;">🗑️</span>
+          <span>Clear / Reset Data</span>
+        </button>
+        <div class="header-status-indicator">
+          <span class="status-dot pulse" id="agent-status-dot"></span>
+          <span class="status-label" id="agent-status-label">● Online</span>
+        </div>
       </div>
     </header>
 
@@ -81,6 +87,52 @@
            ========================================================= -->
       <main class="agent-main">
         
+        <!-- 0. Hero Metrics Command HUD (Live High-Impact Biopharma Dashboard) -->
+        <section class="hero-command-hud">
+          <div class="hud-metric-card" title="Total unique enrolled subjects across study">
+            <div class="hud-metric-icon" style="background:rgba(56,189,248,0.12); color:#38bdf8;">👥</div>
+            <div class="hud-metric-info">
+              <span class="hud-metric-val" id="hud-metric-subjects">0</span>
+              <span class="hud-metric-lbl">Total Subjects</span>
+            </div>
+          </div>
+          <div class="hud-metric-card" title="Safety Analysis Set (SAFFL='Y')">
+            <div class="hud-metric-icon" style="background:rgba(52,211,153,0.12); color:#34d399;">🛡️</div>
+            <div class="hud-metric-info">
+              <span class="hud-metric-val" id="hud-metric-saffl">0</span>
+              <span class="hud-metric-lbl">Safety Population</span>
+            </div>
+          </div>
+          <div class="hud-metric-card" title="Treatment-Emergent Adverse Events documented">
+            <div class="hud-metric-icon" style="background:rgba(251,191,36,0.12); color:#fbbf24;">⚠️</div>
+            <div class="hud-metric-info">
+              <span class="hud-metric-val" id="hud-metric-teae">0</span>
+              <span class="hud-metric-lbl">Reported TEAEs</span>
+            </div>
+          </div>
+          <div class="hud-metric-card" title="Potential Hy's Law hepatotoxicity signals">
+            <div class="hud-metric-icon" style="background:rgba(244,63,94,0.12); color:#f43f5e;">🧪</div>
+            <div class="hud-metric-info">
+              <span class="hud-metric-val" id="hud-metric-hyslaw">0</span>
+              <span class="hud-metric-lbl">Liver Safety Alerts</span>
+            </div>
+          </div>
+          <div class="hud-metric-card" title="Total clinical data cells audited pin-to-pin">
+            <div class="hud-metric-icon" style="background:rgba(168,85,247,0.12); color:#c084fc;">🔬</div>
+            <div class="hud-metric-info">
+              <span class="hud-metric-val" id="hud-metric-cells">0</span>
+              <span class="hud-metric-lbl">Audited Cells</span>
+            </div>
+          </div>
+          <div class="hud-metric-card" title="CDISC SDTM/ADaM & FDA 21 CFR Part 11 Rule Conformance">
+            <div class="hud-metric-icon" style="background:rgba(34,197,94,0.12); color:#4ade80;">⚖️</div>
+            <div class="hud-metric-info">
+              <span class="hud-metric-val text-green" id="hud-metric-p21">⚪ Standby</span>
+              <span class="hud-metric-lbl">CDISC / FDA Conformance</span>
+            </div>
+          </div>
+        </section>
+
         <!-- 1. Instant Task Radio Selector & Clinical Data Bridge -->
         <section class="task-radio-section">
           <!-- In-Page Clinical Data Files & PC Ingestion Bridge -->
@@ -89,21 +141,21 @@
             <div>
               <div class="bridge-title">
                 <span>📁</span>
-                <span>Upload Your Data Files (Any Format)</span>
+                <span>Clinical Data Ingestion &amp; Repository Bridge</span>
               </div>
             <button class="btn-maximize" onclick="toggleMaximize(this)" title="Maximize / Restore View">
               <span class="max-icon">⛶</span> <span class="max-text">Maximize</span>
             </button>
           </div>
               <span style="font-size:11.5px; color:var(--text-muted);">
-                Drop or browse — files are auto-recognized and processed instantly
+                Drop or browse — datasets are auto-recognized, deep-verified pin-to-pin, and opened immediately
               </span>
             </div>
 
             <!-- Active Ingested Files (populated dynamically on upload) -->
             <div class="bridge-files-row" id="ingestion-files-list">
               <div class="bridge-file-pill empty" style="color:var(--text-muted); border-style:dashed; font-style:italic;">
-                No files loaded yet — upload your data files below
+                No files loaded yet — upload your data files below or launch a deep-verification cohort
               </div>
             </div>
 
@@ -116,23 +168,25 @@
             <div id="mini-upload-status" style="margin-top:6px; font-size:11.5px; color:var(--primary-blue); font-weight:600;"></div>
           </div>
 
-          <!-- Secondary Natural Language & Git Directive Bar -->
-          <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+          <!-- Deep Verification Cohorts & Data Reset Bar -->
+          <div class="quick-cohorts-bar" style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
             <button class="btn-card-action" id="btn-load-51-adsl" style="background:linear-gradient(135deg, rgba(56,189,248,0.25), rgba(99,102,241,0.25)); border:1px solid rgba(56,189,248,0.6); color:#bae6fd; font-weight:700; padding:8px 14px; box-shadow:0 2px 8px rgba(56,189,248,0.2);">
-              ⚡ Ingest &amp; Deep-Verify 51-Patient ADSL Trial Data (Pin-to-Pin Check &amp; Auto-Healing)
+              ⚡ 51-Patient ADSL Cohort (Demographics &amp; Flags Auto-Healing)
+            </button>
+            <button class="btn-card-action" id="btn-load-60-adae" style="background:linear-gradient(135deg, rgba(245,158,11,0.25), rgba(239,68,68,0.25)); border:1px solid rgba(245,158,11,0.6); color:#fed7aa; font-weight:700; padding:8px 14px; box-shadow:0 2px 8px rgba(245,158,11,0.2);">
+              ⚠️ 60-Patient ADAE Safety Cohort (MedDRA &amp; Severity Healing)
             </button>
             <button class="btn-card-action" id="btn-load-sample-adam" style="background:linear-gradient(135deg, rgba(234,179,8,0.2), rgba(168,85,247,0.2)); border:1px solid rgba(234,179,8,0.5); color:#fef08a; font-weight:700; padding:8px 14px;">
-              ⚡ Ingest ADLB Laboratory BDS Data with Planted Math Errors
+              🧪 ADLB Laboratory BDS Cohort (Math &amp; Shift Healing)
             </button>
-            <span style="font-size:11.5px; color:var(--text-muted);">
-              Comprehensive test cohorts with deliberate errors (missing age, race, dates, serial numbers, flags, inverted BP, BDS math) to verify 100% pin-to-pin repair.
-            </span>
+            <button class="btn-card-action" id="btn-reset-data-bar" style="background:linear-gradient(135deg, rgba(239,68,68,0.2), rgba(185,28,28,0.2)); border:1px solid rgba(239,68,68,0.5); color:#fca5a5; font-weight:700; padding:8px 14px;" title="Clear all datasets and reset agent memory">
+              🗑️ Reset / Clear All Data
+            </button>
           </div>
 
           <div class="commander-input-row" style="margin-top:12px; display:flex; gap:8px;">
             <input type="text" id="commander-input" class="form-input" style="flex:1; background:rgba(0,0,0,0.3); font-size:12.5px; padding:7px 12px;" placeholder="Type a command: e.g. 'check safety', 'sync to GitHub', 'show lab results', 'run quality check'...">
             <button class="btn-execute" id="btn-execute-cmd" style="padding:7px 14px;">▶ Run</button>
-            
           </div>
         </section>
 

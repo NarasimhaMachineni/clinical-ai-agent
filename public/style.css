@@ -3,20 +3,21 @@
  */
 
 :root {
-  --bg-app: #0d1117;
-  --bg-sidebar: #161b22;
-  --bg-card: #21262d;
-  --bg-subtle: #1c2128;
-  --border-subtle: rgba(240, 246, 252, 0.1);
-  --border-medium: rgba(240, 246, 252, 0.2);
-  --text-primary: #f0f6fc;
-  --text-secondary: #8b949e;
-  --text-muted: #6e7681;
+  --bg-app: #070a13;
+  --bg-sidebar: #0b0f19;
+  --bg-card: #0f1523;
+  --bg-subtle: #12192c;
+  --border-subtle: rgba(56, 189, 248, 0.12);
+  --border-medium: rgba(56, 189, 248, 0.22);
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
   --primary-blue: #38bdf8;
-  --primary-green: #238636;
-  --accent-green: #3fb950;
-  --accent-amber: #d29922;
-  --accent-red: #f85149;
+  --primary-indigo: #6366f1;
+  --primary-green: #10b981;
+  --accent-green: #34d399;
+  --accent-amber: #f59e0b;
+  --accent-red: #ef4444;
   --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', Consolas, Monaco, monospace;
 }
@@ -4153,6 +4154,132 @@ body.has-maximized-element {
 .pin-to-pin-dossier-card {
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
 }
+
+/* =========================================================
+   DARK BIOPHARMA COMMAND HUD & ACTION EXTENSIONS
+   ========================================================= */
+.btn-header-clear {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #fca5a5;
+  padding: 6px 13px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-header-clear:hover {
+  background: rgba(239, 68, 68, 0.25);
+  border-color: rgba(239, 68, 68, 0.6);
+  color: #fff;
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.3);
+  transform: translateY(-1px);
+}
+
+.hero-command-hud {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.hud-metric-card {
+  background: linear-gradient(135deg, rgba(17, 24, 39, 0.95), rgba(11, 15, 25, 0.98));
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: default;
+}
+
+.hud-metric-card:hover {
+  border-color: var(--primary-blue);
+  box-shadow: 0 6px 20px -2px rgba(56, 189, 248, 0.18);
+  transform: translateY(-2px);
+}
+
+.hud-metric-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.hud-metric-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.hud-metric-val {
+  font-size: 18px;
+  font-weight: 800;
+  color: #fff;
+  font-family: var(--font-mono);
+  line-height: 1.2;
+}
+
+.hud-metric-val.text-green {
+  color: #4ade80 !important;
+}
+
+.hud-metric-lbl {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 500;
+}
+
+.btn-remove-pill {
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #fca5a5;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 6px;
+  transition: all 0.15s ease;
+}
+
+.btn-remove-pill:hover {
+  background: #ef4444;
+  color: #fff;
+  border-color: #ef4444;
+  transform: scale(1.15);
+}
+
+.quick-cohorts-bar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 10px;
+}
+
 
 
 
