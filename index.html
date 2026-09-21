@@ -521,15 +521,18 @@
               <div class="pane-card">
                 <div class="card-title-bar">
                   <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
-                    <h3 style="margin-bottom:0;">🔍 Pinnacle 21 &amp; CDISC Regulatory QC Audit</h3>
+                    <h3 style="margin-bottom:0;">🔍 CDISC Technical Conformance Check &amp; 11 Quality Gates</h3>
                     <div style="display:flex; align-items:center; gap:8px;">
-                      <span class="badge-pass" id="qc-summary-badge">5 / 5 CHECKS PASSED</span>
+                      <span class="badge-pass" id="qc-summary-badge" style="background:rgba(148,163,184,0.15); color:#94a3b8; border:1px solid #475569;">STATUS: NOT EVALUATED</span>
                       <button class="btn-maximize" onclick="toggleMaximize(this)" title="Maximize / Restore View">
                         <span class="max-icon">⛶</span> <span class="max-text">Maximize</span>
                       </button>
                     </div>
                   </div>
                 </div>
+                <!-- 11 Technical Conformance Quality Gates (Section 65) -->
+                <div id="quality-gates-container" style="margin-bottom:20px;"></div>
+
                 <div class="qc-findings-list" id="qc-findings-container">
                   <!-- Injected via JS -->
                 </div>
@@ -678,5 +681,29 @@
   </div>
 
 
+
+    <!-- Value Lineage & Traceability Modal (Section 38 & 64) -->
+    <div class="modal-overlay" id="lineage-modal" style="display:none;" onclick="if(event.target === this) closeLineageModal();">
+      <div class="modal-card" style="max-width:720px; width:95%;">
+        <div class="modal-header" style="border-bottom:1px solid var(--border-mid); padding:14px 18px; display:flex; justify-content:space-between; align-items:center;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-size:20px;">🧬</span>
+            <div>
+              <h3 style="font-size:14.5px; margin:0; color:#fff; font-weight:700;">Value Lineage &amp; Derivation Traceability</h3>
+              <div style="font-size:11px; color:var(--text-secondary);">21 CFR Part 11 Compliant Observation-to-Analysis Lineage (Section 64)</div>
+            </div>
+          </div>
+          <button onclick="closeLineageModal()" style="background:transparent; border:none; color:var(--text-secondary); font-size:22px; cursor:pointer; line-height:1;">&times;</button>
+        </div>
+        <div class="modal-body" id="lineage-modal-body" style="padding:18px 20px; font-size:12.5px; max-height:75vh; overflow-y:auto;">
+          <!-- Injected dynamically by openLineageExplanationModal() -->
+        </div>
+        <div class="modal-footer" style="padding:12px 18px; border-top:1px solid var(--border-mid); display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:11px; color:var(--text-muted);">ClinicalOps Deterministic Engine v7.0</span>
+          <button class="btn-primary-small" onclick="closeLineageModal()" style="background:var(--primary-blue); color:#fff; border:none; padding:6px 16px; border-radius:4px; font-weight:600; cursor:pointer;">Close Inspector</button>
+        </div>
+      </div>
+    </div>
+  
 </body>
 </html>
