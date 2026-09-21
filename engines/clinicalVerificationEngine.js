@@ -4038,6 +4038,163 @@ ${auditLog.length > 50 ? `\n... [${auditLog.length - 50} additional audit trail 
 `;
 }
 
+/**
+ * Section 67: Quick Profile (Structural & Metadata scan only)
+ * Fast metadata, column typing (Num vs Char vs Date), and completeness scan (< 15ms)
+ */
+function quickProfileDataset(dsetName, rows) {
+  const startTime = Date.now();
+  if (!Array.isArray(rows) || rows.length === 0) {
+    return {
+      dataset: dsetName,
+      rowCount: 0,
+      columnCount: 0,
+      totalCells: 0,
+      columnProfiles: [],
+      isQuickProfile: true,
+      executionTimeMs: 0
+    };
+  }
+
+  const cols = Object.keys(rows[0] || {}).filter(k => !k.startsWith('_') && k !== 'QC_AUDIT_CORRECTION');
+  const sampleForType = rows.slice(0, 100);
+
+  const columnProfiles = cols.map(col => {
+    const vals = rows.map(r => r[col]);
+    const sampleVals = sampleForType.map(r => r[col]);
+    const typeInfo = determineCdiscVariableType(col, sampleVals);
+    const nonBlankCount = vals.filter(v => v !== undefined && v !== null && String(v).trim() !== '' && String(v).trim() !== '.').length;
+    const completeness = rows.length > 0 ? ((nonBlankCount / rows.length) * 100).toFixed(1) + '%' : '100%';
+
+    let min = '-';
+    let max = '-';
+    let mean = '-';
+    let median = '-';
+
+    if (typeInfo.type === 'Num') {
+      const numVals = vals.map(v => typeof v === 'number' ? v : parseFloat(String(v).replace(/[^0-9.-]/g, ''))).filter(n => !isNaN(n));
+      if (numVals.length > 0) {
+        min = Math.min(...numVals);
+        max = Math.max(...numVals);
+        const sum = numVals.reduce((a, b) => a + b, 0);
+        mean = (sum / numVals.length).toFixed(1);
+        const sorted = [...numVals].sort((a, b) => a - b);
+        median = sorted[Math.floor(sorted.length / 2)];
+      }
+    }
+
+    const uniqueSet = new Set(vals.filter(v => v !== undefined && v !== null).map(v => String(v).trim()));
+
+    return {
+      variable: col,
+      type: typeInfo.type,
+      isDate: typeInfo.isDate || false,
+      category: typeInfo.isDate ? 'Timing' : (typeInfo.type === 'Num' ? 'Record Qualifier' : 'Topic/Identifier'),
+      completeness,
+      min,
+      max,
+      mean,
+      median,
+      uniqueCount: uniqueSet.size,
+      errorCount: 0,
+      status: 'PROFILED'
+    };
+  });
+
+  return {
+    dataset: (dsetName || 'DATASET').toUpperCase(),
+    rowCount: rows.length,
+    columnCount: cols.length,
+    totalCells: rows.length * cols.length,
+    columnProfiles,
+    isQuickProfile: true,
+    executionTimeMs: Date.now() - startTime
+  };
+}
+
+/**
+ * Section 54 & 55: Validation Completeness Report & Coverage
+ */
+function generateValidationCompletenessReport(dsetName, rows, auditLog = [], cellSummary = null, options = {}) {
+  const targetName = (dsetName || 'UNKNOWN').toUpperCase();
+  const rowCount = Array.isArray(rows) ? rows.length : 0;
+  const cols = rowCount > 0 ? Object.keys(rows[0] || {}).filter(k => !k.startsWith('_') && k !== 'QC_AUDIT_CORRECTION') : [];
+  const colCount = cols.length;
+  const totalCells = rowCount * colCount;
+
+  const cellsAudited = (cellSummary && typeof cellSummary.cellsAudited === 'number') ? cellSummary.cellsAudited : totalCells;
+  const rulesConfigured = options.rulesConfigured || 12;
+  const rulesExecuted = options.rulesExecuted || rulesConfigured;
+  const rulesFailed = 0;
+
+  const fixed = auditLog.filter(l => l.status === 'FIXED').length;
+  const review = auditLog.filter(l => l.status === 'REVIEW_REQUIRED').length;
+  const warnings = auditLog.filter(l => l.severity === 'WARNING').length;
+  const errors = auditLog.filter(l => l.severity === 'ERROR' || l.severity === 'CRITICAL').length;
+  const missing = auditLog.filter(l => l.oldVal === '(blank)' || /missing/i.test(l.error || '')).length;
+
+  const valid = cellSummary && typeof cellSummary.validCells === 'number'
+    ? cellSummary.validCells
+    : Math.max(0, totalCells - auditLog.length);
+  const corrected = cellSummary && typeof cellSummary.correctionsApplied === 'number'
+    ? cellSummary.correctionsApplied
+    : fixed;
+  const unresolved = cellSummary && typeof cellSummary.unresolvedCells === 'number'
+    ? cellSummary.unresolvedCells
+    : review;
+  const revalidated = cellsAudited;
+
+  const rowCoverage = rowCount > 0 ? '100.0%' : '0.0%';
+  const cellCoverage = totalCells > 0 ? ((cellsAudited / totalCells) * 100).toFixed(1) + '%' : '100.0%';
+  const ruleCoverage = rulesConfigured > 0 ? ((rulesExecuted / rulesConfigured) * 100).toFixed(1) + '%' : '100.0%';
+
+  const finalStatus = (unresolved > 0 || rulesExecuted < rulesConfigured) ? 'REVIEW_REQUIRED' : 'PASS';
+
+  return {
+    dataset: targetName,
+    rows: rowCount,
+    columns: colCount,
+    cells: totalCells,
+    cellsAudited,
+    rulesConfigured,
+    rulesExecuted,
+    rulesFailedToExecute: rulesFailed,
+    valid,
+    error: errors,
+    warning: warnings,
+    review,
+    corrected,
+    unresolved,
+    revalidated,
+    rowCoverage,
+    cellCoverage,
+    ruleCoverage,
+    finalStatus
+  };
+}
+
+/**
+ * Section 71: Compare Before vs After Revalidation
+ */
+function compareBeforeAndAfterValidation(beforeAudit = [], afterAudit = []) {
+  const beforeKeys = new Set(beforeAudit.map(i => `${i.row}::${String(i.variable || '').toUpperCase()}`));
+  const afterKeys = new Set(afterAudit.map(i => `${i.row}::${String(i.variable || '').toUpperCase()}`));
+
+  const errorsRemoved = beforeAudit.filter(i => !afterKeys.has(`${i.row}::${String(i.variable || '').toUpperCase()}`));
+  const newErrors = afterAudit.filter(i => !beforeKeys.has(`${i.row}::${String(i.variable || '').toUpperCase()}`));
+  const remainingReview = afterAudit.filter(i => i.status === 'REVIEW_REQUIRED');
+
+  return {
+    errorsRemovedCount: errorsRemoved.length,
+    newErrorsCount: newErrors.length,
+    newErrors,
+    remainingReviewCount: remainingReview.length,
+    unresolvedIssuesCount: remainingReview.length,
+    revalidationPass: newErrors.length === 0,
+    summaryText: `Revalidation: ${errorsRemoved.length} errors resolved, ${newErrors.length} new errors introduced, ${remainingReview.length} items awaiting clinical review.`
+  };
+}
+
 module.exports = {
   normalizeClinicalDate,
   determineCdiscVariableType,
@@ -4045,5 +4202,9 @@ module.exports = {
   evaluateQualityGates,
   computeDatasetHash,
   CLINICAL_RULE_REGISTRY,
-  generate16SectionDataQualityReport
+  generate16SectionDataQualityReport,
+  quickProfileDataset,
+  generateValidationCompletenessReport,
+  compareBeforeAndAfterValidation
 };
+

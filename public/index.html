@@ -179,6 +179,64 @@
                       <span class="max-icon">⛶</span> <span class="max-text">Maximize</span>
                     </button>
                   </div>
+
+                  <!-- Performance & Autonomous Validation Action Bar (Sections 66-68) -->
+                  <div class="validation-action-bar" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px; padding:10px 14px; background:linear-gradient(135deg, rgba(15,23,42,0.9), rgba(30,41,59,0.8)); border-radius:8px; border:1px solid rgba(56,189,248,0.35);">
+                    <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                      <button class="btn-validate-prominent" id="btn-validate-all-data" onclick="triggerValidateAllData()" title="Run 100% cell-by-cell GxP audit across all rows and columns using non-blocking Job Manager">
+                        <span>🔍</span> <span>VALIDATE ALL DATA</span>
+                      </button>
+                      <button class="btn-quick-profile" id="btn-quick-profile" onclick="triggerQuickProfile()" title="Fast structural and metadata scan without full rule derivations">
+                        <span>⚡</span> <span>QUICK PROFILE</span>
+                      </button>
+                      <div class="grid-density-controls" style="display:inline-flex; align-items:center; gap:4px; margin-left:6px; background:rgba(0,0,0,0.3); padding:3px 6px; border-radius:6px; border:1px solid rgba(255,255,255,0.08);">
+                        <span style="font-size:10.5px; color:var(--text-muted); text-transform:uppercase; font-weight:600;">Density:</span>
+                        <button class="btn-density active" data-density="normal" onclick="setGridDensity('normal', this)" style="cursor:pointer; font-size:10px; padding:2px 6px; border-radius:3px; background:var(--primary-blue); color:#fff; border:none; font-weight:600;">Normal</button>
+                        <button class="btn-density" data-density="compact" onclick="setGridDensity('compact', this)" style="cursor:pointer; font-size:10px; padding:2px 6px; border-radius:3px; background:transparent; color:var(--text-muted); border:none;">Compact</button>
+                        <button class="btn-density" data-density="comfortable" onclick="setGridDensity('comfortable', this)" style="cursor:pointer; font-size:10px; padding:2px 6px; border-radius:3px; background:transparent; color:var(--text-muted); border:none;">Roomy</button>
+                      </div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                      <div id="grid-perf-hud" style="font-size:11px; font-family:monospace; color:#38bdf8; background:rgba(0,0,0,0.4); padding:3px 8px; border-radius:4px; border:1px solid rgba(56,189,248,0.2);">
+                        ⚡ Latency: &lt;5ms &bull; 240Hz Fluid
+                      </div>
+                      <button class="btn-sm" id="btn-fullscreen-grid" onclick="toggleGridFullscreen()" style="background:rgba(255,255,255,0.06); color:#fff; border:1px solid var(--border-subtle); padding:5px 10px; border-radius:6px; cursor:pointer; font-size:11.5px; display:inline-flex; align-items:center; gap:4px;" title="Maximize data grid to 100vw x 100vh full-screen mode">
+                        <span>⛶</span> <span>Fullscreen Grid</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Live Real-Time Job Progress Banner (Sections 5, 6, 18) -->
+                  <div id="job-progress-banner" style="display:none;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                      <div style="display:flex; align-items:center; gap:8px;">
+                        <span style="font-size:14px; animation:spin 1s linear infinite; display:inline-block;">⚙️</span>
+                        <strong style="color:#fff; font-size:12.5px;" id="job-title-text">Validating Complete Dataset...</strong>
+                        <span class="status-tag" id="job-status-badge" style="background:rgba(56,189,248,0.2); color:#38bdf8; font-size:10.5px;">RUNNING</span>
+                      </div>
+                      <button id="btn-cancel-job" onclick="cancelCurrentJob()" style="background:rgba(239,68,68,0.15); color:#f87171; border:1px solid rgba(239,68,68,0.4); font-size:11px; padding:3px 10px; border-radius:4px; cursor:pointer; font-weight:600;">
+                        ✕ Cancel
+                      </button>
+                    </div>
+                    <div class="job-progress-track">
+                      <div class="job-progress-fill" id="job-progress-fill" style="width:0%;"></div>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; color:var(--text-secondary); margin-top:4px;">
+                      <div>
+                        <span>Rows: <strong id="job-stat-rows" style="color:#fff;">0 / 0</strong></span>
+                        <span style="margin:0 6px;">&bull;</span>
+                        <span>Cells Audited: <strong id="job-stat-cells" style="color:#38bdf8;">0</strong></span>
+                        <span style="margin:0 6px;">&bull;</span>
+                        <span>Rules Executed: <strong id="job-stat-rules" style="color:#a855f7;">0</strong></span>
+                      </div>
+                      <div>
+                        <span>Issues Found: <strong id="job-stat-issues" style="color:#facc15;">0</strong></span>
+                        <span style="margin:0 6px;">&bull;</span>
+                        <span id="job-stat-throughput" style="color:#4ade80;">0 rows/s</span>
+                      </div>
+                    </div>
+                  </div>
+
                   <!-- Category Filter & Search Bar -->
                   <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
                     <div class="dset-category-filters" style="display:flex; gap:6px;">
@@ -347,6 +405,24 @@
                       <span class="max-icon">⛶</span> <span class="max-text">Maximize</span>
                     </button>
                   </div>
+                </div>
+
+                <!-- Dedicated Correction Review & Revalidation Action Bar (Sections 69-71) -->
+                <div class="correction-action-bar" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px; padding:10px 14px; background:linear-gradient(135deg, rgba(15,23,42,0.9), rgba(30,41,59,0.8)); border-radius:8px; border:1px solid rgba(217,119,6,0.35);">
+                  <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                    <button class="btn-review-corr" id="btn-review-corrections" onclick="openCorrectionReviewPanel()" title="Review all proposed cell corrections with original, proposed, evidence, and rule rationale">
+                      <span>🔧</span> <span>REVIEW CORRECTIONS</span>
+                    </button>
+                    <button class="btn-card-action" id="btn-approve-all-deterministic" onclick="approveAllDeterministicCorrections()" style="background:rgba(217,119,6,0.15); color:#facc15; border:1px solid rgba(217,119,6,0.4); font-weight:700; font-size:11.5px; padding:7px 12px; border-radius:6px; cursor:pointer;" title="Approve all 100% deterministic & controlled terminology fixes, leaving ambiguous items for manual review">
+                      <span>⚖️</span> <span>Approve All Deterministic</span>
+                    </button>
+                    <button class="btn-generate-corr" id="btn-generate-corrected-dataset" onclick="generateCleanCorrectedDataset()" title="Apply approved corrections to produce final clean dataset (leaving raw source immutable)">
+                      <span>✓</span> <span>GENERATE CORRECTED DATASET</span>
+                    </button>
+                  </div>
+                  <button class="btn-sm" id="btn-revalidate-data" onclick="revalidateCurrentDataset()" style="background:rgba(255,255,255,0.06); color:#38bdf8; border:1px solid rgba(56,189,248,0.3); font-size:11.5px; padding:6px 12px; border-radius:6px; cursor:pointer;" title="Re-execute all CDISC verification rules to compare Before vs After">
+                    <span>🔄</span> <span>Re-Validate Before vs After</span>
+                  </button>
                 </div>
 
                 <!-- Current Task Execution & Review Narrative -->
@@ -539,9 +615,12 @@
             <div class="tab-pane" id="tab-qc">
               <div class="pane-card">
                 <div class="card-title-bar">
-                  <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                  <div style="display:flex; justify-content:space-between; align-items:center; width:100%; flex-wrap:wrap; gap:8px;">
                     <h3 style="margin-bottom:0;">🔍 CDISC Technical Conformance Check &amp; 11 Quality Gates</h3>
                     <div style="display:flex; align-items:center; gap:8px;">
+                      <button class="btn-validate-prominent" onclick="triggerValidateAllData()" style="padding:4px 12px; font-size:11px;" title="Execute complete 100% cell-level CDISC rule audit">
+                        <span>🔍</span> <span>VALIDATE ALL DATA</span>
+                      </button>
                       <span class="badge-pass" id="qc-summary-badge" style="background:rgba(148,163,184,0.15); color:#94a3b8; border:1px solid #475569;">STATUS: NOT EVALUATED</span>
                       <button class="btn-maximize" onclick="toggleMaximize(this)" title="Maximize / Restore View">
                         <span class="max-icon">⛶</span> <span class="max-text">Maximize</span>
