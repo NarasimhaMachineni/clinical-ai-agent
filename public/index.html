@@ -85,6 +85,32 @@
         
 
 
+        
+        <!-- Fast UI Clinical Command Bar (v8.0 Sections 27-29, 52-53) -->
+        <section class="clinical-command-bar-section" id="clinical-command-bar-section">
+          <div class="clinical-command-bar-card">
+            <div class="cmd-bar-input-row">
+              <span class="cmd-icon">⚡</span>
+              <input type="text" id="clinical-command-input" placeholder="Enter clinical command: e.g. 'Deep verify ADAE', 'Verify complete study', 'Show fixed errors', 'Run double programming'..." autocomplete="off" />
+              <button id="btn-execute-cmd" class="btn-execute-cmd" onclick="executeClinicalCommand()" title="Execute command">
+                <span>Run</span> <kbd>↵</kbd>
+              </button>
+            </div>
+            <div class="cmd-chips-row">
+              <span class="cmd-chips-label">Quick Commands:</span>
+              <button class="cmd-chip" onclick="executeQuickCommand('Verify complete study')">🌐 Verify complete study</button>
+              <button class="cmd-chip" onclick="executeQuickCommand('Deep verify active domain')">🔬 Deep verify domain</button>
+              <button class="cmd-chip" onclick="executeQuickCommand('Show fixed errors')">✅ Show fixed issues</button>
+              <button class="cmd-chip" onclick="executeQuickCommand('Show review required')">⚠️ Show review required</button>
+              <button class="cmd-chip" onclick="executeQuickCommand('Generate corrected dataset')">💾 Generate corrected dataset</button>
+              <button class="cmd-chip" onclick="executeQuickCommand('Run double programming')">⚖️ Run double programming</button>
+            </div>
+          </div>
+        </section>
+
+        
+
+
         <!-- 1. Instant Task Radio Selector & Clinical Data Bridge -->
         <section class="task-radio-section">
           <!-- In-Page Clinical Data Files & PC Ingestion Bridge -->
@@ -189,6 +215,13 @@
                       <button class="btn-quick-profile" id="btn-quick-profile" onclick="triggerQuickProfile()" title="Fast structural and metadata scan without full rule derivations">
                         <span>⚡</span> <span>QUICK PROFILE</span>
                       </button>
+                      <button class="btn-deep-verify" id="btn-deep-verify-domain" onclick="triggerDeepVerifyDomain()" title="Run dedicated domain validator with CDISC business logic">
+                        <span>🔬</span> <span>DEEP VERIFY DOMAIN</span>
+                      </button>
+                      <button class="btn-verify-study" id="btn-verify-complete-study" onclick="triggerVerifyCompleteStudy()" title="Run cross-domain study audit & cascade analysis across all loaded datasets">
+                        <span>🌐</span> <span>VERIFY COMPLETE STUDY</span>
+                      </button>
+
                       <div class="grid-density-controls" style="display:inline-flex; align-items:center; gap:4px; margin-left:6px; background:rgba(0,0,0,0.3); padding:3px 6px; border-radius:6px; border:1px solid rgba(255,255,255,0.08);">
                         <span style="font-size:10.5px; color:var(--text-muted); text-transform:uppercase; font-weight:600;">Density:</span>
                         <button class="btn-density active" data-density="normal" onclick="setGridDensity('normal', this)" style="cursor:pointer; font-size:10px; padding:2px 6px; border-radius:3px; background:var(--primary-blue); color:#fff; border:none; font-weight:600;">Normal</button>
@@ -621,6 +654,13 @@
                       <button class="btn-validate-prominent" onclick="triggerValidateAllData()" style="padding:4px 12px; font-size:11px;" title="Execute complete 100% cell-level CDISC rule audit">
                         <span>🔍</span> <span>VALIDATE ALL DATA</span>
                       </button>
+                      <button class="btn-deep-verify" id="btn-deep-verify-domain-qc" onclick="triggerDeepVerifyDomain()" style="padding:4px 10px; font-size:11px;" title="Run dedicated domain validator">
+                        <span>🔬</span> <span>DEEP VERIFY DOMAIN</span>
+                      </button>
+                      <button class="btn-verify-study" id="btn-verify-complete-study-qc" onclick="triggerVerifyCompleteStudy()" style="padding:4px 10px; font-size:11px;" title="Verify complete multi-domain study">
+                        <span>🌐</span> <span>VERIFY COMPLETE STUDY</span>
+                      </button>
+
                       <span class="badge-pass" id="qc-summary-badge" style="background:rgba(148,163,184,0.15); color:#94a3b8; border:1px solid #475569;">STATUS: NOT EVALUATED</span>
                       <button class="btn-maximize" onclick="toggleMaximize(this)" title="Maximize / Restore View">
                         <span class="max-icon">⛶</span> <span class="max-text">Maximize</span>
@@ -631,8 +671,49 @@
                 <!-- 11 Technical Conformance Quality Gates (Section 65) -->
                 <div id="quality-gates-container" style="margin-bottom:20px;"></div>
 
-                <div class="qc-findings-list" id="qc-findings-container">
-                  <!-- Injected via JS -->
+                <!-- Redesigned Issue Management System (v8.0 Sections 21-24, 55) -->
+                <div class="issue-management-container" id="issue-management-container">
+                  <div class="issue-tabs-bar">
+                    <button class="issue-tab-btn active" id="tab-issues-all" onclick="switchIssueTab('ALL', this)">
+                      <span>📋 ALL</span>
+                      <span class="issue-count-pill" id="issue-count-all">0</span>
+                    </button>
+                    <button class="issue-tab-btn" id="tab-issues-open" onclick="switchIssueTab('OPEN', this)">
+                      <span>❌ OPEN ERRORS</span>
+                      <span class="issue-count-pill pill-danger" id="issue-count-open">0</span>
+                    </button>
+                    <button class="issue-tab-btn" id="tab-issues-fixed" onclick="switchIssueTab('FIXED', this)">
+                      <span>✅ FIXED</span>
+                      <span class="issue-count-pill pill-success" id="issue-count-fixed">0</span>
+                    </button>
+                    <button class="issue-tab-btn" id="tab-issues-warnings" onclick="switchIssueTab('WARNINGS', this)">
+                      <span>⚠️ WARNINGS</span>
+                      <span class="issue-count-pill pill-warning" id="issue-count-warnings">0</span>
+                    </button>
+                    <button class="issue-tab-btn" id="tab-issues-review" onclick="switchIssueTab('REVIEW_REQUIRED', this)">
+                      <span>🔍 REVIEW REQUIRED</span>
+                      <span class="issue-count-pill pill-warning" id="issue-count-review">0</span>
+                    </button>
+                    <button class="issue-tab-btn" id="tab-issues-unresolved" onclick="switchIssueTab('UNRESOLVED', this)">
+                      <span>❓ UNRESOLVED</span>
+                      <span class="issue-count-pill" id="issue-count-unresolved">0</span>
+                    </button>
+                  </div>
+
+                  <!-- Issue Cards List (Dynamic 16-field cards) -->
+                  <div class="qc-findings-list" id="qc-findings-container">
+                    <!-- Injected via JS -->
+                  </div>
+
+                  <!-- Dedicated Fixed Issues Section (Before/After Audit Table) -->
+                  <div id="fixed-issues-section" style="display:none; margin-top:14px;">
+                    <!-- Injected via JS -->
+                  </div>
+
+                  <!-- Dedicated Review Required Section (Human clinical rationale) -->
+                  <div id="review-required-section" style="display:none; margin-top:14px;">
+                    <!-- Injected via JS -->
+                  </div>
                 </div>
 
                 <!-- Independent Double Programming QC Section (SAS 9.4 vs R Pharmaverse) -->

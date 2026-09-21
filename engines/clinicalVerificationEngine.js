@@ -1,6 +1,15 @@
 // engines/clinicalVerificationEngine.js
 // Production-grade Cognitive Clinical Data Reconstructor and Multi-Domain Inspection Engine
 
+let orchestratorModule = null;
+try {
+  orchestratorModule = require('./clinicalValidationOrchestrator');
+} catch (e) {
+  if (typeof globalThis !== 'undefined' && globalThis.ClinicalValidationOrchestrator) {
+    orchestratorModule = globalThis;
+  }
+}
+
 function normalizeClinicalDate(rawVal) {
   if (rawVal === null || rawVal === undefined || rawVal === '') return { isValid: false, formatted: '', wasConverted: false };
   if (rawVal instanceof Date || Object.prototype.toString.call(rawVal) === '[object Date]') {
@@ -4205,6 +4214,22 @@ module.exports = {
   generate16SectionDataQualityReport,
   quickProfileDataset,
   generateValidationCompletenessReport,
-  compareBeforeAndAfterValidation
+  compareBeforeAndAfterValidation,
+  ClinicalValidationOrchestrator: orchestratorModule ? orchestratorModule.ClinicalValidationOrchestrator : null,
+  detectDomain: orchestratorModule ? orchestratorModule.detectDomain : null,
+  DomainValidatorRegistry: orchestratorModule ? orchestratorModule.DomainValidatorRegistry : null,
+  CrossDomainValidator: orchestratorModule ? orchestratorModule.CrossDomainValidator : null,
+  parseClinicalCommand: orchestratorModule ? orchestratorModule.parseClinicalCommand : null,
+  DMValidator: orchestratorModule ? orchestratorModule.DMValidator : null,
+  AEValidator: orchestratorModule ? orchestratorModule.AEValidator : null,
+  ADAEValidator: orchestratorModule ? orchestratorModule.ADAEValidator : null,
+  ADSLValidator: orchestratorModule ? orchestratorModule.ADSLValidator : null,
+  BDSValidator: orchestratorModule ? orchestratorModule.BDSValidator : null,
+  LBValidator: orchestratorModule ? orchestratorModule.LBValidator : null,
+  VSValidator: orchestratorModule ? orchestratorModule.VSValidator : null,
+  EXValidator: orchestratorModule ? orchestratorModule.EXValidator : null,
+  CMValidator: orchestratorModule ? orchestratorModule.CMValidator : null,
+  DSValidator: orchestratorModule ? orchestratorModule.DSValidator : null,
+  SVValidator: orchestratorModule ? orchestratorModule.SVValidator : null
 };
 
