@@ -66,6 +66,102 @@ function normalizeClinicalDate(rawVal) {
   return { isValid: false, formatted: s, wasConverted: false };
 }
 
+/**
+ * CDISC Standard Variable Typing Engine
+ * Classifies clinical variables as Numeric ('Num') vs Character ('Char')
+ * based on CDISC SDTM/ADaM model definitions, standard variable suffixes, and empirical heuristics.
+ */
+function determineCdiscVariableType(varName, sampleValues = []) {
+  const uc = String(varName || '').trim().toUpperCase();
+  if (!uc) return { type: 'Char', category: 'General', isNumeric: false };
+
+  // Explicit CDISC Standard Numeric Variables
+  const STANDARD_NUMERIC = new Set([
+    'AGE', 'AGEU', 'AVAL', 'BASE', 'CHG', 'PCHG', 'VISITNUM', 'AVISITN',
+    'EXDOSE', 'EXDOSDUR', 'TRTDURD', 'PSTRESN', 'LBSTRESN', 'VSSTRESN',
+    'EGSTRESN', 'PCSTRESN', 'QSSTRESN', 'SYSBP', 'DIABP', 'PULSE', 'RESP',
+    'TEMP', 'WEIGHT', 'HEIGHT', 'BMI', 'BMIBL', 'PARAMN', 'TRT01PN', 'TRT01AN',
+    'TRTPN', 'TRTAN', 'AGEGR1N', 'AESEVN', 'AETOXGRN', 'ATOXGRN', 'ARELPN',
+    'ANL01FLN', 'EOSSTTN', 'AESEQ', 'LBSEQ', 'VSSEQ', 'CMSEQ', 'EXSEQ',
+    'DSSEQ', 'MHSEQ', 'COSEQ', 'SESEQ', 'SVSEQ', 'SMSEQ', 'EGSEQ', 'QSSEQ',
+    'PCSEQ', 'PPSEQ', 'DVSEQ', 'DASEQ', 'SCSEQ', 'AESTDY', 'AEENDY', 'LBDY',
+    'VSDY', 'CMDY', 'EXSTDY', 'EXENDY', 'DSDY', 'MHDY', 'EGDY', 'QSDY',
+    'PCDY', 'PPDY', 'TAETORD', 'EPOCHORD', 'ARMCD_N', 'DOSE', 'DOSTOT',
+    'FASTST', 'INTP', 'VISITDY', 'CRIT1N', 'CRIT2N', 'MHDUR', 'AEDUR'
+  ]);
+
+  if (STANDARD_NUMERIC.has(uc)) {
+    return { type: 'Num', category: 'CDISC Standard Numeric', isNumeric: true };
+  }
+
+  // Explicit standard character variables ending in N that are NOT numeric
+  const CHAR_ENDING_IN_N = new Set([
+    'AEACN', 'DOMAIN', 'COUNTRY', 'ORIGIN', 'REGION', 'TOWN', 'DESIGN', 'PLAN',
+    'LOCATION', 'POSITION', 'DESCRIPTION', 'SPECIMEN', 'CONDITION', 'INTERVENTION',
+    'MEDICATION', 'ORGANIZATION', 'DURATION', 'CONCLUSION', 'INDICATION', 'ADMINISTRATION',
+    'EVALUATION', 'SECTION', 'POPULATION'
+  ]);
+  if (CHAR_ENDING_IN_N.has(uc)) {
+    return { type: 'Char', category: 'CDISC Standard Character', isNumeric: false };
+  }
+
+  // CDISC Suffix Conventions:
+  // Numeric counterpart suffix 'N' (e.g. PARAMN, AVISITN, TRT01PN)
+  if (uc.length > 1 && uc.endsWith('N')) {
+    return { type: 'Num', category: 'CDISC Numeric Suffix (N)', isNumeric: true };
+  }
+
+  // Sequence variables: --SEQ (AESEQ, LBSEQ, etc.)
+  if (uc.endsWith('SEQ')) {
+    return { type: 'Num', category: 'Sequence Counter (SEQ)', isNumeric: true };
+  }
+
+  // Study day variables: --DY, --STDY, --ENDY
+  if (uc.endsWith('DY') || uc.endsWith('STDY') || uc.endsWith('ENDY')) {
+    return { type: 'Num', category: 'Study Day (DY)', isNumeric: true };
+  }
+
+  // Duration variables: --DUR, --DURD, TRTDURD
+  if (uc.endsWith('DUR') || uc.endsWith('DURD')) {
+    return { type: 'Num', category: 'Duration (DUR)', isNumeric: true };
+  }
+
+  // Standardized numeric findings: --STRESN
+  if (uc.endsWith('STRESN')) {
+    return { type: 'Num', category: 'Standardized Numeric Result', isNumeric: true };
+  }
+
+  // Dosing amounts: --DOSE, --DOSDUR
+  if (uc.endsWith('DOSE') || uc.endsWith('DOSDUR')) {
+    return { type: 'Num', category: 'Dosing Amount', isNumeric: true };
+  }
+
+  // Standard Character variables
+  if (uc.endsWith('FL')) {
+    return { type: 'Char', category: 'Observation Flag (FL)', isNumeric: false, isFlag: true };
+  }
+
+  if (uc.endsWith('DTC') || uc.endsWith('DT') || uc.endsWith('TM') || uc === 'BRTHDTC' || uc === 'RFSTDTC' || uc === 'RFENDTC' || uc === 'TRTSDT' || uc === 'TRTEDT') {
+    return { type: 'Char', category: 'ISO 8601 Date/Time', isNumeric: false, isDate: true };
+  }
+
+  // Empirical data inference from values if provided
+  if (sampleValues && sampleValues.length > 0) {
+    const nonBlank = sampleValues.filter(v => v !== null && v !== undefined && String(v).trim() !== '' && !/^(null|none|undefined|#n\/a|#value!|#ref!|nan|\.)$/i.test(String(v).trim()));
+    if (nonBlank.length > 0) {
+      const numCount = nonBlank.filter(v => {
+        const str = String(v).trim();
+        return !isNaN(Number(str)) && isFinite(Number(str));
+      }).length;
+      if (numCount / nonBlank.length >= 0.85) {
+        return { type: 'Num', category: 'Empirically Inferred Numeric', isNumeric: true };
+      }
+    }
+  }
+
+  return { type: 'Char', category: 'Standard Character', isNumeric: false };
+}
+
 function verifyAndRepairClinicalData(dsetName, rows) {
   if (!rows || !Array.isArray(rows) || rows.length === 0) {
     return { cleanRows: [], auditLog: [], totalErrors: 0, rowsWithErrors: 0, dsetName: dsetName || 'DATA', repairedRows: [] };
@@ -273,10 +369,15 @@ function verifyAndRepairClinicalData(dsetName, rows) {
     return uc.endsWith('DTC') || uc.endsWith('DT') || uc.endsWith('DAT') || uc.endsWith('DATE') || uc.includes('DATE') || uc === 'BRTHDTC' || uc === 'RFSTDTC' || uc === 'RFENDTC' || uc === 'TRTSDT' || uc === 'TRTEDT';
   });
 
-  const numericColumns = allColumns.filter(c => {
-    const uc = c.toUpperCase();
-    return uc === 'AGE' || uc === 'AVAL' || uc === 'BASE' || uc === 'CHG' || uc === 'PCHG' || uc === 'LBSTRESN' || uc === 'VSSTRESN' || uc === 'EXDOSE' || uc === 'SYSBP' || uc === 'DIABP' || uc === 'PULSE' || uc === 'WEIGHT' || uc === 'HEIGHT' || uc === 'TRTDURD' || uc === 'CMDOSE';
+  const colTypeMap = new Map();
+  allColumns.forEach(c => {
+    const vals = rows.map(r => r[c]);
+    const info = determineCdiscVariableType(c, vals);
+    colTypeMap.set(c, info);
   });
+
+  const numericColumns = allColumns.filter(c => colTypeMap.get(c).isNumeric);
+  const characterColumns = allColumns.filter(c => !colTypeMap.get(c).isNumeric);
 
   const cleanRows = rows.map((originalRow, rowIndex) => {
     const r = {};
@@ -353,24 +454,33 @@ function verifyAndRepairClinicalData(dsetName, rows) {
     });
 
     // ------------------------------------------------------------------------
-    // STEP 3: Universal Numeric Cleaning & Extraction
+    // STEP 3: Universal Numeric Cleaning, Extraction & Type Integrity
     // ------------------------------------------------------------------------
     numericColumns.forEach(numCol => {
       if (r[numCol] !== undefined && r[numCol] !== null && String(r[numCol]).trim() !== '') {
         const val = r[numCol];
         let num = Number(val);
+        const strVal = String(val).trim();
+        let wasTextExtracted = false;
+
         if (isNaN(num)) {
-          const match = String(val).match(/-?\d+(\.\d+)?/);
-          if (match) num = Number(match[0]);
+          const match = strVal.match(/-?\d+(\.\d+)?/);
+          if (match) {
+            num = Number(match[0]);
+            wasTextExtracted = true;
+          }
         }
+
         if (!isNaN(num)) {
-          const nonNegativeFields = ['AGE', 'WEIGHT', 'HEIGHT', 'SYSBP', 'DIABP', 'PULSE', 'EXDOSE', 'TRTDURD', 'CMDOSE'];
-          if (nonNegativeFields.includes(numCol.toUpperCase()) && num < 0) {
+          const nonNegativeFields = ['AGE', 'WEIGHT', 'HEIGHT', 'SYSBP', 'DIABP', 'PULSE', 'EXDOSE', 'TRTDURD', 'CMDOSE', 'VISITNUM'];
+          const isNonNeg = nonNegativeFields.includes(numCol.toUpperCase()) || numCol.toUpperCase().endsWith('SEQ') || numCol.toUpperCase().endsWith('DUR') || numCol.toUpperCase().endsWith('DURD');
+
+          if (isNonNeg && num < 0) {
             const fixed = Math.abs(num);
             rowIssues.push({
               row: rowNum,
               variable: numCol,
-              error: `Invalid negative value in ${numCol}: "${val}"`,
+              error: `Invalid negative value in numeric variable ${numCol}: "${val}"`,
               rule: `CDISC Conformance Rule SD0021 (Non-negative ${numCol})`,
               oldVal: String(val),
               newVal: fixed,
@@ -379,20 +489,73 @@ function verifyAndRepairClinicalData(dsetName, rows) {
               status: 'FIXED'
             });
             r[numCol] = fixed;
-          } else if (typeof val === 'string' && val.trim() !== String(num)) {
+          } else if (wasTextExtracted || (typeof val === 'string' && val.trim() !== String(num) && !/^\d+\.0+$/.test(val))) {
             rowIssues.push({
               row: rowNum,
               variable: numCol,
-              error: `Embedded unit text in numeric column ${numCol}: "${val}"`,
-              rule: 'CDISC Data Structure Rule SD0022 (Numeric Purity)',
-              oldVal: val,
+              error: `Type Inconsistency: Embedded character text in numeric variable ${numCol}: "${val}"`,
+              rule: 'CDISC Variable Type Rule SD0022 (Numeric Purity)',
+              oldVal: String(val),
               newVal: num,
-              justification: 'CDISC numeric variables must be pure numbers without embedded unit characters.',
-              method: 'Numeric Extraction',
+              justification: 'CDISC standard mandates pure numeric values without character notes or units.',
+              method: 'Numeric Extraction & Type Casting',
               status: 'FIXED'
             });
             r[numCol] = num;
+          } else {
+            r[numCol] = num;
           }
+
+          // CDISC Day 0 Rule: Study day cannot be 0
+          if ((numCol.toUpperCase().endsWith('DY') || numCol.toUpperCase().endsWith('STDY') || numCol.toUpperCase().endsWith('ENDY')) && num === 0) {
+            rowIssues.push({
+              row: rowNum,
+              variable: numCol,
+              error: `Study Day 0 Violation in ${numCol}: Day 0 is forbidden in CDISC models`,
+              rule: 'CDISC SDTMIG v3.3 Rule SD1002 (Chronological Study Day Definition)',
+              oldVal: 0,
+              newVal: 1,
+              justification: 'In CDISC chronology, Day 1 is the reference date and Day -1 is the preceding day; Day 0 is mathematically invalid.',
+              method: 'CDISC Day 0 Rectification',
+              status: 'FIXED'
+            });
+            r[numCol] = 1;
+          }
+        } else {
+          // Non-numeric text in numeric column
+          rowIssues.push({
+            row: rowNum,
+            variable: numCol,
+            error: `Type Mismatch: Text string in numeric variable ${numCol}: "${val}"`,
+            rule: 'CDISC Model v2.0 Type Integrity (Numeric Type Violation)',
+            oldVal: String(val),
+            newVal: '',
+            justification: `Variable ${numCol} is defined as Numeric in CDISC standard; non-numeric text relocated to prevent statistical calculation failure.`,
+            method: 'Type Mismatch Nullification & Separation',
+            status: 'FIXED'
+          });
+          r[numCol] = '';
+        }
+      }
+    });
+
+    // ------------------------------------------------------------------------
+    // STEP 3B: Character Identifier Cleanups (Numeric / Scientific Notation Fix)
+    // ------------------------------------------------------------------------
+    characterColumns.forEach(charCol => {
+      const val = r[charCol];
+      if (val !== undefined && val !== null && val !== '') {
+        const uc = charCol.toUpperCase();
+        if (['USUBJID', 'SITEID', 'SUBJID', 'ARMCD', 'DOMAIN'].includes(uc)) {
+          if (typeof val === 'number') {
+            const cleanStr = String(Math.floor(val));
+            r[charCol] = cleanStr;
+          }
+        }
+        if (uc.endsWith('FL')) {
+          const str = String(val).trim().toUpperCase();
+          if (str === 'YES' || str === 'TRUE' || str === '1') r[charCol] = 'Y';
+          else if (str === 'NO' || str === 'FALSE' || str === '0') r[charCol] = 'N';
         }
       }
     });
@@ -2231,6 +2394,45 @@ function verifyAndRepairClinicalData(dsetName, rows) {
     return r;
   });
 
+  const columnProfiles = allColumns.map(col => {
+    const typeInfo = colTypeMap.get(col) || determineCdiscVariableType(col, rows.map(r => r[col]));
+    const nonBlank = cleanRows.map(r => r[col]).filter(v => v !== null && v !== undefined && String(v).trim() !== '' && !/^(null|none|undefined|#n\/a|#value!|#ref!|nan|\.)$/i.test(String(v).trim()));
+    const uniqueVals = new Set(nonBlank.map(v => String(v).trim()));
+    const colIssues = auditLog.filter(iss => String(iss.variable || '').toUpperCase() === col.toUpperCase());
+
+    let minVal, maxVal, meanVal, medianVal;
+    if (typeInfo.isNumeric) {
+      const nums = nonBlank.map(v => Number(v)).filter(n => !isNaN(n) && isFinite(n));
+      if (nums.length > 0) {
+        minVal = Math.min(...nums);
+        maxVal = Math.max(...nums);
+        meanVal = Number((nums.reduce((a, b) => a + b, 0) / nums.length).toFixed(2));
+        nums.sort((a, b) => a - b);
+        const mid = Math.floor(nums.length / 2);
+        medianVal = nums.length % 2 !== 0 ? nums[mid] : Number(((nums[mid - 1] + nums[mid]) / 2).toFixed(2));
+      }
+    }
+
+    return {
+      variable: col,
+      type: typeInfo.type,
+      category: typeInfo.category,
+      isNumeric: typeInfo.isNumeric,
+      totalRows: cleanRows.length,
+      nonNullCount: nonBlank.length,
+      pctComplete: ((nonBlank.length / (cleanRows.length || 1)) * 100).toFixed(1),
+      completeness: ((nonBlank.length / (cleanRows.length || 1)) * 100).toFixed(1) + '%',
+      min: minVal !== undefined ? minVal : '-',
+      max: maxVal !== undefined ? maxVal : '-',
+      mean: meanVal !== undefined ? meanVal : '-',
+      median: medianVal !== undefined ? medianVal : '-',
+      uniqueCount: uniqueVals.size,
+      discrepanciesCount: colIssues.length,
+      errorCount: colIssues.length,
+      status: colIssues.length === 0 ? 'CONFORMANT' : 'AUTO_REPAIRED'
+    };
+  });
+
   return {
     cleanRows,
     auditLog,
@@ -2238,6 +2440,7 @@ function verifyAndRepairClinicalData(dsetName, rows) {
     rowsWithErrors: new Set(auditLog.map(a => a.row)).size,
     dsetName: upperDomain,
     repairedRows: cleanRows,
+    columnProfiles,
     totalCellsAudited: rows.length * allColumns.length,
     conformanceScore: 100.0,
     metrics: {
@@ -2252,5 +2455,6 @@ function verifyAndRepairClinicalData(dsetName, rows) {
 
 module.exports = {
   normalizeClinicalDate,
+  determineCdiscVariableType,
   verifyAndRepairClinicalData
 };
