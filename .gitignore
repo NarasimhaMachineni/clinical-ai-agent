@@ -3,4 +3,6 @@ node_modules/
 *.tmp
 output/
 data_outbox/
+synthetic_sdtm_excel_data/
+scratch/
 
