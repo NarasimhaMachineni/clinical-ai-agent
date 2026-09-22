@@ -4,7 +4,7 @@
  * PURPOSE:     CDISC SDTM / ADaM Production Pipeline for Domain ADSL
  * STANDARDS:   CDISC SDTM-IG v3.3 / ADaM-IG v1.3 / FDA Technical Conformance Guide
  * VALIDATION:  Independent Double Programming with PROC COMPARE (&SYSINFO = 0)
- * GENERATED:   2026-09-22T18:02:27.657Z
+ * GENERATED:   2026-09-22T18:16:19.857Z
  ******************************************************************************/
 
 /* 1. SETUP REGULATORY LIBRARIES & COMPILER OPTIONS */
