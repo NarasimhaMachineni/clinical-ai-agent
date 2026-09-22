@@ -1232,11 +1232,18 @@ code, pre { font-family: 'JetBrains Mono', monospace; }
   background: rgba(0,0,0,0.65);
   backdrop-filter: blur(6px);
   z-index: 5000;
-  display: flex !important;
+  display: flex;
   align-items: center;
   justify-content: center;
 }
-.modal-overlay[style*="display:none"] { display: none !important; }
+.modal-overlay.hidden,
+.modal-overlay[hidden],
+.modal-overlay[style*="display: none"],
+.modal-overlay[style*="display:none"],
+.modal-overlay[style*="display: none !important"],
+.modal-overlay[style*="display:none !important"] {
+  display: none !important;
+}
 
 .modal-card {
   background: var(--bg-card);
@@ -1342,6 +1349,14 @@ code, pre { font-family: 'JetBrains Mono', monospace; }
   display: flex;
   align-items: center;
   justify-content: center;
+}
+.std-modal-backdrop.hidden,
+.std-modal-backdrop[hidden],
+.std-modal-backdrop[style*="display: none"],
+.std-modal-backdrop[style*="display:none"],
+.std-modal-backdrop[style*="display: none !important"],
+.std-modal-backdrop[style*="display:none !important"] {
+  display: none !important;
 }
 
 .std-modal-content {

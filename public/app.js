@@ -1,3 +1,130 @@
+
+// ============================================================================
+// UNIVERSAL MODAL WORKBENCH & LIFECYCLE CONTROLLER (v9.1 Zero-Stuck Fix)
+// ============================================================================
+
+function showModalElement(modalIdOrEl) {
+  const modal = typeof modalIdOrEl === 'string' ? document.getElementById(modalIdOrEl) : modalIdOrEl;
+  if (!modal) return;
+  modal.classList.remove('hidden');
+  modal.removeAttribute('hidden');
+  modal.removeAttribute('aria-hidden');
+  modal.style.removeProperty('display');
+  modal.style.setProperty('display', 'flex', 'important');
+}
+window.showModalElement = showModalElement;
+
+function hideModalElement(modalIdOrEl) {
+  const modal = typeof modalIdOrEl === 'string' ? document.getElementById(modalIdOrEl) : modalIdOrEl;
+  if (!modal) return;
+  modal.classList.add('hidden');
+  modal.setAttribute('hidden', '');
+  modal.setAttribute('aria-hidden', 'true');
+  modal.style.setProperty('display', 'none', 'important');
+}
+window.hideModalElement = hideModalElement;
+
+function closeAllModals() {
+  const modalIds = [
+    'lineage-modal',
+    'upload-modal',
+    'settings-modal',
+    'std-inspector-modal',
+    'study-map-modal',
+    'dataset-profiler-modal',
+    'reasoning-trace-modal',
+    'subject-twin-modal',
+    'command-center-modal',
+    'double-programming-modal'
+  ];
+  modalIds.forEach(id => hideModalElement(id));
+  if (typeof document !== 'undefined') {
+    document.querySelectorAll('.modal-overlay, .std-modal-backdrop').forEach(el => hideModalElement(el));
+  }
+}
+window.closeAllModals = closeAllModals;
+
+function closeLineageModal() {
+  hideModalElement('lineage-modal');
+}
+window.closeLineageModal = closeLineageModal;
+
+function closeUploadModal() {
+  hideModalElement('upload-modal');
+}
+window.closeUploadModal = closeUploadModal;
+
+function openUploadModal() {
+  showModalElement('upload-modal');
+}
+window.openUploadModal = openUploadModal;
+
+function closeSettingsModal() {
+  hideModalElement('settings-modal');
+}
+window.closeSettingsModal = closeSettingsModal;
+
+function openSettingsModal() {
+  showModalElement('settings-modal');
+}
+window.openSettingsModal = openSettingsModal;
+
+function closeStdInspectorModal() {
+  hideModalElement('std-inspector-modal');
+}
+window.closeStdInspectorModal = closeStdInspectorModal;
+
+function closeStudyMapModal() {
+  hideModalElement('study-map-modal');
+}
+window.closeStudyMapModal = closeStudyMapModal;
+
+function closeDatasetProfilerModal() {
+  hideModalElement('dataset-profiler-modal');
+}
+window.closeDatasetProfilerModal = closeDatasetProfilerModal;
+
+function closeReasoningTraceModal() {
+  hideModalElement('reasoning-trace-modal');
+}
+window.closeReasoningTraceModal = closeReasoningTraceModal;
+
+function closeSubjectTwinModal() {
+  hideModalElement('subject-twin-modal');
+}
+window.closeSubjectTwinModal = closeSubjectTwinModal;
+
+function closeDoubleProgrammingModal() {
+  hideModalElement('double-programming-modal');
+}
+window.closeDoubleProgrammingModal = closeDoubleProgrammingModal;
+
+function closeCommandCenterModal() {
+  hideModalElement('command-center-modal');
+}
+window.closeCommandCenterModal = closeCommandCenterModal;
+
+// Global Delegated Click & Keydown listeners for Modal Lifecycle
+if (typeof document !== 'undefined') {
+  document.addEventListener('click', (e) => {
+    // 1. Clicking directly on the dark backdrop overlay outside modal card
+    if (e.target && (e.target.classList.contains('modal-overlay') || e.target.classList.contains('std-modal-backdrop'))) {
+      hideModalElement(e.target);
+    }
+    // 2. Clicking any close button with .btn-close-modal or [data-close-modal]
+    if (e.target && (e.target.classList.contains('btn-close-modal') || e.target.getAttribute('data-close-modal') !== null)) {
+      const parentModal = e.target.closest('.modal-overlay, .std-modal-backdrop');
+      if (parentModal) hideModalElement(parentModal);
+    }
+  });
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeAllModals();
+    }
+  });
+}
+
 /**
  * ClinicalOps AI Agent — Autonomous PC Task Engine (v6.3)
  * Focused 5 Core Clinical Automation Tasks with Automated Data Checking & Intelligent Medical/Statistical Review
@@ -10191,8 +10318,8 @@ function setupUploadModal() {
   const fileInput = document.getElementById('file-input-element');
   const statusEl = document.getElementById('upload-files-status');
 
-  const openModal = () => { if (modal) modal.style.display = 'flex'; };
-  const closeModal = () => { if (modal) modal.style.display = 'none'; };
+  const openModal = () => { if (modal) showModalElement(modal); };
+  const closeModal = () => { if (modal) hideModalElement(modal); };
 
   if (btnOpen) btnOpen.addEventListener('click', openModal);
   if (btnSidebarOpen) btnSidebarOpen.addEventListener('click', openModal);
@@ -10304,12 +10431,12 @@ function setupSettingsModal() {
   const btnSave = document.getElementById('btn-save-settings');
 
   if (btnOpen) btnOpen.addEventListener('click', () => { if (modal) modal.style.display = 'flex'; });
-  if (btnClose) btnClose.addEventListener('click', () => { if (modal) modal.style.display = 'none'; });
+  if (btnClose) btnClose.addEventListener('click', () => { if (modal) hideModalElement(modal); });
 
   if (btnSave) {
     btnSave.addEventListener('click', async () => {
       appendTerminalLog('OK', 'CONFIG_SAVED', 'Configuration saved successfully for PC & GitHub Sync.');
-      if (modal) modal.style.display = 'none';
+      if (modal) hideModalElement(modal);
     });
   }
 }
@@ -16027,10 +16154,7 @@ function openLineageExplanationModal(domain, rowIndex, colName) {
 }
 window.openLineageExplanationModal = openLineageExplanationModal;
 
-function closeLineageModal() {
-  const modal = document.getElementById('lineage-modal');
-  if (modal) modal.style.display = 'none';
-}
+function closeLineageModal() { hideModalElement('lineage-modal'); }
 window.closeLineageModal = closeLineageModal;
 
 // ============================================================================
@@ -16718,15 +16842,14 @@ function getV9Engine(name) {
 function openStudyMapModal() {
   const modal = document.getElementById('study-map-modal');
   if (modal) {
-    modal.style.display = 'flex';
+    showModalElement(modal);
     renderStudyMap();
   }
 }
 window.openStudyMapModal = openStudyMapModal;
 
 function closeStudyMapModal() {
-  const modal = document.getElementById('study-map-modal');
-  if (modal) modal.style.display = 'none';
+  hideModalElement('study-map-modal');
 }
 window.closeStudyMapModal = closeStudyMapModal;
 
@@ -16912,15 +17035,14 @@ window.renderStudyMap = renderStudyMap;
 function openDatasetProfilerModal(domain) {
   const modal = document.getElementById('dataset-profiler-modal');
   if (modal) {
-    modal.style.display = 'flex';
+    showModalElement(modal);
     renderDatasetProfiler(domain);
   }
 }
 window.openDatasetProfilerModal = openDatasetProfilerModal;
 
 function closeDatasetProfilerModal() {
-  const modal = document.getElementById('dataset-profiler-modal');
-  if (modal) modal.style.display = 'none';
+  hideModalElement('dataset-profiler-modal');
 }
 window.closeDatasetProfilerModal = closeDatasetProfilerModal;
 
@@ -17091,15 +17213,14 @@ window.filterProfilerCards = filterProfilerCards;
 function openWhyInspector(issueOrCell, domain, row, variable) {
   const modal = document.getElementById('reasoning-trace-modal');
   if (modal) {
-    modal.style.display = 'flex';
+    showModalElement(modal);
     renderReasoningTrace(issueOrCell, domain, row, variable);
   }
 }
 window.openWhyInspector = openWhyInspector;
 
 function closeReasoningTraceModal() {
-  const modal = document.getElementById('reasoning-trace-modal');
-  if (modal) modal.style.display = 'none';
+  hideModalElement('reasoning-trace-modal');
 }
 window.closeReasoningTraceModal = closeReasoningTraceModal;
 
@@ -17225,15 +17346,14 @@ window.renderReasoningTrace = renderReasoningTrace;
 function openSubjectTwinModal(usubjid) {
   const modal = document.getElementById('subject-twin-modal');
   if (modal) {
-    modal.style.display = 'flex';
+    showModalElement(modal);
     renderSubjectTwin(usubjid);
   }
 }
 window.openSubjectTwinModal = openSubjectTwinModal;
 
 function closeSubjectTwinModal() {
-  const modal = document.getElementById('subject-twin-modal');
-  if (modal) modal.style.display = 'none';
+  hideModalElement('subject-twin-modal');
 }
 window.closeSubjectTwinModal = closeSubjectTwinModal;
 
@@ -17393,15 +17513,14 @@ window.renderSubjectTwin = renderSubjectTwin;
 function openDoubleProgrammingModal(domain) {
   const modal = document.getElementById('double-programming-modal');
   if (modal) {
-    modal.style.display = 'flex';
+    showModalElement(modal);
     renderDoubleProgrammingWorkbench(domain);
   }
 }
 window.openDoubleProgrammingModal = openDoubleProgrammingModal;
 
 function closeDoubleProgrammingModal() {
-  const modal = document.getElementById('double-programming-modal');
-  if (modal) modal.style.display = 'none';
+  hideModalElement('double-programming-modal');
 }
 window.closeDoubleProgrammingModal = closeDoubleProgrammingModal;
 
@@ -17568,7 +17687,7 @@ function openCommandCenterModal() {
   const modal = document.getElementById('command-center-modal');
   const input = document.getElementById('command-palette-input');
   if (modal) {
-    modal.style.display = 'flex';
+    showModalElement(modal);
     if (input) {
       input.value = '';
       input.focus();
@@ -17579,8 +17698,7 @@ function openCommandCenterModal() {
 window.openCommandCenterModal = openCommandCenterModal;
 
 function closeCommandCenterModal() {
-  const modal = document.getElementById('command-center-modal');
-  if (modal) modal.style.display = 'none';
+  hideModalElement('command-center-modal');
 }
 window.closeCommandCenterModal = closeCommandCenterModal;
 
@@ -17687,12 +17805,7 @@ function setupV9EventListeners() {
         openCommandCenterModal();
       }
     } else if (e.key === 'Escape') {
-      closeCommandCenterModal();
-      closeStudyMapModal();
-      closeDatasetProfilerModal();
-      closeReasoningTraceModal();
-      closeSubjectTwinModal();
-      closeDoubleProgrammingModal();
+      closeAllModals();
     }
   });
 }
