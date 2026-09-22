@@ -30,6 +30,21 @@
         </div>
       </div>
       <div class="header-right-actions" style="display:flex; align-items:center; gap:12px;">
+        <button class="btn-header-nav" id="btn-view-study-map" onclick="openStudyMapModal()" title="View Visual Study Map & Lineage Graph" style="display:flex; align-items:center; gap:5px; background:rgba(59,130,246,0.15); border:1px solid rgba(59,130,246,0.4); color:#93c5fd; padding:5px 10px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">
+          <span>🗺️</span> <span>Study Map</span>
+        </button>
+        <button class="btn-header-nav" id="btn-open-profiler" onclick="openDatasetProfilerModal()" title="Open Dataset Columnar Intelligence Profiler" style="display:flex; align-items:center; gap:5px; background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.4); color:#6ee7b7; padding:5px 10px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">
+          <span>📊</span> <span>Profiler</span>
+        </button>
+        <button class="btn-header-nav" id="btn-open-subject-twin" onclick="openSubjectTwinModal()" title="View Subject Digital Twin & Journey" style="display:flex; align-items:center; gap:5px; background:rgba(168,85,247,0.15); border:1px solid rgba(168,85,247,0.4); color:#d8b4fe; padding:5px 10px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">
+          <span>👯</span> <span>Digital Twin</span>
+        </button>
+        <button class="btn-header-nav" id="btn-open-double-prog" onclick="openDoubleProgrammingModal()" title="Open SAS & R Double Programming Workbench" style="display:flex; align-items:center; gap:5px; background:rgba(245,158,11,0.15); border:1px solid rgba(245,158,11,0.4); color:#fde68a; padding:5px 10px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">
+          <span>👥</span> <span>Double Prog</span>
+        </button>
+        <button class="btn-header-nav" id="btn-open-command-palette" onclick="openCommandCenterModal()" title="Open Command Center (Ctrl+K)" style="display:flex; align-items:center; gap:5px; background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.4); color:#fca5a5; padding:5px 10px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">
+          <span>⚡</span> <kbd style="font-size:10.5px; background:rgba(0,0,0,0.3); padding:1px 4px; border-radius:3px;">Ctrl+K</kbd>
+        </button>
         <button class="btn-header-clear" id="btn-clear-all-data" title="Purge all loaded datasets and reset agent to clean standby state">
           <span style="font-size:13px;">🗑️</span>
           <span>Clear / Reset Data</span>
@@ -850,7 +865,8 @@
       document.head.appendChild(s);
     }
   </script>
-  <script src="app.js?v=17.0"></script>
+  <script src="engines/clinicalValidationOrchestrator.js"></script>
+  <script src="app.js?v=18.0"></script>
   <!-- Self-Healing Error Pop-up Toast Container -->
   <div id="self-healing-toast-container"></div>
 
@@ -901,5 +917,140 @@
       </div>
     </div>
   
+
+  <!-- Visual Study Map Modal (Section 2) -->
+  <div class="modal-overlay" id="study-map-modal" style="display:none;" onclick="if(event.target === this) closeStudyMapModal();">
+    <div class="modal-card" style="max-width:1100px; width:95%;">
+      <div class="modal-header" style="border-bottom:1px solid var(--border-mid); padding:14px 18px; display:flex; justify-content:space-between; align-items:center;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:22px;">🗺️</span>
+          <div>
+            <h3 style="font-size:15px; margin:0; color:#fff; font-weight:700;">Interactive Visual Study Map &amp; Lineage Graph</h3>
+            <div style="font-size:11px; color:var(--text-secondary);">Dynamic CDISC SDTM &amp; ADaM structural data flow, dependencies, and analysis endpoints</div>
+          </div>
+        </div>
+        <button onclick="closeStudyMapModal()" style="background:transparent; border:none; color:var(--text-secondary); font-size:22px; cursor:pointer;">&times;</button>
+      </div>
+      <div class="modal-body" id="study-map-modal-body" style="padding:20px; font-size:13px; max-height:75vh; overflow-y:auto;">
+        <!-- Injected dynamically by renderStudyMap() -->
+      </div>
+      <div class="modal-footer" style="padding:12px 18px; border-top:1px solid var(--border-mid); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:11px; color:var(--text-muted);">Study Lineage Graph Engine v9.0</span>
+        <button class="btn-primary-small" onclick="closeStudyMapModal()" style="background:var(--primary-blue); color:#fff; border:none; padding:6px 16px; border-radius:4px; font-weight:600; cursor:pointer;">Close Map</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dataset Intelligence Profiler Modal (Section 3) -->
+  <div class="modal-overlay" id="dataset-profiler-modal" style="display:none;" onclick="if(event.target === this) closeDatasetProfilerModal();">
+    <div class="modal-card" style="max-width:960px; width:95%;">
+      <div class="modal-header" style="border-bottom:1px solid var(--border-mid); padding:14px 18px; display:flex; justify-content:space-between; align-items:center;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:22px;">📊</span>
+          <div>
+            <h3 style="font-size:15px; margin:0; color:#fff; font-weight:700;" id="profiler-modal-title">Dataset Columnar Intelligence Profiler</h3>
+            <div style="font-size:11px; color:var(--text-secondary);">Comprehensive statistical, quantile, and data-quality analysis across all variables</div>
+          </div>
+        </div>
+        <button onclick="closeDatasetProfilerModal()" style="background:transparent; border:none; color:var(--text-secondary); font-size:22px; cursor:pointer;">&times;</button>
+      </div>
+      <div class="modal-body" id="dataset-profiler-body" style="padding:20px; font-size:13px; max-height:75vh; overflow-y:auto;">
+        <!-- Filled dynamically by renderDatasetProfiler() -->
+      </div>
+      <div class="modal-footer" style="padding:12px 18px; border-top:1px solid var(--border-mid); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:11px; color:var(--text-muted);">Statistical & Anomaly Profiling Engine v9.0</span>
+        <button class="btn-primary-small" onclick="closeDatasetProfilerModal()" style="background:var(--primary-blue); color:#fff; border:none; padding:6px 16px; border-radius:4px; font-weight:600; cursor:pointer;">Close Profiler</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reasoning Trace ("WHY?") Modal (Sections 8 & 9) -->
+  <div class="modal-overlay" id="reasoning-trace-modal" style="display:none;" onclick="if(event.target === this) closeReasoningTraceModal();">
+    <div class="modal-card" style="max-width:800px; width:95%;">
+      <div class="modal-header" style="border-bottom:1px solid var(--border-mid); padding:14px 18px; display:flex; justify-content:space-between; align-items:center;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:22px;">💡</span>
+          <div>
+            <h3 style="font-size:15px; margin:0; color:#fff; font-weight:700;">Reasoning Trace &amp; "WHY?" Inspector</h3>
+            <div style="font-size:11px; color:var(--text-secondary);" id="reasoning-trace-target">Step-by-step regulatory calculation and evidence tree</div>
+          </div>
+        </div>
+        <button onclick="closeReasoningTraceModal()" style="background:transparent; border:none; color:var(--text-secondary); font-size:22px; cursor:pointer;">&times;</button>
+      </div>
+      <div class="modal-body" id="reasoning-trace-body" style="padding:20px; font-size:13px; max-height:75vh; overflow-y:auto;">
+        <!-- Filled dynamically by renderReasoningTrace() -->
+      </div>
+      <div class="modal-footer" style="padding:12px 18px; border-top:1px solid var(--border-mid); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:11px; color:var(--text-muted);">Deterministic Derivation Rule Engine v9.0</span>
+        <button class="btn-primary-small" onclick="closeReasoningTraceModal()" style="background:var(--primary-blue); color:#fff; border:none; padding:6px 16px; border-radius:4px; font-weight:600; cursor:pointer;">Close Trace</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Subject Digital Twin Modal (Sections 10 & 11) -->
+  <div class="modal-overlay" id="subject-twin-modal" style="display:none;" onclick="if(event.target === this) closeSubjectTwinModal();">
+    <div class="modal-card" style="max-width:1000px; width:95%;">
+      <div class="modal-header" style="border-bottom:1px solid var(--border-mid); padding:14px 18px; display:flex; justify-content:space-between; align-items:center;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:22px;">👯</span>
+          <div>
+            <h3 style="font-size:15px; margin:0; color:#fff; font-weight:700;" id="subject-twin-title">Subject Digital Twin &amp; Unified Clinical Journey</h3>
+            <div style="font-size:11px; color:var(--text-secondary);">Consolidated chronological timeline across all SDTM &amp; ADaM domains with anomaly detection</div>
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <select id="subject-twin-selector" onchange="loadSubjectTwin(this.value)" style="background:#1e293b; color:#fff; border:1px solid var(--border-mid); border-radius:4px; padding:4px 8px; font-size:12px;">
+            <!-- Populated dynamically -->
+          </select>
+          <button onclick="closeSubjectTwinModal()" style="background:transparent; border:none; color:var(--text-secondary); font-size:22px; cursor:pointer;">&times;</button>
+        </div>
+      </div>
+      <div class="modal-body" id="subject-twin-body" style="padding:20px; font-size:13px; max-height:75vh; overflow-y:auto;">
+        <!-- Filled dynamically by renderSubjectTwin() -->
+      </div>
+      <div class="modal-footer" style="padding:12px 18px; border-top:1px solid var(--border-mid); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:11px; color:var(--text-muted);">Subject Clinical Timeline Engine v9.0</span>
+        <button class="btn-primary-small" onclick="closeSubjectTwinModal()" style="background:var(--primary-blue); color:#fff; border:none; padding:6px 16px; border-radius:4px; font-weight:600; cursor:pointer;">Close Twin</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Command Center Palette Modal (Section 32) -->
+  <div class="modal-overlay" id="command-center-modal" style="display:none;" onclick="if(event.target === this) closeCommandCenterModal();">
+    <div class="modal-card" style="max-width:680px; width:95%; border:1px solid #3b82f6; box-shadow:0 10px 40px rgba(0,0,0,0.8);">
+      <div class="modal-header" style="border-bottom:1px solid var(--border-mid); padding:12px 16px; display:flex; align-items:center; gap:10px;">
+        <span style="font-size:18px;">⚡</span>
+        <input type="text" id="command-palette-input" onkeyup="handleCommandPaletteInput(event)" placeholder="Type a command or query (e.g. /deep-verify DM, /explain AGE, /subject-twin, /double-program)..." style="flex:1; background:transparent; border:none; color:#fff; font-size:14px; outline:none;" />
+        <span style="font-size:11px; color:var(--text-muted); background:rgba(255,255,255,0.08); padding:2px 6px; border-radius:4px;">ESC to close</span>
+      </div>
+      <div class="modal-body" id="command-palette-results" style="padding:12px 16px; font-size:13px; max-height:55vh; overflow-y:auto;">
+        <!-- Populated dynamically with commands & quick actions -->
+      </div>
+    </div>
+  </div>
+
+  <!-- SAS <-> R Double Programming Workbench Modal (Sections 23-25) -->
+  <div class="modal-overlay" id="double-programming-modal" style="display:none;" onclick="if(event.target === this) closeDoubleProgrammingModal();">
+    <div class="modal-card" style="max-width:1050px; width:95%;">
+      <div class="modal-header" style="border-bottom:1px solid var(--border-mid); padding:14px 18px; display:flex; justify-content:space-between; align-items:center;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:22px;">👥</span>
+          <div>
+            <h3 style="font-size:15px; margin:0; color:#fff; font-weight:700;">SAS &amp; R Independent Double Programming Workbench</h3>
+            <div style="font-size:11px; color:var(--text-secondary);">Independent dual-language derivation generation &amp; reconciliation comparison</div>
+          </div>
+        </div>
+        <button onclick="closeDoubleProgrammingModal()" style="background:transparent; border:none; color:var(--text-secondary); font-size:22px; cursor:pointer;">&times;</button>
+      </div>
+      <div class="modal-body" id="double-programming-body" style="padding:20px; font-size:13px; max-height:75vh; overflow-y:auto;">
+        <!-- Injected dynamically by renderDoubleProgrammingWorkbench() -->
+      </div>
+      <div class="modal-footer" style="padding:12px 18px; border-top:1px solid var(--border-mid); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:11px; color:var(--text-muted);">Double Programming Reconciliation v9.0</span>
+        <button class="btn-primary-small" onclick="closeDoubleProgrammingModal()" style="background:var(--primary-blue); color:#fff; border:none; padding:6px 16px; border-radius:4px; font-weight:600; cursor:pointer;">Close Workbench</button>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>

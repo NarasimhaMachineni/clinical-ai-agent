@@ -4230,6 +4230,20 @@ module.exports = {
   EXValidator: orchestratorModule ? orchestratorModule.EXValidator : null,
   CMValidator: orchestratorModule ? orchestratorModule.CMValidator : null,
   DSValidator: orchestratorModule ? orchestratorModule.DSValidator : null,
-  SVValidator: orchestratorModule ? orchestratorModule.SVValidator : null
+  SVValidator: orchestratorModule ? orchestratorModule.SVValidator : null,
+  StudyUnderstandingEngine: orchestratorModule ? orchestratorModule.StudyUnderstandingEngine : null,
+  DatasetProfiler: orchestratorModule ? orchestratorModule.DatasetProfiler : null,
+  DataQualityScorer: orchestratorModule ? orchestratorModule.DataQualityScorer : null,
+  TemporalReasoningEngine: orchestratorModule ? orchestratorModule.TemporalReasoningEngine : null,
+  SemanticTypeEngine: orchestratorModule ? orchestratorModule.SemanticTypeEngine : null,
+  DuplicateIntelligenceEngine: orchestratorModule ? orchestratorModule.DuplicateIntelligenceEngine : null,
+  OutlierAndPlausibilityEngine: orchestratorModule ? orchestratorModule.OutlierAndPlausibilityEngine : null,
+  ReasoningTraceEngine: orchestratorModule ? orchestratorModule.ReasoningTraceEngine : null,
+  SubjectDigitalTwinEngine: orchestratorModule ? orchestratorModule.SubjectDigitalTwinEngine : null,
+  RootCauseEngine: orchestratorModule ? orchestratorModule.RootCauseEngine : null,
+  SASRDoubleProgrammingEngine: orchestratorModule ? orchestratorModule.SASRDoubleProgrammingEngine : null,
+  SubmissionReadinessEngine: orchestratorModule ? orchestratorModule.SubmissionReadinessEngine : null,
+  SnapshotAndReproducibilityEngine: orchestratorModule ? orchestratorModule.SnapshotAndReproducibilityEngine : null,
+  ClinicalOpsOrchestrator: orchestratorModule ? (orchestratorModule.ClinicalOpsOrchestrator || orchestratorModule.ClinicalValidationOrchestrator) : null
 };
 

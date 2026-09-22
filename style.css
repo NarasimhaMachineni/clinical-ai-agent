@@ -2501,3 +2501,184 @@ html {
   color: #fef08a;
   line-height: 1.4;
 }
+
+
+/* =========================================================
+   CLINICALOPS v9.0 ADVANCED INTELLIGENCE UI STYLES
+   ========================================================= */
+
+/* Visual Study Map */
+.study-map-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.study-map-node {
+  background: rgba(30, 41, 59, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 14px;
+  transition: all 0.2s ease;
+}
+.study-map-node:hover {
+  border-color: #3b82f6;
+  transform: translateY(-2px);
+}
+.study-map-edge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(15, 23, 42, 0.6);
+  border-radius: 6px;
+  margin-bottom: 6px;
+  font-size: 12px;
+  border-left: 3px solid #3b82f6;
+}
+
+/* Dataset Profiler Cards */
+.profiler-cols-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 14px;
+}
+.profiler-card {
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 14px;
+}
+.profiler-stat-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  padding: 3px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+.profiler-badge-anomaly {
+  display: inline-block;
+  font-size: 10.5px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  margin-top: 4px;
+}
+
+/* Reasoning Trace Tree */
+.reasoning-step-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+}
+.reasoning-step-card {
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 14px 16px;
+  position: relative;
+}
+.reasoning-step-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.reasoning-step-badge {
+  background: #3b82f6;
+  color: #fff;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+}
+.reasoning-step-arrow {
+  text-align: center;
+  color: #64748b;
+  font-size: 18px;
+  margin: -4px 0;
+}
+
+/* Subject Digital Twin Timeline */
+.timeline-track {
+  position: relative;
+  border-left: 2px solid rgba(255, 255, 255, 0.15);
+  margin-left: 20px;
+  padding-left: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.timeline-entry {
+  position: relative;
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 10px 14px;
+}
+.timeline-entry::before {
+  content: '';
+  position: absolute;
+  left: -31px;
+  top: 14px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #3b82f6;
+  border: 2px solid #0f172a;
+}
+.timeline-entry.domain-AE::before { background: #f59e0b; }
+.timeline-entry.domain-EX::before { background: #10b981; }
+.timeline-entry.domain-LB::before { background: #a855f7; }
+.timeline-entry.domain-VS::before { background: #06b6d4; }
+.timeline-entry.domain-DS::before { background: #ef4444; }
+
+/* Command Center Palette */
+.cmd-palette-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+  color: #cbd5e1;
+}
+.cmd-palette-item:hover, .cmd-palette-item.selected {
+  background: rgba(59, 130, 246, 0.2);
+  color: #fff;
+}
+.cmd-chip {
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-muted);
+}
+
+/* Double Programming Dual Split */
+.double-prog-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 14px;
+}
+.prog-code-box {
+  background: #090d16;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11.5px;
+  color: #e2e8f0;
+  max-height: 380px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+}
