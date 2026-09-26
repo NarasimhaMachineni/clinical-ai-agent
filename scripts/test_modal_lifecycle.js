@@ -56,7 +56,11 @@ const modalIds = [
   'reasoning-trace-modal',
   'subject-twin-modal',
   'command-center-modal',
-  'double-programming-modal'
+  'double-programming-modal',
+  'execution-plan-modal',
+  'system-health-modal',
+  'self-test-modal',
+  'study-lock-modal'
 ];
 
 modalIds.forEach(id => {
@@ -102,7 +106,11 @@ const modalPairs = [
   { name: 'Reasoning Trace Modal', open: () => showModalElement('reasoning-trace-modal'), close: closeReasoningTraceModal, id: 'reasoning-trace-modal' },
   { name: 'Subject Twin Modal', open: () => showModalElement('subject-twin-modal'), close: closeSubjectTwinModal, id: 'subject-twin-modal' },
   { name: 'Double Programming Modal', open: () => showModalElement('double-programming-modal'), close: closeDoubleProgrammingModal, id: 'double-programming-modal' },
-  { name: 'Command Center Modal', open: () => showModalElement('command-center-modal'), close: closeCommandCenterModal, id: 'command-center-modal' }
+  { name: 'Command Center Modal', open: () => showModalElement('command-center-modal'), close: closeCommandCenterModal, id: 'command-center-modal' },
+  { name: 'Execution Plan Modal', open: () => showModalElement('execution-plan-modal'), close: closeExecutionPlanModal, id: 'execution-plan-modal' },
+  { name: 'System Health Modal', open: () => showModalElement('system-health-modal'), close: closeSystemHealthModal, id: 'system-health-modal' },
+  { name: 'Self-Test Modal', open: () => showModalElement('self-test-modal'), close: closeSelfTestModal, id: 'self-test-modal' },
+  { name: 'Study Lock Modal', open: () => showModalElement('study-lock-modal'), close: closeStudyLockModal, id: 'study-lock-modal' }
 ];
 
 modalPairs.forEach(m => {

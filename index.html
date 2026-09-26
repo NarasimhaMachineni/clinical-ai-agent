@@ -45,6 +45,12 @@
         <button class="btn-header-nav" id="btn-open-command-palette" onclick="openCommandCenterModal()" title="Open Command Center (Ctrl+K)" style="display:flex; align-items:center; gap:5px; background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.4); color:#fca5a5; padding:5px 10px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">
           <span>⚡</span> <kbd style="font-size:10.5px; background:rgba(0,0,0,0.3); padding:1px 4px; border-radius:3px;">Ctrl+K</kbd>
         </button>
+        <button class="btn-header-nav" id="btn-toggle-study-lock" onclick="toggleStudyLock()" title="Study Database Lock / Freeze (21 CFR Part 11)" style="display:flex; align-items:center; gap:5px; background:rgba(234,179,8,0.15); border:1px solid rgba(234,179,8,0.4); color:#fef08a; padding:5px 10px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">
+          <span id="study-lock-icon">🔓</span> <span id="study-lock-label">PRE-LOCK</span>
+        </button>
+        <button class="btn-header-nav" id="btn-system-health" onclick="openSystemHealthModal()" title="System Health Diagnostics & Self-Test" style="display:flex; align-items:center; gap:5px; background:rgba(34,197,94,0.15); border:1px solid rgba(34,197,94,0.4); color:#86efac; padding:5px 10px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">
+          <span>🩺</span> <span>Health</span>
+        </button>
         <button class="btn-header-clear" id="btn-clear-all-data" title="Purge all loaded datasets and reset agent to clean standby state">
           <span style="font-size:13px;">🗑️</span>
           <span>Clear / Reset Data</span>
@@ -282,6 +288,23 @@
                         <span style="margin:0 6px;">&bull;</span>
                         <span id="job-stat-throughput" style="color:#4ade80;">0 rows/s</span>
                       </div>
+                    </div>
+                  </div>
+
+                  <!-- Universal Cell Accountability & Reconciliation Summary (Section 16) -->
+                  <div class="cell-accountability-card" id="cell-accountability-card" style="margin-bottom:12px; background:rgba(15,23,42,0.85); border:1px solid rgba(56,189,248,0.3); border-radius:8px; padding:10px 14px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; flex-wrap:wrap; gap:6px;">
+                      <div style="display:flex; align-items:center; gap:8px;">
+                        <span style="font-size:16px;">⚖️</span>
+                        <strong style="color:#fff; font-size:12.5px;">Universal Cell Accountability &amp; Reconciliation Balance</strong>
+                        <span style="font-size:11px; color:var(--text-secondary);">(Total = VALID + INVALID + WARNING + MISSING + CORRECTED + REVIEW + NA)</span>
+                      </div>
+                      <div id="cell-reconciliation-status-badge" style="font-size:11px; font-weight:700; color:#4ade80; background:rgba(34,197,94,0.15); border:1px solid rgba(34,197,94,0.4); padding:2px 8px; border-radius:10px;">
+                        ✓ RECONCILED (0 Discrepancy)
+                      </div>
+                    </div>
+                    <div class="cell-accountability-grid" id="cell-accountability-grid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(110px, 1fr)); gap:6px; font-size:11px;">
+                      <!-- Populated dynamically via renderCellAccountability() -->
                     </div>
                   </div>
 
@@ -713,6 +736,10 @@
                       <span>❓ UNRESOLVED</span>
                       <span class="issue-count-pill" id="issue-count-unresolved">0</span>
                     </button>
+                    <button class="issue-tab-btn" id="tab-issues-blocked" onclick="switchIssueTab('BLOCKED', this)">
+                      <span>⛔ BLOCKED</span>
+                      <span class="issue-count-pill pill-danger" id="issue-count-blocked">0</span>
+                    </button>
                   </div>
 
                   <!-- Issue Cards List (Dynamic 16-field cards) -->
@@ -1048,6 +1075,103 @@
       <div class="modal-footer" style="padding:12px 18px; border-top:1px solid var(--border-mid); display:flex; justify-content:space-between; align-items:center;">
         <span style="font-size:11px; color:var(--text-muted);">Double Programming Reconciliation v9.0</span>
         <button class="btn-primary-small" onclick="closeDoubleProgrammingModal()" style="background:var(--primary-blue); color:#fff; border:none; padding:6px 16px; border-radius:4px; font-weight:600; cursor:pointer;">Close Workbench</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1. Execution Plan Modal (Section 41) -->
+  <div class="modal-overlay" id="execution-plan-modal" style="display:none;" onclick="if(event.target === this) closeExecutionPlanModal();">
+    <div class="modal-card" style="max-width:850px; width:95%;">
+      <div class="modal-header" style="border-bottom:1px solid var(--border-mid); padding:14px 18px; display:flex; justify-content:space-between; align-items:center;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:22px;">📋</span>
+          <div>
+            <h3 style="font-size:15px; margin:0; color:#fff; font-weight:700;" id="execution-plan-title">Deterministic 13-Step Execution Plan</h3>
+            <div style="font-size:11px; color:var(--text-secondary);">Pre-execution pipeline inspection &amp; step-by-step milestone tracking (Section 41)</div>
+          </div>
+        </div>
+        <button onclick="closeExecutionPlanModal()" style="background:transparent; border:none; color:var(--text-secondary); font-size:22px; cursor:pointer;">&times;</button>
+      </div>
+      <div class="modal-body" id="execution-plan-body" style="padding:20px; font-size:13px; max-height:75vh; overflow-y:auto;">
+        <!-- Filled dynamically by renderExecutionPlan() -->
+      </div>
+      <div class="modal-footer" style="padding:12px 18px; border-top:1px solid var(--border-mid); display:flex; justify-content:space-between; align-items:center;">
+        <button class="btn-sm" onclick="closeExecutionPlanModal()" style="background:transparent; color:var(--text-muted); border:1px solid var(--border-subtle); padding:6px 14px; border-radius:4px; cursor:pointer;">Cancel</button>
+        <button class="btn-primary-small" id="btn-confirm-execute-plan" onclick="executePlanConfirmed()" style="background:var(--primary-blue); color:#fff; border:none; padding:6px 18px; border-radius:4px; font-weight:600; cursor:pointer;">▶ Execute Plan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. System Health & Self-Diagnostics Modal (Section 75) -->
+  <div class="modal-overlay" id="system-health-modal" style="display:none;" onclick="if(event.target === this) closeSystemHealthModal();">
+    <div class="modal-card" style="max-width:850px; width:95%;">
+      <div class="modal-header" style="border-bottom:1px solid var(--border-mid); padding:14px 18px; display:flex; justify-content:space-between; align-items:center;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:22px;">🩺</span>
+          <div>
+            <h3 style="font-size:15px; margin:0; color:#fff; font-weight:700;">Full System Diagnostics &amp; Health Telemetry</h3>
+            <div style="font-size:11px; color:var(--text-secondary);">Comprehensive runtime health checks across validators, rules, memory, and engine states (Section 75)</div>
+          </div>
+        </div>
+        <button onclick="closeSystemHealthModal()" style="background:transparent; border:none; color:var(--text-secondary); font-size:22px; cursor:pointer;">&times;</button>
+      </div>
+      <div class="modal-body" id="system-health-body" style="padding:20px; font-size:13px; max-height:75vh; overflow-y:auto;">
+        <!-- Filled dynamically by renderSystemHealth() -->
+      </div>
+      <div class="modal-footer" style="padding:12px 18px; border-top:1px solid var(--border-mid); display:flex; justify-content:space-between; align-items:center;">
+        <button class="btn-sm" onclick="triggerRunSystemSelfTest()" style="background:rgba(34,197,94,0.15); color:#4ade80; border:1px solid rgba(34,197,94,0.4); padding:6px 14px; border-radius:4px; cursor:pointer; font-weight:700;">🧪 Run System Self-Test</button>
+        <button class="btn-primary-small" onclick="closeSystemHealthModal()" style="background:var(--primary-blue); color:#fff; border:none; padding:6px 16px; border-radius:4px; font-weight:600; cursor:pointer;">Close Diagnostics</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. System Self-Test Runner Modal (Section 76) -->
+  <div class="modal-overlay" id="self-test-modal" style="display:none;" onclick="if(event.target === this) closeSelfTestModal();">
+    <div class="modal-card" style="max-width:900px; width:95%;">
+      <div class="modal-header" style="border-bottom:1px solid var(--border-mid); padding:14px 18px; display:flex; justify-content:space-between; align-items:center;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:22px;">🧪</span>
+          <div>
+            <h3 style="font-size:15px; margin:0; color:#fff; font-weight:700;">11-Stage End-to-End System Self-Test</h3>
+            <div style="font-size:11px; color:var(--text-secondary);">Autonomous pipeline verification: Ingestion -> Detection -> Validation -> Correction -> Lineage -> Audit -> TLF -> SAS/R -> Export -> Perf (Section 76)</div>
+          </div>
+        </div>
+        <button onclick="closeSelfTestModal()" style="background:transparent; border:none; color:var(--text-secondary); font-size:22px; cursor:pointer;">&times;</button>
+      </div>
+      <div class="modal-body" id="self-test-body" style="padding:20px; font-size:13px; max-height:75vh; overflow-y:auto;">
+        <!-- Filled dynamically by renderSelfTestResults() -->
+      </div>
+      <div class="modal-footer" style="padding:12px 18px; border-top:1px solid var(--border-mid); display:flex; justify-content:space-between; align-items:center;">
+        <span id="self-test-summary-status" style="font-size:12px; font-weight:700; color:#4ade80;">READY</span>
+        <div style="display:flex; gap:8px;">
+          <button class="btn-sm" onclick="triggerRunSystemSelfTest()" style="background:rgba(56,189,248,0.15); color:#38bdf8; border:1px solid rgba(56,189,248,0.4); padding:6px 14px; border-radius:4px; cursor:pointer; font-weight:600;">🔄 Re-run All Stages</button>
+          <button class="btn-primary-small" onclick="closeSelfTestModal()" style="background:var(--primary-blue); color:#fff; border:none; padding:6px 16px; border-radius:4px; font-weight:600; cursor:pointer;">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Study Database Lock Governance Modal (Section 71) -->
+  <div class="modal-overlay" id="study-lock-modal" style="display:none;" onclick="if(event.target === this) closeStudyLockModal();">
+    <div class="modal-card" style="max-width:600px; width:95%;">
+      <div class="modal-header" style="border-bottom:1px solid var(--border-mid); padding:14px 18px; display:flex; justify-content:space-between; align-items:center;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:22px;">🔒</span>
+          <div>
+            <h3 style="font-size:15px; margin:0; color:#fff; font-weight:700;">Study Database Lock &amp; Freeze Controls</h3>
+            <div style="font-size:11px; color:var(--text-secondary);">21 CFR Part 11 Regulatory Compliance Lock (Section 71)</div>
+          </div>
+        </div>
+        <button onclick="closeStudyLockModal()" style="background:transparent; border:none; color:var(--text-secondary); font-size:22px; cursor:pointer;">&times;</button>
+      </div>
+      <div class="modal-body" id="study-lock-body" style="padding:20px; font-size:13px;">
+        <div id="study-lock-content-view">
+          <!-- Filled dynamically -->
+        </div>
+      </div>
+      <div class="modal-footer" style="padding:12px 18px; border-top:1px solid var(--border-mid); display:flex; justify-content:space-between; align-items:center;">
+        <button class="btn-sm" onclick="closeStudyLockModal()" style="background:transparent; color:var(--text-muted); border:1px solid var(--border-subtle); padding:6px 14px; border-radius:4px; cursor:pointer;">Cancel</button>
+        <button class="btn-primary-small" id="btn-submit-lock-action" onclick="submitStudyLockAction()" style="background:#eab308; color:#000; border:none; padding:6px 18px; border-radius:4px; font-weight:700; cursor:pointer;">Confirm Lock State</button>
       </div>
     </div>
   </div>

@@ -3799,6 +3799,7 @@ function verifyAndRepairClinicalData(dsetName, rows, options = {}) {
   let correctionsProposedCount = 0;
   let correctionsAppliedCount = 0;
   let reviewRequiredCellsCount = 0;
+  let notApplicableCellsCount = 0;
 
   for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
     const rowNum = rowIndex + 1;
@@ -3833,6 +3834,10 @@ function verifyAndRepairClinicalData(dsetName, rows, options = {}) {
         } else if (matchingIssue.status === 'REVIEW_REQUIRED') {
           validityStatus = 'REVIEW_REQUIRED';
           reviewRequiredCellsCount++;
+        } else if (String(matchingIssue.error || '').toLowerCase().includes('missing') || matchingIssue.oldVal === '(blank)') {
+          validityStatus = 'MISSING';
+          missingStatus = 'DERIVABLE';
+          missingCellsCount++;
         } else if (matchingIssue.severity === 'WARNING') {
           validityStatus = 'WARNING';
           warningCellsCount++;
@@ -3840,16 +3845,12 @@ function verifyAndRepairClinicalData(dsetName, rows, options = {}) {
           validityStatus = 'INVALID';
           invalidCellsCount++;
         }
-
-        if (String(matchingIssue.error || '').toLowerCase().includes('missing') || matchingIssue.oldVal === '(blank)') {
-          missingStatus = 'DERIVABLE';
-          missingCellsCount++;
-        }
       } else if (isBlankVal) {
         const colUpper = col.toUpperCase();
         if (colUpper === 'DCSREAS' || colUpper === 'DTHDTC' || (upperDomain.includes('AE') && colUpper.includes('ENDTC'))) {
           validityStatus = 'NOT_APPLICABLE';
           missingStatus = 'STRUCTURAL_MISSING';
+          notApplicableCellsCount++;
         } else {
           validityStatus = 'MISSING';
           missingStatus = 'UNEXPECTED_MISSING';
@@ -3915,6 +3916,9 @@ function verifyAndRepairClinicalData(dsetName, rows, options = {}) {
 
   const unresolvedCells = invalidCellsCount + reviewRequiredCellsCount;
   const revalidationStatus = unresolvedCells === 0 ? 'PASS' : (invalidCellsCount > 0 ? 'FAIL' : 'REVIEW REQUIRED');
+  const correctedCellsCount = correctionsAppliedCount + correctionsProposedCount;
+  const reconciledSum = validCellsCount + invalidCellsCount + warningCellsCount + missingCellsCount + correctedCellsCount + reviewRequiredCellsCount + notApplicableCellsCount;
+  const discrepancy = (rows.length * allColumns.length) - reconciledSum;
 
   const cellSummary = {
     dataset: upperDomain,
@@ -3925,9 +3929,14 @@ function verifyAndRepairClinicalData(dsetName, rows, options = {}) {
     invalidCells: invalidCellsCount,
     warningCells: warningCellsCount,
     missingCells: missingCellsCount,
+    correctedCells: correctedCellsCount,
     correctionsProposed: correctionsProposedCount,
     correctionsApplied: correctionsAppliedCount,
     reviewRequiredCells: reviewRequiredCellsCount,
+    notApplicableCells: notApplicableCellsCount,
+    reconciledSum: reconciledSum,
+    discrepancy: discrepancy,
+    isReconciled: (discrepancy === 0),
     unresolvedCells: unresolvedCells,
     revalidationStatus: revalidationStatus
   };
@@ -4244,6 +4253,13 @@ module.exports = {
   SASRDoubleProgrammingEngine: orchestratorModule ? orchestratorModule.SASRDoubleProgrammingEngine : null,
   SubmissionReadinessEngine: orchestratorModule ? orchestratorModule.SubmissionReadinessEngine : null,
   SnapshotAndReproducibilityEngine: orchestratorModule ? orchestratorModule.SnapshotAndReproducibilityEngine : null,
+  CellAccountabilityEngine: orchestratorModule ? orchestratorModule.CellAccountabilityEngine : null,
+  ExecutionPlanEngine: orchestratorModule ? orchestratorModule.ExecutionPlanEngine : null,
+  StudyLockManager: orchestratorModule ? orchestratorModule.StudyLockManager : null,
+  SystemHealthEngine: orchestratorModule ? orchestratorModule.SystemHealthEngine : null,
+  SelfTestRunner: orchestratorModule ? orchestratorModule.SelfTestRunner : null,
+  GoldenFixtureEngine: orchestratorModule ? orchestratorModule.GoldenFixtureEngine : null,
+  PerformanceBenchmarkEngine: orchestratorModule ? orchestratorModule.PerformanceBenchmarkEngine : null,
   ClinicalOpsOrchestrator: orchestratorModule ? (orchestratorModule.ClinicalOpsOrchestrator || orchestratorModule.ClinicalValidationOrchestrator) : null
 };
 
