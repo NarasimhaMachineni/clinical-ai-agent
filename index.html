@@ -74,25 +74,30 @@
             </button>
           </div>
           <div class="metrics-grid">
-            <div class="metric-card">
+            <div class="metric-card" id="card-metric-subjects" onclick="openMetricDrillDown('TOTAL_PATIENTS')" style="cursor:pointer;" title="Click to view underlying patient subjects and unique key details">
               <span class="metric-val" id="metric-subjects">0</span>
-              <span class="metric-lbl">Total Patients</span>
+              <span class="metric-lbl" id="metric-lbl-subjects">Total Patients</span>
+              <div class="metric-sub" id="metric-sub-subjects" style="font-size:10px; color:var(--text-muted); margin-top:2px;">Unique key: USUBJID</div>
             </div>
-            <div class="metric-card">
-              <span class="metric-val" id="metric-saffl">0</span>
-              <span class="metric-lbl">Patients in Safety Analysis</span>
+            <div class="metric-card" id="card-metric-saffl" onclick="openMetricDrillDown('SAFETY_POPULATION')" style="cursor:pointer;" title="Click to view safety analysis population">
+              <span class="metric-val" id="metric-saffl" style="font-size:12.5px;">NOT CONFIGURED</span>
+              <span class="metric-lbl" id="metric-lbl-saffl">Patients in Safety Analysis</span>
+              <div class="metric-sub" id="metric-sub-saffl" style="font-size:10px; color:var(--text-muted); margin-top:2px;">Rule: SAFFL = 'Y'</div>
             </div>
-            <div class="metric-card">
+            <div class="metric-card" id="card-metric-teae" onclick="openMetricDrillDown('ADVERSE_EVENTS')" style="cursor:pointer;" title="Click to view adverse event breakdown">
               <span class="metric-val" id="metric-teae">0</span>
-              <span class="metric-lbl">Side Effects Reported</span>
+              <span class="metric-lbl" id="metric-lbl-teae">Side Effects Reported</span>
+              <div class="metric-sub" id="metric-sub-teae" style="font-size:10px; color:var(--text-muted); margin-top:2px;">Source: Standby</div>
             </div>
-            <div class="metric-card">
-              <span class="metric-val" id="metric-hyslaw">0</span>
-              <span class="metric-lbl">Liver Toxicity Alerts</span>
+            <div class="metric-card" id="card-metric-hyslaw" onclick="openMetricDrillDown('LIVER_SAFETY')" style="cursor:pointer;" title="Click to view liver safety surveillance">
+              <span class="metric-val" id="metric-hyslaw" style="font-size:12px;">NOT CONFIGURED</span>
+              <span class="metric-lbl" id="metric-lbl-hyslaw">Liver Toxicity Alerts</span>
+              <div class="metric-sub" id="metric-sub-hyslaw" style="font-size:10px; color:var(--text-muted); margin-top:2px;">Hy's Law Screening</div>
             </div>
-            <div class="metric-card full-span">
-              <span class="metric-val text-green" id="metric-p21">⚪ Standby</span>
-              <span class="metric-lbl">FDA Rules Checked</span>
+            <div class="metric-card full-span" id="card-metric-p21" onclick="openMetricDrillDown('RULE_CHECKS')" style="cursor:pointer;" title="Click to view executed CDISC / FDA rule checks">
+              <span class="metric-val" id="metric-p21">⚪ Standby</span>
+              <span class="metric-lbl" id="metric-lbl-p21">FDA Rules Checked</span>
+              <div class="metric-sub" id="metric-sub-p21" style="font-size:10px; color:var(--text-muted); margin-top:2px;">Real Rule Execution</div>
             </div>
           </div>
         </div>
@@ -1172,6 +1177,52 @@
       <div class="modal-footer" style="padding:12px 18px; border-top:1px solid var(--border-mid); display:flex; justify-content:space-between; align-items:center;">
         <button class="btn-sm" onclick="closeStudyLockModal()" style="background:transparent; color:var(--text-muted); border:1px solid var(--border-subtle); padding:6px 14px; border-radius:4px; cursor:pointer;">Cancel</button>
         <button class="btn-primary-small" id="btn-submit-lock-action" onclick="submitStudyLockAction()" style="background:#eab308; color:#000; border:none; padding:6px 18px; border-radius:4px; font-weight:700; cursor:pointer;">Confirm Lock State</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Live Study Metric Evidence Drill-Down Modal (v11.0 Sections 2-8) -->
+  <div class="modal-overlay" id="metric-drilldown-modal" style="display:none;" onclick="if(event.target === this) closeMetricDrillDownModal();">
+    <div class="modal-card" style="max-width:780px; width:95%;">
+      <div class="modal-header" style="border-bottom:1px solid var(--border-mid); padding:14px 18px; display:flex; justify-content:space-between; align-items:center;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:22px;" id="metric-drilldown-icon">📊</span>
+          <div>
+            <h3 style="font-size:15px; margin:0; color:#fff; font-weight:700;" id="metric-drilldown-title">Metric Evidence Drill-Down</h3>
+            <div style="font-size:11px; color:var(--text-secondary);" id="metric-drilldown-subtitle">Authoritative data provenance and subject cohort</div>
+          </div>
+        </div>
+        <button onclick="closeMetricDrillDownModal()" style="background:transparent; border:none; color:var(--text-secondary); font-size:22px; cursor:pointer;">&times;</button>
+      </div>
+      <div class="modal-body" id="metric-drilldown-body" style="padding:18px 20px; font-size:12.5px; max-height:75vh; overflow-y:auto;">
+        <!-- Populated dynamically -->
+      </div>
+      <div class="modal-footer" style="padding:12px 18px; border-top:1px solid var(--border-mid); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:11px; color:var(--text-muted);">21 CFR Part 11 Audit Provenance</span>
+        <button class="btn-primary-small" onclick="closeMetricDrillDownModal()" style="background:var(--primary-blue); color:#fff; border:none; padding:6px 16px; border-radius:4px; font-weight:600; cursor:pointer;">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. TLF Cell Lineage & Patient Drill-Down Modal (v11.0 Section 28) -->
+  <div class="modal-overlay" id="tlf-drilldown-modal" style="display:none;" onclick="if(event.target === this) closeTlfDrillDownModal();">
+    <div class="modal-card" style="max-width:880px; width:95%;">
+      <div class="modal-header" style="border-bottom:1px solid var(--border-mid); padding:14px 18px; display:flex; justify-content:space-between; align-items:center;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:22px;">🔬</span>
+          <div>
+            <h3 style="font-size:15px; margin:0; color:#fff; font-weight:700;" id="tlf-drilldown-title">TLF Cell Lineage &amp; Patient Drill-Down</h3>
+            <div style="font-size:11px; color:var(--text-secondary);" id="tlf-drilldown-subtitle">Section 28 Cell-to-Patient Traceability</div>
+          </div>
+        </div>
+        <button onclick="closeTlfDrillDownModal()" style="background:transparent; border:none; color:var(--text-secondary); font-size:22px; cursor:pointer;">&times;</button>
+      </div>
+      <div class="modal-body" id="tlf-drilldown-body" style="padding:18px 20px; font-size:12.5px; max-height:75vh; overflow-y:auto;">
+        <!-- Populated dynamically -->
+      </div>
+      <div class="modal-footer" style="padding:12px 18px; border-top:1px solid var(--border-mid); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:11px; color:var(--text-muted);" id="tlf-drilldown-footer-info">ICH E3 Statistical Derivation</span>
+        <button class="btn-primary-small" onclick="closeTlfDrillDownModal()" style="background:var(--primary-blue); color:#fff; border:none; padding:6px 16px; border-radius:4px; font-weight:600; cursor:pointer;">Close</button>
       </div>
     </div>
   </div>

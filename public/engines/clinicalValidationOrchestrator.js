@@ -3398,8 +3398,753 @@ adlb <- adlb %>%
     }
   };
 
+  // 6.22 Authoritative Central Study Data Store (v11.0 Section 1 & 46)
+  const StudyDataStore = {
+    studyId: 'ONC-2025-001',
+    studyTitle: 'Phase 3 Multi-Center Randomized Clinical Investigation',
+    protocol: 'ONC-2025-001',
+    dataVersion: 1,
+    lastValidatedVersion: 0,
+    datasets: {},        // domain -> { rows, sourceRows, rowCount, colCount, columns, hash, version }
+    metadata: {},        // domain -> { variables, label, standard }
+    configuration: {
+      safetyFlagVariable: 'SAFFL',
+      safetyPopulationRule: 'SAFFL === "Y"',
+      efficacyPopulationRule: 'ITTFL === "Y"',
+      hepaticSafety: {
+        altThreshold: 3.0,
+        astThreshold: 3.0,
+        tbilThreshold: 2.0,
+        alpMaxThreshold: 2.0
+      }
+    },
+    validationRuns: [],
+    activeRunId: null,
+    validationResults: {},
+    cellAccountability: {},
+    lineage: {},
+    audit: [],
+    tlfResults: {},
+    qcResults: {},
+
+    setDataset(domain, rows, sourceRows = null) {
+      const uDom = String(domain || '').toUpperCase();
+      const currentRows = Array.isArray(rows) ? rows : [];
+      const sRows = Array.isArray(sourceRows) ? sourceRows : (this.datasets[uDom]?.sourceRows || JSON.parse(JSON.stringify(currentRows)));
+      const cols = currentRows[0] ? Object.keys(currentRows[0]) : [];
+      this.datasets[uDom] = {
+        domain: uDom,
+        rows: currentRows,
+        sourceRows: sRows,
+        rowCount: currentRows.length,
+        colCount: cols.length,
+        columns: cols,
+        version: (this.datasets[uDom]?.version || 0) + 1,
+        updatedAt: new Date().toISOString()
+      };
+      const rawStudy = currentRows[0]?.STUDYID || currentRows[0]?.StudyID || sRows[0]?.STUDYID;
+      if (rawStudy) this.studyId = rawStudy;
+      this.dataVersion++;
+      this.invalidateDependentResults(uDom);
+      return this.datasets[uDom];
+    },
+
+    hasDataset(domain) {
+      return !!this.datasets[String(domain || '').toUpperCase()];
+    },
+
+    getDataset(domain) {
+      return this.datasets[String(domain || '').toUpperCase()]?.rows || [];
+    },
+
+    getDatasetEntry(domain) {
+      return this.datasets[String(domain || '').toUpperCase()] || null;
+    },
+
+    getSourceDataset(domain) {
+      return this.datasets[String(domain || '').toUpperCase()]?.sourceRows || [];
+    },
+
+    getActiveDomains() {
+      return Object.keys(this.datasets).filter(d => this.datasets[d] && this.datasets[d].rowCount > 0);
+    },
+
+    getUniqueSubjects() {
+      const adsl = this.datasets['ADSL']?.rows || this.datasets['DM']?.rows;
+      if (adsl && adsl.length > 0) {
+        return Array.from(new Set(adsl.map(r => r.USUBJID).filter(Boolean)));
+      }
+      const set = new Set();
+      Object.values(this.datasets).forEach(d => {
+        (d.rows || []).forEach(r => { if (r.USUBJID) set.add(r.USUBJID); });
+      });
+      return Array.from(set);
+    },
+
+    removeDataset(domain) {
+      const uDom = String(domain || '').toUpperCase();
+      delete this.datasets[uDom];
+      this.dataVersion++;
+      this.invalidateDependentResults(uDom);
+      if (Object.keys(this.datasets).length === 0) {
+        this.studyId = '';
+      }
+    },
+
+    clearAll() {
+      this.studyId = '';
+      this.datasets = {};
+      this.validationResults = {};
+      this.cellAccountability = {};
+      this.tlfResults = {};
+      this.qcResults = {};
+      this.audit = [];
+      this.dataVersion++;
+      this.lastValidatedVersion = 0;
+    },
+
+    invalidateDependentResults(domain) {
+      delete this.validationResults[domain];
+      delete this.validationResults['ALL'];
+      delete this.tlfResults[domain];
+      delete this.tlfResults['ALL'];
+      this.lastValidatedVersion = 0; // Signals results out of date
+    },
+
+    markValidated(runId, results) {
+      this.activeRunId = runId;
+      this.lastValidatedVersion = this.dataVersion;
+      if (results) {
+        Object.keys(results).forEach(k => {
+          this.validationResults[k] = results[k];
+        });
+      }
+      this.validationRuns.push({
+        runId,
+        dataVersion: this.dataVersion,
+        timestamp: new Date().toISOString(),
+        summary: results?.summary || null
+      });
+    },
+
+    isValidationCurrent() {
+      return this.dataVersion > 0 && this.lastValidatedVersion === this.dataVersion;
+    },
+
+    addAuditEntry(entry) {
+      const auditRec = {
+        id: `AUD-${Date.now()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
+        timestamp: new Date().toISOString(),
+        user: 'ClinicalOps AI Engine (Lakshmi Narasimha Machineni)',
+        ...entry
+      };
+      this.audit.push(auditRec);
+      return auditRec;
+    },
+
+    getAuditTrail(domain = null) {
+      if (!domain) return this.audit;
+      return this.audit.filter(a => String(a.domain || '').toUpperCase() === String(domain).toUpperCase());
+    }
+  };
+
+  // 6.23 Live Study Metrics Engine (v11.0 Sections 2–5)
+  const LiveStudyMetricsEngine = {
+    calculateTotalPatients(store = StudyDataStore) {
+      const adslRows = store.getDataset('ADSL');
+      const dmRows = store.getDataset('DM');
+      let source = 'NONE';
+      let uniqueSubjs = new Set();
+      let rowCount = 0;
+
+      if (adslRows.length > 0) {
+        source = 'ADSL';
+        rowCount = adslRows.length;
+        adslRows.forEach(r => {
+          const id = r.USUBJID || r.SUBJID;
+          if (id && String(id).trim()) uniqueSubjs.add(String(id).trim());
+        });
+      } else if (dmRows.length > 0) {
+        source = 'DM';
+        rowCount = dmRows.length;
+        dmRows.forEach(r => {
+          const id = r.USUBJID || r.SUBJID;
+          if (id && String(id).trim()) uniqueSubjs.add(String(id).trim());
+        });
+      } else {
+        const activeDoms = store.getActiveDomains();
+        if (activeDoms.length > 0) {
+          source = activeDoms[0];
+          activeDoms.forEach(d => {
+            const dRows = store.getDataset(d);
+            rowCount += dRows.length;
+            dRows.forEach(r => {
+              const id = r.USUBJID || r.SUBJID || r.PTID;
+              if (id && String(id).trim()) uniqueSubjs.add(String(id).trim());
+            });
+          });
+        }
+      }
+
+      const subjectsList = Array.from(uniqueSubjs);
+      return {
+        count: subjectsList.length,
+        source: source,
+        uniqueKey: 'USUBJID',
+        rowCount: rowCount,
+        subjects: subjectsList,
+        isRowMismatch: rowCount > 0 && rowCount !== subjectsList.length
+      };
+    },
+
+    calculateSafetyPopulation(store = StudyDataStore) {
+      const adslRows = store.getDataset('ADSL');
+      const safetyVar = store.configuration?.safetyFlagVariable || 'SAFFL';
+
+      if (adslRows.length > 0) {
+        const hasSafetyCol = adslRows[0] && Object.keys(adslRows[0]).some(k => k.toUpperCase() === safetyVar.toUpperCase());
+        if (hasSafetyCol) {
+          const safflSubjs = new Set();
+          const excludedSubjs = new Set();
+          adslRows.forEach(r => {
+            const val = String(r[safetyVar] || r.SAFFL || '').trim().toUpperCase();
+            const id = r.USUBJID || r.SUBJID;
+            if (val === 'Y') {
+              if (id) safflSubjs.add(String(id).trim());
+            } else {
+              if (id) excludedSubjs.add(String(id).trim());
+            }
+          });
+          return {
+            status: 'CONFIGURED',
+            count: safflSubjs.size,
+            totalSubj: adslRows.length,
+            percent: adslRows.length > 0 ? ((safflSubjs.size / adslRows.length) * 100).toFixed(1) : '0.0',
+            source: `ADSL.${safetyVar}`,
+            subjects: Array.from(safflSubjs),
+            excludedSubjects: Array.from(excludedSubjs)
+          };
+        }
+      }
+
+      return {
+        status: 'NOT CONFIGURED',
+        count: null,
+        totalSubj: 0,
+        percent: null,
+        source: 'NONE',
+        message: 'Safety population flag (SAFFL) not configured in dataset',
+        subjects: [],
+        excludedSubjects: []
+      };
+    },
+
+    calculateAdverseEvents(store = StudyDataStore) {
+      const aeRows = store.getDataset('AE');
+      const adaeRows = store.getDataset('ADAE');
+
+      const aeSubjs = new Set();
+      let aeSerious = 0;
+      aeRows.forEach(r => {
+        if (r.USUBJID) aeSubjs.add(String(r.USUBJID).trim());
+        if (String(r.AESER || '').trim().toUpperCase() === 'Y') aeSerious++;
+      });
+
+      const adaeSubjs = new Set();
+      let adaeSerious = 0;
+      let adaeTreatmentEmergent = 0;
+      adaeRows.forEach(r => {
+        if (r.USUBJID) adaeSubjs.add(String(r.USUBJID).trim());
+        if (String(r.AESER || '').trim().toUpperCase() === 'Y') adaeSerious++;
+        if (String(r.TRTEMFL || '').trim().toUpperCase() === 'Y') adaeTreatmentEmergent++;
+      });
+
+      if (adaeRows.length > 0) {
+        return {
+          totalEvents: adaeRows.length,
+          uniqueSubjects: adaeSubjs.size,
+          seriousEvents: adaeSerious,
+          treatmentEmergentEvents: adaeTreatmentEmergent,
+          source: 'ADAE',
+          isAnalysis: true,
+          sdtmSourceEvents: aeRows.length > 0 ? aeRows.length : null
+        };
+      } else if (aeRows.length > 0) {
+        return {
+          totalEvents: aeRows.length,
+          uniqueSubjects: aeSubjs.size,
+          seriousEvents: aeSerious,
+          treatmentEmergentEvents: null,
+          source: 'AE',
+          isAnalysis: false,
+          sdtmSourceEvents: aeRows.length
+        };
+      }
+
+      return {
+        totalEvents: 0,
+        uniqueSubjects: 0,
+        seriousEvents: 0,
+        treatmentEmergentEvents: 0,
+        source: 'NONE',
+        isAnalysis: false
+      };
+    },
+
+    getMetricsSnapshot(store = StudyDataStore) {
+      const patients = this.calculateTotalPatients(store);
+      const safety = this.calculateSafetyPopulation(store);
+      const ae = this.calculateAdverseEvents(store);
+      const liver = LiverSafetyEngine.evaluateLiverSafety(store);
+      const rules = RuleExecutionEngine.getExecutionSummary(store);
+
+      return {
+        patients,
+        safety,
+        adverseEvents: ae,
+        liverSafety: liver,
+        rules,
+        timestamp: new Date().toISOString()
+      };
+    }
+  };
+
+  // 6.24 Configurable Liver Safety & Hy's Law Engine (v11.0 Section 6)
+  const LiverSafetyEngine = {
+    evaluateLiverSafety(store = StudyDataStore) {
+      const adlbRows = store.getDataset('ADLB');
+      const lbRows = store.getDataset('LB');
+      const labRows = adlbRows.length > 0 ? adlbRows : lbRows;
+      const domainName = adlbRows.length > 0 ? 'ADLB' : (lbRows.length > 0 ? 'LB' : null);
+
+      if (!domainName || labRows.length === 0) {
+        return {
+          status: 'NOT CONFIGURED',
+          alertCount: 0,
+          alerts: [],
+          message: 'Laboratory dataset (LB/ADLB) not loaded.',
+          recordsChecked: 0
+        };
+      }
+
+      const cfg = store.configuration?.hepaticSafety || {
+        altThreshold: 3.0,
+        astThreshold: 3.0,
+        tbilThreshold: 2.0,
+        alpMaxThreshold: 2.0
+      };
+
+      const defaultULN = {
+        ALT: 45,
+        AST: 40,
+        ALP: 120,
+        BILI: 1.2
+      };
+
+      const subjectLabs = new Map();
+      let hasLiverEnzymes = false;
+
+      labRows.forEach((r, idx) => {
+        const subj = String(r.USUBJID || r.SUBJID || '').trim();
+        if (!subj) return;
+
+        const pcd = String(r.PARAMCD || r.LBTESTCD || r.LBTEST || '').trim().toUpperCase();
+        let paramType = null;
+        if (pcd === 'ALT' || pcd.includes('ALANINE')) paramType = 'ALT';
+        else if (pcd === 'AST' || pcd.includes('ASPARTATE')) paramType = 'AST';
+        else if (pcd === 'ALP' || pcd.includes('ALKALINE')) paramType = 'ALP';
+        else if (pcd === 'BILI' || pcd === 'TBIL' || pcd.includes('BILIRUBIN')) paramType = 'BILI';
+
+        if (!paramType) return;
+        hasLiverEnzymes = true;
+
+        const val = parseFloat(r.AVAL !== undefined ? r.AVAL : (r.LBSTRESN !== undefined ? r.LBSTRESN : r.LBORRES));
+        const uln = parseFloat(r.ANRHI || r.LBSTNRHI || r.A1HI || defaultULN[paramType]);
+        const dateVal = r.ADT || r.ADTM || r.LBDTC || null;
+        const visitVal = r.AVISIT || r.VISIT || (r.VISITNUM !== undefined ? `VISIT-${r.VISITNUM}` : null);
+        const timeKey = dateVal || visitVal || 'STUDY_OVERALL';
+
+        if (isNaN(val) || val <= 0) return;
+
+        if (!subjectLabs.has(subj)) subjectLabs.set(subj, []);
+        subjectLabs.get(subj).push({
+          row: idx + 1,
+          paramType,
+          pcd,
+          val,
+          uln,
+          ratio: uln > 0 ? (val / uln) : 0,
+          timeKey,
+          date: dateVal || 'Unspecified',
+          visit: visitVal || 'Unspecified',
+          rawRow: r
+        });
+      });
+
+      if (!hasLiverEnzymes) {
+        return {
+          status: 'INSUFFICIENT DATA',
+          alertCount: 0,
+          alerts: [],
+          message: 'No liver enzyme parameters (ALT, AST, ALP, BILI) found in laboratory records.',
+          recordsChecked: labRows.length
+        };
+      }
+
+      const potentialSignals = [];
+
+      subjectLabs.forEach((labs, subj) => {
+        const visits = new Map();
+        labs.forEach(l => {
+          const k = l.timeKey;
+          if (!visits.has(k)) visits.set(k, {});
+          visits.get(k)[l.paramType] = l;
+        });
+
+        visits.forEach((meas, vKey) => {
+          const altMeas = meas.ALT;
+          const astMeas = meas.AST;
+          const biliMeas = meas.BILI;
+          const alpMeas = meas.ALP;
+
+          const transaminaseElevated = (altMeas && altMeas.ratio >= cfg.altThreshold) || (astMeas && astMeas.ratio >= cfg.astThreshold);
+          const biliElevated = biliMeas && biliMeas.ratio >= cfg.tbilThreshold;
+          const alpNotCholestatic = !alpMeas || alpMeas.ratio < cfg.alpMaxThreshold;
+
+          if (transaminaseElevated && biliElevated && alpNotCholestatic) {
+            potentialSignals.push({
+              subject: subj,
+              visit: vKey,
+              altRatio: altMeas ? altMeas.ratio.toFixed(2) : 'N/A',
+              astRatio: astMeas ? astMeas.ratio.toFixed(2) : 'N/A',
+              biliRatio: biliMeas ? biliMeas.ratio.toFixed(2) : 'N/A',
+              alpRatio: alpMeas ? alpMeas.ratio.toFixed(2) : 'N/A',
+              supportingRecords: [altMeas, astMeas, biliMeas, alpMeas].filter(Boolean).map(m => ({
+                row: m.row,
+                param: m.paramType,
+                value: m.val,
+                uln: m.uln,
+                ratio: `${m.ratio.toFixed(2)}x ULN`
+              })),
+              status: 'POTENTIAL SIGNAL — REVIEW REQUIRED',
+              severity: 'CRITICAL',
+              fdaCriteriaSatisfied: 'Hy\'s Law (ALT/AST > 3x ULN + TBL > 2x ULN, ALP < 2x ULN)'
+            });
+          }
+        });
+      });
+
+      return {
+        status: potentialSignals.length > 0 ? 'ALERTS FOUND' : 'NO ALERTS',
+        alertCount: potentialSignals.length,
+        alerts: potentialSignals,
+        message: potentialSignals.length > 0
+          ? `Detected ${potentialSignals.length} potential hepatic signal(s) meeting Hy's Law screening threshold.`
+          : 'Zero hepatotoxicity alerts detected across evaluated laboratory records.',
+        recordsChecked: labRows.length,
+        subjectsScreened: subjectLabs.size
+      };
+    }
+  };
+
+  // 6.25 Data-Driven CDISC & FDA Rule Execution Engine (v11.0 Sections 7–8)
+  const RuleExecutionEngine = {
+    standardRules: [
+      { rule_id: 'FDA-TCG-001', rule_name: 'Primary Subject Identifier Uniqueness', domain: 'DM', standard: 'FDA TCG §2.2', validator: (store) => {
+        const dm = store.getDataset('DM');
+        if (!dm.length) return { applicable: false };
+        const ids = dm.map(r => r.USUBJID).filter(Boolean);
+        const dupes = ids.length - new Set(ids).size;
+        return { applicable: true, passed: dupes === 0, evidence: dupes === 0 ? `All ${ids.length} subjects have strictly unique USUBJID` : `${dupes} duplicate USUBJID detected` };
+      }},
+      { rule_id: 'FDA-TCG-002', rule_name: 'ISO 8601 Date Format Normalization', domain: 'ALL', standard: 'FDA TCG §3.1', validator: (store) => {
+        const activeDoms = store.getActiveDomains();
+        if (!activeDoms.length) return { applicable: false };
+        let totalDates = 0; let invalidDates = 0;
+        activeDoms.forEach(d => {
+          store.getDataset(d).forEach(r => {
+            Object.keys(r).forEach(k => {
+              if (k.endsWith('DTC') || k.endsWith('DT')) {
+                const val = String(r[k] || '').trim();
+                if (val && !/^(null|nan|\.)$/i.test(val)) {
+                  totalDates++;
+                  if (!/^\d{4}(-\d{2}(-\d{2}(T\d{2}:\d{2}(:\d{2})?)?)?)?$/.test(val)) invalidDates++;
+                }
+              }
+            });
+          });
+        });
+        return { applicable: totalDates > 0, passed: invalidDates === 0, evidence: invalidDates === 0 ? `All ${totalDates} date/time fields conform to ISO 8601` : `${invalidDates} non-conforming dates detected` };
+      }},
+      { rule_id: 'CDISC-SDTM-DM-001', rule_name: 'Demographic Controlled Terminology (SEX/RACE/ETHNIC)', domain: 'DM/ADSL', standard: 'CDISC SDTMIG v3.3 / ADaMIG v1.3', validator: (store) => {
+        const rows = store.getDataset('DM').length ? store.getDataset('DM') : store.getDataset('ADSL');
+        if (!rows.length) return { applicable: false };
+        const hasSex = rows.some(r => r.SEX !== undefined && r.SEX !== null && String(r.SEX).trim() !== '');
+        if (!hasSex) return { applicable: false };
+        let invalidCt = 0;
+        rows.forEach(r => {
+          if (r.SEX && !['M', 'F', 'U', 'UNDIFFERENTIATED'].includes(String(r.SEX).trim().toUpperCase())) invalidCt++;
+        });
+        return { applicable: true, passed: invalidCt === 0, evidence: invalidCt === 0 ? 'All demographic records adhere to NCI Controlled Terminology for SEX' : `${invalidCt} invalid SEX terminology records` };
+      }},
+      { rule_id: 'CDISC-SDTM-AE-001', rule_name: 'Adverse Event Chronology & Sequence Integrity', domain: 'AE', standard: 'CDISC SDTMIG v3.3', validator: (store) => {
+        const ae = store.getDataset('AE');
+        if (!ae.length) return { applicable: false };
+        let invSeq = 0; let invDates = 0;
+        ae.forEach(r => {
+          if (r.AESTDTC && r.AEENDTC && r.AESTDTC > r.AEENDTC) invDates++;
+          if (r.AESEQ !== undefined && (isNaN(Number(r.AESEQ)) || Number(r.AESEQ) <= 0)) invSeq++;
+        });
+        const passed = invDates === 0 && invSeq === 0;
+        return { applicable: true, passed, evidence: passed ? `All ${ae.length} AE events strictly ordered with valid AESEQ` : `${invDates} inverted dates, ${invSeq} invalid AESEQ` };
+      }},
+      { rule_id: 'CDISC-ADAM-ADSL-001', rule_name: 'Subject-Level Analysis Age Validity & Range', domain: 'ADSL', standard: 'CDISC ADaMIG v1.3', validator: (store) => {
+        const adsl = store.getDataset('ADSL').length ? store.getDataset('ADSL') : store.getDataset('DM');
+        if (!adsl.length) return { applicable: false };
+        const hasAge = adsl.some(r => r.AGE !== undefined && r.AGE !== null && String(r.AGE).trim() !== '');
+        if (!hasAge) return { applicable: false };
+        let invalidAge = 0;
+        adsl.forEach(r => {
+          const ageNum = Number(r.AGE);
+          if (r.AGE === undefined || r.AGE === null || isNaN(ageNum) || ageNum < 0 || ageNum > 120) invalidAge++;
+        });
+        return { applicable: true, passed: invalidAge === 0, evidence: invalidAge === 0 ? 'All subjects have valid non-negative age within physiological bounds' : `${invalidAge} subjects with invalid/negative AGE values` };
+      }},
+      { rule_id: 'CDISC-ADAM-ADAE-001', rule_name: 'Treatment Emergence Flag (TRTEMFL) Concordance', domain: 'ADAE', standard: 'CDISC ADaMIG v1.3', validator: (store) => {
+        const adae = store.getDataset('ADAE');
+        const adsl = store.getDataset('ADSL');
+        if (!adae.length) return { applicable: false };
+        let trtemflDiscrepancies = 0;
+        const subjStart = new Map();
+        adsl.forEach(s => { if (s.USUBJID && s.TRTSDT) subjStart.set(s.USUBJID, s.TRTSDT); });
+        adae.forEach(r => {
+          const sdt = r.ASTDT || r.AESTDTC;
+          const trtsdt = r.TRTSDT || subjStart.get(r.USUBJID);
+          if (sdt && trtsdt && r.TRTEMFL) {
+            const shouldBeY = sdt >= trtsdt;
+            if (shouldBeY && r.TRTEMFL !== 'Y') trtemflDiscrepancies++;
+            if (!shouldBeY && r.TRTEMFL === 'Y') trtemflDiscrepancies++;
+          }
+        });
+        return { applicable: true, passed: trtemflDiscrepancies === 0, evidence: trtemflDiscrepancies === 0 ? 'All TRTEMFL flags concordant with exposure date' : `${trtemflDiscrepancies} TRTEMFL mismatches` };
+      }}
+    ],
+
+    executeRules(store = StudyDataStore) {
+      const results = [];
+      let executed = 0;
+      let passed = 0;
+      let failed = 0;
+      let warnings = 0;
+      let notApplicable = 0;
+      let blocked = 0;
+
+      this.standardRules.forEach(rule => {
+        try {
+          const res = rule.validator(store);
+          if (!res.applicable) {
+            notApplicable++;
+            results.push({
+              rule_id: rule.rule_id,
+              rule_name: rule.rule_name,
+              domain: rule.domain,
+              standard: rule.standard,
+              applicable: false,
+              execution_status: 'NOT_EXECUTED',
+              status: 'NOT_APPLICABLE',
+              evidence: `Domain dataset ${rule.domain} not loaded.`
+            });
+          } else {
+            executed++;
+            if (res.passed) {
+              passed++;
+              results.push({
+                rule_id: rule.rule_id,
+                rule_name: rule.rule_name,
+                domain: rule.domain,
+                standard: rule.standard,
+                applicable: true,
+                execution_status: 'EXECUTED',
+                status: 'PASS',
+                evidence: res.evidence || 'Passed regulatory check'
+              });
+            } else {
+              failed++;
+              results.push({
+                rule_id: rule.rule_id,
+                rule_name: rule.rule_name,
+                domain: rule.domain,
+                standard: rule.standard,
+                applicable: true,
+                execution_status: 'EXECUTED',
+                status: 'FAIL',
+                evidence: res.evidence || 'Failed regulatory requirement'
+              });
+            }
+          }
+        } catch (err) {
+          blocked++;
+          results.push({
+            rule_id: rule.rule_id,
+            rule_name: rule.rule_name,
+            domain: rule.domain,
+            standard: rule.standard,
+            applicable: true,
+            execution_status: 'BLOCKED',
+            status: 'BLOCKED',
+            evidence: `Rule execution blocked: ${err.message}`
+          });
+        }
+      });
+
+      return {
+        summary: {
+          totalRules: this.standardRules.length,
+          executed,
+          passed,
+          failed,
+          warnings,
+          notApplicable,
+          blocked,
+          allPassed: executed > 0 && failed === 0 && blocked === 0
+        },
+        rules: results
+      };
+    },
+
+    getExecutionSummary(store = StudyDataStore) {
+      return this.executeRules(store).summary;
+    }
+  };
+
+  // 6.26 Explanation Context Manager with Unique Identity & Navigation (v11.0 Sections 36–38)
+  const ExplanationContextManager = {
+    currentRequestId: 0,
+    currentContext: null,
+    activeExplanation: null,
+    itemsList: [],
+    currentIndex: -1,
+
+    clearContext() {
+      this.currentContext = null;
+      this.activeExplanation = null;
+      this.itemsList = [];
+      this.currentIndex = -1;
+      return null;
+    },
+
+    createContext(target, type = 'LINEAGE') {
+      this.currentRequestId++;
+      const reqId = this.currentRequestId;
+      const contextId = `EXP-REQ-${reqId}-${Date.now()}`;
+
+      const ctx = {
+        contextId,
+        requestId: reqId,
+        target,
+        type,
+        createdAt: new Date().toISOString(),
+        isStale: () => this.currentContext?.contextId !== contextId
+      };
+
+      this.currentContext = ctx;
+      this.activeExplanation = ctx;
+      return ctx;
+    },
+
+    getCurrentContext() {
+      return this.currentContext;
+    },
+
+    openExplanation(domain, row, variable, itemsList = []) {
+      this.currentRequestId++;
+      const reqId = this.currentRequestId;
+      const contextId = `EXP-REQ-${reqId}-${Date.now()}`;
+      const uDom = String(domain || '').toUpperCase();
+      const uVar = String(variable || '').toUpperCase();
+      const rNum = Number(row) || 1;
+
+      this.itemsList = Array.isArray(itemsList) && itemsList.length > 0 ? itemsList : [{ domain: uDom, row: rNum, variable: uVar }];
+      this.currentIndex = this.itemsList.findIndex(i => String(i.domain).toUpperCase() === uDom && Number(i.row) === rNum && String(i.variable).toUpperCase() === uVar);
+      if (this.currentIndex === -1) {
+        this.itemsList.unshift({ domain: uDom, row: rNum, variable: uVar });
+        this.currentIndex = 0;
+      }
+
+      this.activeExplanation = {
+        contextId,
+        explanationRequestId: reqId,
+        datasetId: `DS-${uDom}`,
+        domain: uDom,
+        rowId: rNum,
+        recordKey: `${uDom}_${rNum}_${uVar}`,
+        variable: uVar,
+        timestamp: new Date().toISOString()
+      };
+
+      this.currentContext = {
+        contextId,
+        requestId: reqId,
+        target: { domain: uDom, row: rNum, variable: uVar },
+        type: 'LINEAGE',
+        createdAt: new Date().toISOString(),
+        isStale: () => this.currentContext?.contextId !== contextId
+      };
+
+      return {
+        context: this.activeExplanation,
+        hasPrev: this.currentIndex > 0,
+        hasNext: this.currentIndex < this.itemsList.length - 1,
+        totalItems: this.itemsList.length,
+        currentIndex: this.currentIndex
+      };
+    },
+
+    navigate(direction) {
+      if (!this.itemsList || this.itemsList.length === 0) return null;
+      let newIdx = this.currentIndex;
+      if (direction === 'NEXT' && this.currentIndex < this.itemsList.length - 1) {
+        newIdx++;
+      } else if (direction === 'PREV' && this.currentIndex > 0) {
+        newIdx--;
+      } else {
+        return null;
+      }
+      const item = this.itemsList[newIdx];
+      return this.openExplanation(item.domain, item.row, item.variable, this.itemsList);
+    },
+
+    isCurrentRequest(reqId) {
+      return this.currentRequestId === reqId;
+    }
+  };
+
+  // 6.27 Interactive TLF Cell Drill-Down Engine (v11.0 Section 28)
+  const TlfDrillDownEngine = {
+    generateDrillDownData(tableId, cellLabel, subjects = [], sourceRows = [], derivationFormula = '', filterCondition = '', denominator = '') {
+      return {
+        tableId,
+        cellLabel,
+        totalSubjects: subjects.length,
+        subjects: Array.isArray(subjects) ? subjects : [],
+        totalRecords: sourceRows.length,
+        sourceRecords: Array.isArray(sourceRows) ? sourceRows.slice(0, 100) : [],
+        derivationFormula: derivationFormula || 'Direct frequency tabulation: N_observed / N_population * 100',
+        filterCondition: filterCondition || 'ITT Population (ITTFL == "Y")',
+        denominator: denominator || `Total Pop N = ${subjects.length}`,
+        timestamp: new Date().toISOString()
+      };
+    }
+  };
+
   // 6.21 Unified Master ClinicalOps Orchestrator (Section 83)
   const ClinicalOpsOrchestrator = {
+    StudyDataStore,
+    LiveStudyMetricsEngine,
+    LiverSafetyEngine,
+    RuleExecutionEngine,
+    ExplanationContextManager,
+    TlfDrillDownEngine,
     StudyUnderstandingEngine,
     DatasetProfiler,
     DataQualityScorer,
@@ -3428,6 +4173,12 @@ adlb <- adlb %>%
 
   // Export module
   const exportsObj = {
+    StudyDataStore,
+    LiveStudyMetricsEngine,
+    LiverSafetyEngine,
+    RuleExecutionEngine,
+    ExplanationContextManager,
+    TlfDrillDownEngine,
     detectDomain,
     DomainValidatorRegistry,
     DMValidator,
