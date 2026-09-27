@@ -42,6 +42,9 @@
         <button class="btn-header-nav" id="btn-open-double-prog" onclick="openDoubleProgrammingModal()" title="Open SAS & R Double Programming Workbench" style="display:flex; align-items:center; gap:5px; background:rgba(245,158,11,0.15); border:1px solid rgba(245,158,11,0.4); color:#fde68a; padding:5px 10px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">
           <span>👥</span> <span>Double Prog</span>
         </button>
+        <button class="btn-header-nav" id="btn-open-clinical-os" onclick="openClinicalOsModal('PROTOCOL')" title="ClinicalOps AI OS NextGen Workbench (Protocol Intelligence, Time Machine, Vendor Recon, Reviewer Mode, Observability)" style="display:flex; align-items:center; gap:5px; background:rgba(99,102,241,0.18); border:1px solid rgba(99,102,241,0.5); color:#a5b4fc; padding:5px 10px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">
+          <span>🏛️</span> <span>Clinical OS</span>
+        </button>
         <button class="btn-header-nav" id="btn-open-command-palette" onclick="openCommandCenterModal()" title="Open Command Center (Ctrl+K)" style="display:flex; align-items:center; gap:5px; background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.4); color:#fca5a5; padding:5px 10px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">
           <span>⚡</span> <kbd style="font-size:10.5px; background:rgba(0,0,0,0.3); padding:1px 4px; border-radius:3px;">Ctrl+K</kbd>
         </button>
@@ -126,8 +129,12 @@
               <span class="cmd-chips-label">Quick Commands:</span>
               <button class="cmd-chip" onclick="executeQuickCommand('Verify complete study')">🌐 Verify complete study</button>
               <button class="cmd-chip" onclick="executeQuickCommand('Deep verify active domain')">🔬 Deep verify domain</button>
+              <button class="cmd-chip" onclick="openClinicalOsModal('PROTOCOL')">📑 Protocol Intel</button>
+              <button class="cmd-chip" onclick="openClinicalOsModal('TIME_MACHINE')">⏱️ Time Machine</button>
+              <button class="cmd-chip" onclick="openClinicalOsModal('VENDOR_RECON')">🏢 Vendor Recon</button>
+              <button class="cmd-chip" onclick="openClinicalOsModal('OBSERVABILITY')">📡 Observability</button>
+              <button class="cmd-chip" onclick="openClinicalOsModal('REVIEWER_MODE')">📂 Reviewer Mode</button>
               <button class="cmd-chip" onclick="executeQuickCommand('Show fixed errors')">✅ Show fixed issues</button>
-              <button class="cmd-chip" onclick="executeQuickCommand('Show review required')">⚠️ Show review required</button>
               <button class="cmd-chip" onclick="executeQuickCommand('Generate corrected dataset')">💾 Generate corrected dataset</button>
               <button class="cmd-chip" onclick="executeQuickCommand('Run double programming')">⚖️ Run double programming</button>
             </div>
@@ -1229,6 +1236,44 @@
       <div class="modal-footer" style="padding:12px 18px; border-top:1px solid var(--border-mid); display:flex; justify-content:space-between; align-items:center;">
         <span style="font-size:11px; color:var(--text-muted);" id="tlf-drilldown-footer-info">ICH E3 Statistical Derivation</span>
         <button class="btn-primary-small" onclick="closeTlfDrillDownModal()" style="background:var(--primary-blue); color:#fff; border:none; padding:6px 16px; border-radius:4px; font-weight:600; cursor:pointer;">Close</button>
+      </div>
+  <!-- 7. ClinicalOps AI OS Master Workbench Modal (v13.0) -->
+  <div class="modal-overlay" id="clinical-os-modal" style="display:none;" onclick="if(event.target === this) closeClinicalOsModal();">
+    <div class="modal-card" style="max-width:1050px; width:95%; max-height:90vh; display:flex; flex-direction:column;">
+      <div class="modal-header" style="border-bottom:1px solid var(--border-mid); padding:14px 20px; display:flex; justify-content:space-between; align-items:center; background:rgba(15,23,42,0.95);">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span style="font-size:24px;">🏛️</span>
+          <div>
+            <h3 style="font-size:16px; margin:0; color:#fff; font-weight:700;">ClinicalOps AI OS — NextGen Platform Workbench (v13.0)</h3>
+            <div style="font-size:11px; color:var(--text-secondary);">Evidence-First Protocol Intelligence • Time Machine • Data Observability • Submission Simulator</div>
+          </div>
+        </div>
+        <button onclick="closeClinicalOsModal()" style="background:transparent; border:none; color:var(--text-secondary); font-size:22px; cursor:pointer;" title="Close Workbench">&times;</button>
+      </div>
+      
+      <!-- Subnavigation Tabs -->
+      <div style="background:rgba(2,6,23,0.9); padding:8px 18px; border-bottom:1px solid var(--border-mid); display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+        <button class="clinical-os-nav-btn active" id="btn-cos-protocol" onclick="switchClinicalOsTab('PROTOCOL')" style="background:var(--primary-blue); color:#fff; border:none; padding:5px 12px; border-radius:5px; font-size:11.5px; font-weight:600; cursor:pointer;">📑 Protocol &amp; Amendments</button>
+        <button class="clinical-os-nav-btn" id="btn-cos-time-machine" onclick="switchClinicalOsTab('TIME_MACHINE')" style="background:rgba(255,255,255,0.06); color:#cbd5e1; border:1px solid var(--border-subtle); padding:5px 12px; border-radius:5px; font-size:11.5px; font-weight:600; cursor:pointer;">⏱️ Time Machine &amp; Multi-Cut</button>
+        <button class="clinical-os-nav-btn" id="btn-cos-vendor-recon" onclick="switchClinicalOsTab('VENDOR_RECON')" style="background:rgba(255,255,255,0.06); color:#cbd5e1; border:1px solid var(--border-subtle); padding:5px 12px; border-radius:5px; font-size:11.5px; font-weight:600; cursor:pointer;">🏢 Vendor &amp; Lab Reconciliation</button>
+        <button class="clinical-os-nav-btn" id="btn-cos-observability" onclick="switchClinicalOsTab('OBSERVABILITY')" style="background:rgba(255,255,255,0.06); color:#cbd5e1; border:1px solid var(--border-subtle); padding:5px 12px; border-radius:5px; font-size:11.5px; font-weight:600; cursor:pointer;">📡 Observability &amp; Drift</button>
+        <button class="clinical-os-nav-btn" id="btn-cos-reviewer-mode" onclick="switchClinicalOsTab('REVIEWER_MODE')" style="background:rgba(255,255,255,0.06); color:#cbd5e1; border:1px solid var(--border-subtle); padding:5px 12px; border-radius:5px; font-size:11.5px; font-weight:600; cursor:pointer;">📂 Reviewer Mode &amp; eCTD M5</button>
+        <button class="clinical-os-nav-btn" id="btn-cos-control-tower" onclick="switchClinicalOsTab('CONTROL_TOWER')" style="background:rgba(255,255,255,0.06); color:#cbd5e1; border:1px solid var(--border-subtle); padding:5px 12px; border-radius:5px; font-size:11.5px; font-weight:600; cursor:pointer;">🛡️ Zero-Trust Gateways</button>
+        <button class="clinical-os-nav-btn" id="btn-cos-reproducibility" onclick="switchClinicalOsTab('REPRODUCIBILITY')" style="background:rgba(255,255,255,0.06); color:#cbd5e1; border:1px solid var(--border-subtle); padding:5px 12px; border-radius:5px; font-size:11.5px; font-weight:600; cursor:pointer;">🔐 Reproducibility Vault</button>
+      </div>
+
+      <!-- Modal Body Content -->
+      <div class="modal-body" id="clinical-os-modal-body" style="padding:20px; font-size:12.5px; overflow-y:auto; flex:1; background:rgba(15,23,42,0.6);">
+        <!-- Injected dynamically by switchClinicalOsTab -->
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer" style="padding:12px 20px; border-top:1px solid var(--border-mid); display:flex; justify-content:space-between; align-items:center; background:rgba(15,23,42,0.95);">
+        <div style="font-size:11px; color:var(--text-muted); display:flex; align-items:center; gap:8px;">
+          <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#22c55e;"></span>
+          <span id="clinical-os-footer-status">ClinicalOps AI OS v13.0 Engine Online</span>
+        </div>
+        <button class="btn-primary-small" onclick="closeClinicalOsModal()" style="background:var(--primary-blue); color:#fff; border:none; padding:6px 18px; border-radius:4px; font-weight:600; cursor:pointer;">Done</button>
       </div>
     </div>
   </div>
