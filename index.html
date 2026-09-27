@@ -476,7 +476,7 @@
                     </div>
                   </div>
                   <div style="display:flex; align-items:center; gap:8px;">
-                    <span class="badge-pass" style="font-size:11.5px; padding:3px 10px;">100% GxP VALIDATED</span>
+                    <span class="badge-pass" id="review-gxp-badge" style="font-size:11.5px; padding:3px 10px; background:rgba(148,163,184,0.15); color:#94a3b8; border:1px solid #475569;">STATUS: NOT EVALUATED</span>
                     <button class="btn-maximize" onclick="toggleMaximize(this)" title="Maximize / Restore View">
                       <span class="max-icon">⛶</span> <span class="max-text">Maximize</span>
                     </button>
@@ -587,7 +587,7 @@
                       <span style="font-size:18px;">🔬</span>
                       <strong style="font-size:13px; color:#fff;">Pin-to-Pin Deep Verification &amp; Data Completeness Dossier</strong>
                     </div>
-                    <span class="badge-pass" id="badge-pin-conformance" style="font-size:11px; padding:3px 10px; background:rgba(34,197,94,0.15); border:1px solid rgba(34,197,94,0.4); color:#4ade80;">100% GxP CONFORMANCE</span>
+                    <span class="badge-pass" id="badge-pin-conformance" style="font-size:11px; padding:3px 10px; background:rgba(148,163,184,0.15); color:#94a3b8; border:1px solid #475569;">GxP: AWAITING EVALUATION</span>
                   </div>
                   <div style="font-size:11.5px; color:var(--text-secondary); margin-bottom:12px; line-height:1.5;">
                     Every single column, row, format, word, and character is audited pin-to-pin across SDTM, ADaM, and TLF standards. All missing values are healed with 100% data completeness.
@@ -607,7 +607,7 @@
                     </div>
                     <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-subtle); border-radius:6px; padding:8px 10px; text-align:center;">
                       <span style="font-size:10px; text-transform:uppercase; color:var(--text-muted); display:block;">Data Completeness</span>
-                      <strong style="font-size:15px; color:#4ade80;" id="dossier-metric-completeness">100.0%</strong>
+                      <strong style="font-size:15px; color:#4ade80;" id="dossier-metric-completeness">0.0%</strong>
                     </div>
                   </div>
                 </div>
@@ -644,8 +644,8 @@
                       </div>
                     </div>
                     <div class="card-actions" style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-                      <span class="badge-pass" style="font-size:11px; padding:3px 10px; background:rgba(34,197,94,0.15); border:1px solid rgba(34,197,94,0.4); color:#4ade80;">
-                        🟢 PIN-TO-PIN CONCORDANCE: 100% VERIFIED
+                      <span class="badge-pass" id="tlf-concordance-badge" style="font-size:11px; padding:3px 10px; background:rgba(148,163,184,0.15); color:#94a3b8; border:1px solid #475569;">
+                        TLF AUDIT: AWAITING AUDIT
                       </span>
                       <button class="btn-maximize" onclick="toggleMaximize(this)" title="Maximize / Restore View">
                         <span class="max-icon">⛶</span> <span class="max-text">Maximize</span>
@@ -1216,6 +1216,12 @@
           </div>
         </div>
         <button onclick="closeTlfDrillDownModal()" style="background:transparent; border:none; color:var(--text-secondary); font-size:22px; cursor:pointer;">&times;</button>
+      </div>
+      <div style="background:rgba(15,23,42,0.9); padding:8px 18px; border-bottom:1px solid var(--border-mid); display:flex; gap:8px; flex-wrap:wrap;">
+        <button class="tlf-subnav-btn active" id="btn-tlf-sub-summary" onclick="switchTlfDrillDownTab('SUMMARY')" style="background:var(--primary-blue); color:#fff; border:none; padding:4px 10px; border-radius:4px; font-size:11.5px; font-weight:600; cursor:pointer;">🔬 Cell Summary &amp; Records</button>
+        <button class="tlf-subnav-btn" id="btn-tlf-sub-denom" onclick="switchTlfDrillDownTab('DENOM')" style="background:rgba(255,255,255,0.06); color:#cbd5e1; border:1px solid var(--border-subtle); padding:4px 10px; border-radius:4px; font-size:11.5px; font-weight:600; cursor:pointer;">👥 Denominator Intelligence (N)</button>
+        <button class="tlf-subnav-btn" id="btn-tlf-sub-numer" onclick="switchTlfDrillDownTab('NUMER')" style="background:rgba(255,255,255,0.06); color:#cbd5e1; border:1px solid var(--border-subtle); padding:4px 10px; border-radius:4px; font-size:11.5px; font-weight:600; cursor:pointer;">📋 Numerator Traceability</button>
+        <button class="tlf-subnav-btn" id="btn-tlf-sub-lineage" onclick="switchTlfDrillDownTab('LINEAGE')" style="background:rgba(255,255,255,0.06); color:#cbd5e1; border:1px solid var(--border-subtle); padding:4px 10px; border-radius:4px; font-size:11.5px; font-weight:600; cursor:pointer;">🌳 Derivation Provenance</button>
       </div>
       <div class="modal-body" id="tlf-drilldown-body" style="padding:18px 20px; font-size:12.5px; max-height:75vh; overflow-y:auto;">
         <!-- Populated dynamically -->
