@@ -3040,43 +3040,43 @@ adlb <- adlb %>%
     cellRegistry: new Map(),
 
     reset: function() {
-       this.cellRegistry.clear();
-       return this;
+      this.cellRegistry.clear();
+      return this;
     },
 
     recordCellState: function(domain, rowId, variable, state) {
-       const uDom = String(domain || 'DATASET').toUpperCase();
-       const uVar = String(variable || '').toUpperCase();
-       const key = `${uDom}:${rowId}:${uVar}`;
-       this.cellRegistry.set(key, { domain: uDom, rowId, variable: uVar, state, timestamp: new Date().toISOString() });
-       return this;
+      const uDom = String(domain || 'DATASET').toUpperCase();
+      const uVar = String(variable || '').toUpperCase();
+      const key = `${uDom}:${rowId}:${uVar}`;
+      this.cellRegistry.set(key, { domain: uDom, rowId, variable: uVar, state, timestamp: new Date().toISOString() });
+      return this;
     },
 
     getReconciliationReport: function() {
-       const totalCells = this.cellRegistry.size;
-       const stateCounts = {
-         VALID: 0,
-         INVALID: 0,
-         WARNING: 0,
-         MISSING: 0,
-         CORRECTED: 0,
-         REVIEW_REQUIRED: 0,
-         NOT_APPLICABLE: 0,
-         RESOLVED_BY_DETERMINISTIC_RULE: 0,
-         RESOLVED_BY_CDISC_STANDARDIZATION: 0
-       };
+      const totalCells = this.cellRegistry.size;
+      const stateCounts = {
+        VALID: 0,
+        INVALID: 0,
+        WARNING: 0,
+        MISSING: 0,
+        CORRECTED: 0,
+        REVIEW_REQUIRED: 0,
+        NOT_APPLICABLE: 0,
+        RESOLVED_BY_DETERMINISTIC_RULE: 0,
+        RESOLVED_BY_CDISC_STANDARDIZATION: 0
+      };
 
-       this.cellRegistry.forEach(entry => {
-         stateCounts[entry.state] = (stateCounts[entry.state] || 0) + 1;
-       });
+      this.cellRegistry.forEach(entry => {
+        stateCounts[entry.state] = (stateCounts[entry.state] || 0) + 1;
+      });
 
-       return {
-         totalCells,
-         states: stateCounts,
-         discrepancy: 0,
-         isReconciled: true,
-         reconciledSum: totalCells
-       };
+      return {
+        totalCells,
+        states: stateCounts,
+        discrepancy: 0,
+        isReconciled: true,
+        reconciledSum: totalCells
+      };
     },
 
     auditDatasetCells: function(domain = 'DATASET', rows = [], auditLog = [], cleanRows = null) {
@@ -5433,7 +5433,244 @@ adlb <- adlb %>%
     }
   };
 
+  // 6.31b Version-Aware Standards Registry (Section 12 of Master Engineering Spec)
+  // Single source of truth for all CDISC standard references.
+  // Every rule in this system should resolve its standard/version from here.
+  const StandardsRegistry = (function() {
+    const STANDARDS = {
+      SDTMIG: {
+        name: 'CDISC Study Data Tabulation Model Implementation Guide',
+        abbreviation: 'SDTMIG',
+        latestVersion: '3.4',
+        supportedVersions: ['3.1.2', '3.1.3', '3.2', '3.3', '3.4'],
+        defaultVersion: '3.3',
+        releaseMap: {
+          '3.1.2': { released: '2008-11', status: 'RETIRED' },
+          '3.1.3': { released: '2012-08', status: 'RETIRED' },
+          '3.2':   { released: '2013-11', status: 'RETIRED' },
+          '3.3':   { released: '2019-11', status: 'CURRENT' },
+          '3.4':   { released: '2023-09', status: 'CURRENT' }
+        },
+        // Required variables per domain (subset — expand per FDA SDTM conformance rules)
+        requiredVariables: {
+          DM:  ['STUDYID','DOMAIN','USUBJID','SUBJID','RFSTDTC','RFENDTC','SITEID','AGE','AGEU','SEX','RACE','ETHNIC','ARMCD','ARM','ACTARMCD','ACTARM','COUNTRY','DMDTC','DMDY'],
+          AE:  ['STUDYID','DOMAIN','USUBJID','AESEQ','AETERM','AEDECOD','AEBODSYS','AESER','AESEV','AEREL','AEOUT','AESTDTC','AEENDTC'],
+          LB:  ['STUDYID','DOMAIN','USUBJID','LBSEQ','LBTEST','LBTESTCD','LBCAT','LBORRES','LBORRESU','LBSTRESC','LBSTRESN','LBSTRESU','LBBLFL','VISITNUM','VISIT','LBDTC'],
+          VS:  ['STUDYID','DOMAIN','USUBJID','VSSEQ','VSTESTCD','VSTEST','VSORRES','VSORRESU','VSSTRESC','VSSTRESN','VSSTRESU','VSBLFL','VISITNUM','VISIT','VSDTC'],
+          EX:  ['STUDYID','DOMAIN','USUBJID','EXSEQ','EXTRT','EXDOSE','EXDOSU','EXDOSFRM','EXROUTE','EXSTDTC','EXENDTC'],
+          CM:  ['STUDYID','DOMAIN','USUBJID','CMSEQ','CMTRT','CMDECOD','CMCAT','CMINDC','CMSTDTC','CMENDTC'],
+          DS:  ['STUDYID','DOMAIN','USUBJID','DSSEQ','DSTERM','DSDECOD','DSCAT','DSGRPID','DSSTDTC'],
+          SV:  ['STUDYID','DOMAIN','USUBJID','VISITNUM','VISIT','SVSTDTC','SVENDTC'],
+          MH:  ['STUDYID','DOMAIN','USUBJID','MHSEQ','MHTERM','MHDECOD','MHBODSYS','MHSTDTC'],
+          EG:  ['STUDYID','DOMAIN','USUBJID','EGSEQ','EGTESTCD','EGTEST','EGORRES','EGORRESU','EGSTRESC','EGSTRESN','EGSTRESU','EGDTC'],
+          PE:  ['STUDYID','DOMAIN','USUBJID','PESEQ','PETESTCD','PETEST','PEORRES','PEDTC'],
+          TU:  ['STUDYID','DOMAIN','USUBJID','TUSEQ','TUTESTCD','TUTEST','TOORRES','TODTC'],
+          RS:  ['STUDYID','DOMAIN','USUBJID','RSSEQ','RSTESTCD','RSTEST','RSORRES','RSDTC']
+        },
+        // Key-variables (primary keys) per domain
+        keyVariables: {
+          DM:  ['STUDYID','USUBJID'],
+          AE:  ['STUDYID','USUBJID','AESEQ'],
+          LB:  ['STUDYID','USUBJID','LBSEQ'],
+          VS:  ['STUDYID','USUBJID','VSSEQ'],
+          EX:  ['STUDYID','USUBJID','EXSEQ'],
+          CM:  ['STUDYID','USUBJID','CMSEQ'],
+          DS:  ['STUDYID','USUBJID','DSSEQ'],
+          SV:  ['STUDYID','USUBJID','VISITNUM'],
+          MH:  ['STUDYID','USUBJID','MHSEQ'],
+          EG:  ['STUDYID','USUBJID','EGSEQ'],
+          PE:  ['STUDYID','USUBJID','PESEQ']
+        }
+      },
+      ADAMIG: {
+        name: 'CDISC Analysis Data Model Implementation Guide',
+        abbreviation: 'ADaMIG',
+        latestVersion: '1.3',
+        supportedVersions: ['1.0', '1.1', '1.2', '1.3'],
+        defaultVersion: '1.3',
+        releaseMap: {
+          '1.0': { released: '2009-01', status: 'RETIRED' },
+          '1.1': { released: '2011-02', status: 'RETIRED' },
+          '1.2': { released: '2014-12', status: 'RETIRED' },
+          '1.3': { released: '2019-11', status: 'CURRENT' }
+        },
+        requiredVariables: {
+          ADSL: ['STUDYID','USUBJID','SUBJID','SITEID','AGE','AGEU','SEX','RACE','ARM','ARMCD','ACTARM','ACTARMCD','TRTSDT','TRTEDT','SAFFL','ITTFL','FASFL','PP01FL','TRTDURD'],
+          ADAE: ['STUDYID','USUBJID','AESEQ','AEDECOD','AETERM','AEBODSYS','AESER','AESEV','AEREL','AEOUT','ASTDT','AENDT','TRTEMFL','SAFFL'],
+          ADLB: ['STUDYID','USUBJID','PARAMCD','PARAM','AVAL','BASE','CHG','PCHG','VISITNUM','VISIT','ADT','DTYPE'],
+          ADVS: ['STUDYID','USUBJID','PARAMCD','PARAM','AVAL','BASE','CHG','VISITNUM','VISIT','ADT','DTYPE'],
+          ADTTE: ['STUDYID','USUBJID','PARAMCD','PARAM','AVAL','CNSR','EVNTDESC','STARTDT','ADT'],
+          ADQS: ['STUDYID','USUBJID','PARAMCD','PARAM','AVAL','AVALC','BASE','CHG','VISITNUM','VISIT','ADT'],
+          ADPC: ['STUDYID','USUBJID','PARAMCD','PARAM','AVAL','NFRLT','NRRLT','PCSPEC','PCSTRESU','ADT','ATPT']
+        },
+        keyVariables: {
+          ADSL:  ['STUDYID','USUBJID'],
+          ADAE:  ['STUDYID','USUBJID','AESEQ'],
+          ADLB:  ['STUDYID','USUBJID','PARAMCD','VISITNUM','ADT'],
+          ADVS:  ['STUDYID','USUBJID','PARAMCD','VISITNUM','ADT'],
+          ADTTE: ['STUDYID','USUBJID','PARAMCD'],
+          ADQS:  ['STUDYID','USUBJID','PARAMCD','VISITNUM','ADT'],
+          ADPC:  ['STUDYID','USUBJID','PARAMCD','NFRLT']
+        }
+      },
+      CDASHIG: {
+        name: 'CDISC Clinical Data Acquisition Standards Harmonization Implementation Guide',
+        abbreviation: 'CDASHIG',
+        latestVersion: '2.2',
+        supportedVersions: ['1.1', '2.0', '2.1', '2.2'],
+        defaultVersion: '2.2',
+        releaseMap: {
+          '1.1': { released: '2011-07', status: 'RETIRED' },
+          '2.0': { released: '2017-07', status: 'RETIRED' },
+          '2.1': { released: '2019-09', status: 'CURRENT' },
+          '2.2': { released: '2022-03', status: 'CURRENT' }
+        }
+      },
+      DEFINEXML: {
+        name: 'CDISC Define-XML Specification',
+        abbreviation: 'Define-XML',
+        latestVersion: '2.1.7',
+        supportedVersions: ['1.0', '2.0', '2.1.0', '2.1.3', '2.1.7'],
+        defaultVersion: '2.1.7',
+        releaseMap: {
+          '1.0':   { released: '2005-03', status: 'RETIRED' },
+          '2.0':   { released: '2013-04', status: 'CURRENT' },
+          '2.1.0': { released: '2021-01', status: 'CURRENT' },
+          '2.1.3': { released: '2022-01', status: 'CURRENT' },
+          '2.1.7': { released: '2023-06', status: 'CURRENT' }
+        }
+      },
+      SENDIG: {
+        name: 'CDISC Standard for Exchange of Nonclinical Data Implementation Guide',
+        abbreviation: 'SENDIG',
+        latestVersion: '3.1.1',
+        supportedVersions: ['3.0', '3.1', '3.1.1'],
+        defaultVersion: '3.1.1',
+        releaseMap: {
+          '3.0':   { released: '2014-08', status: 'RETIRED' },
+          '3.1':   { released: '2018-06', status: 'CURRENT' },
+          '3.1.1': { released: '2023-01', status: 'CURRENT' }
+        }
+      }
+    };
+
+    // Active version selections (can be updated at runtime per study configuration)
+    const _activeVersions = {
+      SDTMIG: '3.3',
+      ADAMIG: '1.3',
+      CDASHIG: '2.2',
+      DEFINEXML: '2.1.7',
+      SENDIG: '3.1.1'
+    };
+
+    return {
+      /**
+       * Get full standard definition by key (e.g. 'SDTMIG', 'ADaMIG')
+       */
+      getStandard(key) {
+        return STANDARDS[String(key).toUpperCase()] || null;
+      },
+
+      /**
+       * Get the currently active version for a standard
+       */
+      getActiveVersion(key) {
+        return _activeVersions[String(key).toUpperCase()] || null;
+      },
+
+      /**
+       * Set the active version for a standard (validates against supported versions)
+       * @returns {boolean} true if set, false if version not supported
+       */
+      setActiveVersion(key, version) {
+        const std = STANDARDS[String(key).toUpperCase()];
+        if (!std) return false;
+        if (!std.supportedVersions.includes(String(version))) return false;
+        _activeVersions[String(key).toUpperCase()] = String(version);
+        return true;
+      },
+
+      /**
+       * Get required variables for a domain under a given standard/version
+       */
+      getRequiredVariables(standardKey, domain) {
+        const std = STANDARDS[String(standardKey).toUpperCase()];
+        if (!std || !std.requiredVariables) return [];
+        return std.requiredVariables[String(domain).toUpperCase()] || [];
+      },
+
+      /**
+       * Get key variables (primary keys) for a domain
+       */
+      getKeyVariables(standardKey, domain) {
+        const std = STANDARDS[String(standardKey).toUpperCase()];
+        if (!std || !std.keyVariables) return [];
+        return std.keyVariables[String(domain).toUpperCase()] || [];
+      },
+
+      /**
+       * Resolve the correct standard key for a given domain name
+       * (e.g. 'ADSL' → 'ADaMIG', 'DM' → 'SDTMIG')
+       */
+      resolveStandardForDomain(domain) {
+        const d = String(domain).toUpperCase();
+        // ADaM datasets start with AD
+        if (d.startsWith('AD')) return 'ADaMIG';
+        // SDTM domains
+        return 'SDTMIG';
+      },
+
+      /**
+       * Return a formatted citation string for use in rule references
+       */
+      cite(standardKey, section, version) {
+        const std = STANDARDS[String(standardKey).toUpperCase()];
+        if (!std) return `${standardKey} §${section}`;
+        const v = version || _activeVersions[String(standardKey).toUpperCase()] || std.defaultVersion;
+        return `${std.abbreviation} v${v} §${section}`;
+      },
+
+      /**
+       * Return the release status for a given version
+       */
+      getVersionStatus(standardKey, version) {
+        const std = STANDARDS[String(standardKey).toUpperCase()];
+        if (!std || !std.releaseMap) return 'UNKNOWN';
+        return (std.releaseMap[String(version)] || {}).status || 'UNKNOWN';
+      },
+
+      /**
+       * Returns a complete registry summary for UI/audit display
+       */
+      getSummary() {
+        return Object.keys(STANDARDS).map(key => {
+          const std = STANDARDS[key];
+          const activeV = _activeVersions[key] || std.defaultVersion;
+          return {
+            key,
+            name: std.name,
+            abbreviation: std.abbreviation,
+            activeVersion: activeV,
+            latestVersion: std.latestVersion,
+            status: (std.releaseMap[activeV] || {}).status || 'UNKNOWN',
+            supportedVersions: std.supportedVersions
+          };
+        });
+      },
+
+      /**
+       * Check if a variable is required for a given domain under the active standard version
+       */
+      isRequired(domain, variable) {
+        const stdKey = this.resolveStandardForDomain(domain);
+        const required = this.getRequiredVariables(stdKey, domain);
+        return required.includes(String(variable).toUpperCase());
+      }
+    };
+  })();
+
   // 6.32 Study Knowledge Graph & Change Impact Engine (v12.0 Sections 22–25)
+
   const StudyKnowledgeGraph = {
     nodes: new Map(),
     edges: [],
@@ -7011,6 +7248,7 @@ ${itemDefXml}
     SuppEngine,
     SUPPValidator,
     ControlledTerminologyRegistry,
+    StandardsRegistry,
     StudyKnowledgeGraph,
     ChangeImpactEngine,
     RegulatoryEvidenceLocker,

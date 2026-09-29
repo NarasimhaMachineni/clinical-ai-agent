@@ -25,8 +25,8 @@
       </div>
       <div class="header-center-controls">
         <div class="data-source-status-pill" id="data-source-status-pill" title="System Data Source Mode (Section 27)">
-          <span class="source-dot live" id="source-dot" style="background:#22c55e; box-shadow:0 0 8px #22c55e;"></span>
-          <span class="source-text" id="source-indicator-text">CLINICAL ENGINE: 🟢 GxP PRODUCTION READY (ACTIVE — READY FOR INGESTION)</span>
+          <span class="source-dot" id="source-dot" style="background:#64748b; box-shadow:0 0 6px #64748b;"></span>
+          <span class="source-text" id="source-indicator-text">CLINICAL ENGINE: ⚪ STANDBY — NO DATA LOADED</span>
         </div>
       </div>
       <div class="header-right-actions" style="display:flex; align-items:center; gap:12px;">
@@ -264,7 +264,7 @@
                     </div>
                     <div style="display:flex; align-items:center; gap:10px;">
                       <div id="grid-perf-hud" style="font-size:11px; font-family:monospace; color:#38bdf8; background:rgba(0,0,0,0.4); padding:3px 8px; border-radius:4px; border:1px solid rgba(56,189,248,0.2);">
-                        ⚡ Latency: &lt;5ms &bull; 240Hz Fluid
+                        <span id="grid-perf-hud-text">⚡ Latency: — ms</span>
                       </div>
                       <button class="btn-sm" id="btn-fullscreen-grid" onclick="toggleGridFullscreen()" style="background:rgba(255,255,255,0.06); color:#fff; border:1px solid var(--border-subtle); padding:5px 10px; border-radius:6px; cursor:pointer; font-size:11.5px; display:inline-flex; align-items:center; gap:4px;" title="Maximize data grid to 100vw x 100vh full-screen mode">
                         <span>⛶</span> <span>Fullscreen Grid</span>
@@ -511,8 +511,8 @@
                 <!-- Current Task Execution & Review Narrative -->
                 <div class="review-focus-box" id="review-focus-banner" style="background:rgba(56, 189, 248, 0.08); border:1px solid rgba(56, 189, 248, 0.3); border-radius:8px; padding:12px 14px; margin-bottom:16px;">
                   <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                    <strong style="color:var(--primary-blue); font-size:12.5px;" id="review-focus-title">Active Review: Automated GxP Ingestion &amp; Surveillance</strong>
-                    <span style="font-size:11px; color:var(--text-muted);" id="review-focus-ts">Continuous Scan Active</span>
+                    <strong style="color:var(--primary-blue); font-size:12.5px;" id="review-focus-title">System Status: ⚪ STANDBY — Upload a dataset to begin analysis</strong>
+                    <span style="font-size:11px; color:var(--text-muted);" id="review-focus-ts">No data loaded</span>
                   </div>
                 <p style="font-size:12px; color:var(--text-primary); margin:0; line-height:1.5;" id="review-focus-desc">
                     System standing by. Upload any ADaM or SDTM dataset to perform keen data verification, detect errors, auto-repair discrepancies, and download clean datasets.

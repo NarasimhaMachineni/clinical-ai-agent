@@ -8915,11 +8915,13 @@ window.addEventListener('keydown', (e) => {
 });
 
 window.updateGridPerformanceHud = function(latencyMs, throughput, extra) {
-  const hud = document.getElementById('grid-perf-hud');
-  if (!hud) return;
-  const tpStr = throughput > 0 ? ` • ${throughput.toLocaleString()} rows/s` : '';
+  const hudText = document.getElementById('grid-perf-hud-text');
+  if (!hudText) return;
+  const latNum = parseFloat(latencyMs);
+  const latStr = isNaN(latNum) ? '—' : latNum.toFixed(1);
+  const tpStr = (throughput > 0) ? ` • ${throughput.toLocaleString()} rows/s` : '';
   const extraStr = extra ? ` [${extra}]` : '';
-  hud.textContent = `⚡ Latency: ${latencyMs}ms${tpStr} • 240Hz Fluid${extraStr}`;
+  hudText.textContent = `⚡ Latency: ${latStr} ms${tpStr}${extraStr}`;
 };
 
 window.debounceDatasetFilter = function(targetName, val) {
@@ -9672,8 +9674,11 @@ function renderDatasetTable(dsetName) {
   }, 0);
 
   if (typeof updateGridPerformanceHud === 'function') {
-    const renderTime = ((typeof performance !== 'undefined' ? performance.now() : Date.now()) - renderStartTime).toFixed(1);
-    updateGridPerformanceHud(renderTime, 0, 'Grid');
+    const renderTime = ((typeof performance !== 'undefined' ? performance.now() : Date.now()) - renderStartTime);
+    const renderTimeStr = renderTime.toFixed(1);
+    const visibleRows = rows ? rows.length : 0;
+    const throughputVal = (renderTime > 0 && visibleRows > 0) ? Math.round((visibleRows / renderTime) * 1000) : 0;
+    updateGridPerformanceHud(renderTimeStr, throughputVal, 'Grid');
   }
 }
 
@@ -9970,11 +9975,11 @@ function updateReviewTabUI() {
 
   if (totalRecords === 0) {
     const focusTitle = document.getElementById('review-focus-title');
-    if (focusTitle) focusTitle.textContent = 'Active Review: Automated GxP Ingestion & Surveillance';
+    if (focusTitle) focusTitle.textContent = 'System Status: ⚪ STANDBY — No data loaded';
     const focusDesc = document.getElementById('review-focus-desc');
-    if (focusDesc) focusDesc.textContent = 'System standing by. Upload any ADaM or SDTM dataset to perform keen data verification, detect errors, auto-repair discrepancies, and download clean datasets.';
+    if (focusDesc) focusDesc.textContent = 'System standing by. Upload any ADaM or SDTM dataset to perform data verification, detect errors, auto-repair discrepancies, and download clean datasets.';
     const narrative = document.getElementById('review-clinical-narrative');
-    if (narrative) narrative.innerHTML = '<strong>Status:</strong> Ready for data ingestion. Please upload your ADaM or SDTM dataset (.sas7bdat, .xpt, .xlsx, .csv) into the drop zones above.';
+    if (narrative) narrative.innerHTML = '<strong>Status:</strong> Ready for data ingestion. Please upload your ADaM or SDTM dataset (.xpt, .xlsx, .csv) into the drop zones above.';
     return;
   }
 
@@ -9996,11 +10001,11 @@ function updateReviewTabUI() {
                   (clientRealData.DM && clientRealData.DM[0] && clientRealData.DM[0].STUDYID) || 'ACTIVE STUDY';
 
   const focusTitle = document.getElementById('review-focus-title');
-  if (focusTitle) focusTitle.textContent = `Active Review: ${studyId} — ${allDomains.join(', ')} Verified`;
+  if (focusTitle) focusTitle.textContent = `🟢 ACTIVE REVIEW: ${studyId} — ${allDomains.join(', ')}`;
   const focusDesc = document.getElementById('review-focus-desc');
-  if (focusDesc) focusDesc.textContent = `Autonomous GxP verification complete: ${totalRecords} records across ${allDomains.length} domain(s) audited. All ${totalErrors} detected discrepancies auto-repaired in place with 100% data completeness.`;
+  if (focusDesc) focusDesc.textContent = `Validation complete: ${totalRecords} records across ${allDomains.length} domain(s) processed. ${totalErrors} issue(s) flagged. Review the Quality Check tab for full rule-level findings.`;
   const focusTs = document.getElementById('review-focus-ts');
-  if (focusTs) focusTs.textContent = `Verified at ${getFormattedLocalTime()}`;
+  if (focusTs) focusTs.textContent = `Loaded at ${getFormattedLocalTime()}`;
 
   const setTag = (id, text, isPass = true) => {
     const el = document.getElementById(id);
@@ -12187,6 +12192,36 @@ function renderSpecificationsTab(selectedDomain) {
         </div>
       </div>
     `;
+    // --- Live StandardsRegistry Panel (Section 12) ---
+    var _srSummary = (typeof StandardsRegistry !== 'undefined' && StandardsRegistry.getSummary) ? StandardsRegistry.getSummary() : [];
+    if (_srSummary.length > 0) {
+      var _srRows = _srSummary.map(function(s) {
+        var sc = s.status === 'CURRENT' ? '#4ade80' : '#f87171';
+        var sb = s.status === 'CURRENT' ? 'rgba(34,197,94,0.12)' : 'rgba(248,113,113,0.12)';
+        var sn = s.name.length > 55 ? s.name.substring(0,55) + '\u2026' : s.name;
+        var svs = s.supportedVersions.map(function(v){return escapeHtml(v);}).join(' \u00b7 ');
+        return '<tr style="border-top:1px solid rgba(255,255,255,0.06)">' +
+          '<td style="padding:7px 12px;color:#cbd5e1;font-weight:600">' + escapeHtml(s.abbreviation) + '</td>' +
+          '<td style="padding:7px 12px;color:#e2e8f0;font-size:11px">' + escapeHtml(sn) + '</td>' +
+          '<td style="padding:7px 12px;color:#38bdf8;font-family:monospace">v' + escapeHtml(s.activeVersion) + '</td>' +
+          '<td style="padding:7px 12px;font-family:monospace;color:#94a3b8;font-size:10px">' + svs + '</td>' +
+          '<td style="padding:7px 12px"><span style="background:' + sb + ';color:' + sc + ';border:1px solid ' + sc + '40;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:600">' + escapeHtml(s.status) + '</span></td>' +
+          '</tr>';
+      }).join('');
+      var _srHtml = '<div style="margin-top:18px;background:rgba(15,23,42,0.7);border:1px solid rgba(56,189,248,0.25);border-radius:10px;overflow:hidden">' +
+        '<div style="padding:10px 16px;background:rgba(56,189,248,0.08);border-bottom:1px solid rgba(56,189,248,0.2);display:flex;align-items:center;gap:8px">' +
+        '<span>\uD83D\uDCCB</span><strong style="color:#93c5fd;font-size:13px">Active CDISC Standards Registry</strong>' +
+        '<span style="font-size:11px;color:#64748b;margin-left:auto">StandardsRegistry.getSummary() \u2014 live</span></div>' +
+        '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px">' +
+        '<thead><tr style="background:rgba(0,0,0,0.3)">' +
+        '<th style="padding:7px 12px;text-align:left;color:#64748b;font-size:10px;text-transform:uppercase">Standard</th>' +
+        '<th style="padding:7px 12px;text-align:left;color:#64748b;font-size:10px;text-transform:uppercase">Full Name</th>' +
+        '<th style="padding:7px 12px;text-align:left;color:#64748b;font-size:10px;text-transform:uppercase">Active Version</th>' +
+        '<th style="padding:7px 12px;text-align:left;color:#64748b;font-size:10px;text-transform:uppercase">Supported</th>' +
+        '<th style="padding:7px 12px;text-align:left;color:#64748b;font-size:10px;text-transform:uppercase">Status</th>' +
+        '</tr></thead><tbody>' + _srRows + '</tbody></table></div></div>';
+      container.innerHTML += _srHtml;
+    }
     return;
   }
 
@@ -12880,11 +12915,11 @@ function clearAllAgentData(silent = false) {
   const pill = document.getElementById('data-source-status-pill');
   const dot = document.getElementById('source-dot');
   const txt = document.getElementById('source-indicator-text');
-  if (txt) txt.textContent = 'CLINICAL ENGINE: 🟢 GxP PRODUCTION READY (ACTIVE — READY FOR INGESTION)';
+  if (txt) txt.textContent = 'CLINICAL ENGINE: ⚪ STANDBY — NO DATA LOADED';
   if (dot) {
     dot.className = 'source-dot';
-    dot.style.background = '#22c55e';
-    dot.style.boxShadow = '0 0 8px #22c55e';
+    dot.style.background = '#64748b';
+    dot.style.boxShadow = '0 0 6px #64748b';
   }
 
   // Update Ingestion pills and dataset domain tags
@@ -13761,10 +13796,10 @@ function setDataSourceMode(mode, meta = {}) {
     text.innerHTML = 'CLINICAL ENGINE: 🟢 CLINICAL VERIFICATION BENCHMARK (' + escapeHtml(meta.name || 'Sample Cohort') + ')';
     appendTerminalLog('STATE', 'DATA_SOURCE', '[CLINICAL ENGINE: 🟢 ACTIVE] Clinical test cohort engaged for live validation & repair.');
   } else {
-    dot.className = 'source-dot live';
-    dot.style.background = '#22c55e';
-    dot.style.boxShadow = '0 0 8px #22c55e';
-    text.innerHTML = 'CLINICAL ENGINE: 🟢 GxP PRODUCTION READY (ACTIVE — READY FOR INGESTION)';
+    dot.className = 'source-dot';
+    dot.style.background = '#64748b';
+    dot.style.boxShadow = '0 0 6px #64748b';
+    text.innerHTML = 'CLINICAL ENGINE: ⚪ STANDBY — NO DATA LOADED';
   }
 }
 
