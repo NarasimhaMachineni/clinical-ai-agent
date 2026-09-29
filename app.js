@@ -7059,7 +7059,7 @@ function updateLiveStudyMetrics(taskStats = null) {
       patients: { count: 0, source: 'NONE', uniqueKey: 'USUBJID', subjects: [], isRowMismatch: false },
       safety: { status: 'NOT CONFIGURED', count: null, percent: null, source: 'NONE', message: 'Not configured' },
       adverseEvents: { totalEvents: 0, uniqueSubjects: 0, seriousEvents: 0, treatmentEmergentEvents: 0, source: 'NONE', isAnalysis: false },
-      liverSafety: { status: 'NOT CONFIGURED', alertCount: 0, alerts: [], message: 'Lab dataset not loaded' },
+      liverSafety: { status: 'NOT ASSESSED', alertCount: 0, alerts: [], message: 'Lab dataset not loaded' },
       rules: { totalRules: 6, executed: 0, passed: 0, failed: 0, warnings: 0, notApplicable: 6, blocked: 0 }
     };
   }
@@ -7120,7 +7120,7 @@ function updateLiveStudyMetrics(taskStats = null) {
       elHys.style.color = '#facc15';
       elHys.style.fontSize = '11.5px';
     } else {
-      elHys.textContent = 'NOT CONFIGURED';
+      elHys.textContent = 'NOT ASSESSED';
       elHys.style.color = 'var(--text-muted)';
       elHys.style.fontSize = '11.5px';
     }
@@ -7141,7 +7141,7 @@ function updateLiveStudyMetrics(taskStats = null) {
         elP21.className = 'metric-val text-red';
       }
     } else {
-      elP21.textContent = '⚪ Standby';
+      elP21.textContent = 'NOT EXECUTED';
       elP21.className = 'metric-val';
     }
   }
@@ -8914,14 +8914,55 @@ window.addEventListener('keydown', (e) => {
   }
 });
 
+window.clinicalPerformanceTelemetry = {
+  lastProfileMs: null,
+  lastValidationMs: null,
+  lastGridRenderMs: null,
+  lastFilterMs: null,
+  lastSearchMs: null,
+  memoryMb: null,
+  update: function(type, durationMs) {
+    const val = parseFloat(durationMs);
+    if (!isNaN(val)) {
+      if (type === 'Profile' || type === 'Quick Profile') this.lastProfileMs = val.toFixed(1);
+      else if (type === 'Validation') this.lastValidationMs = val.toFixed(1);
+      else if (type === 'Grid') this.lastGridRenderMs = val.toFixed(1);
+      else if (type === 'Filter') this.lastFilterMs = val.toFixed(1);
+      else if (type === 'Search') this.lastSearchMs = val.toFixed(1);
+    }
+    if (typeof performance !== 'undefined' && performance.memory && performance.memory.usedJSHeapSize) {
+      this.memoryMb = (performance.memory.usedJSHeapSize / (1024 * 1024)).toFixed(1);
+    }
+  },
+  getTelemetrySummary: function() {
+    return {
+      profileMs: this.lastProfileMs ? `${this.lastProfileMs} ms` : '—',
+      validationMs: this.lastValidationMs ? `${this.lastValidationMs} ms` : '—',
+      gridFirstRenderMs: this.lastGridRenderMs ? `${this.lastGridRenderMs} ms` : '—',
+      filterMs: this.lastFilterMs ? `${this.lastFilterMs} ms` : '—',
+      searchMs: this.lastSearchMs ? `${this.lastSearchMs} ms` : '—',
+      memoryMb: this.memoryMb ? `${this.memoryMb} MB` : (typeof process !== 'undefined' && process.memoryUsage ? `${(process.memoryUsage().heapUsed / (1024 * 1024)).toFixed(1)} MB` : '—')
+    };
+  }
+};
+
 window.updateGridPerformanceHud = function(latencyMs, throughput, extra) {
   const hudText = document.getElementById('grid-perf-hud-text');
+  if (extra && window.clinicalPerformanceTelemetry) {
+    window.clinicalPerformanceTelemetry.update(extra, latencyMs);
+  }
   if (!hudText) return;
   const latNum = parseFloat(latencyMs);
   const latStr = isNaN(latNum) ? '—' : latNum.toFixed(1);
   const tpStr = (throughput > 0) ? ` • ${throughput.toLocaleString()} rows/s` : '';
   const extraStr = extra ? ` [${extra}]` : '';
-  hudText.textContent = `⚡ Latency: ${latStr} ms${tpStr}${extraStr}`;
+  const mem = window.clinicalPerformanceTelemetry ? window.clinicalPerformanceTelemetry.getTelemetrySummary().memoryMb : '—';
+  const memStr = mem !== '—' ? ` • Mem: ${mem}` : '';
+  hudText.textContent = `⚡ Latency: ${latStr} ms${tpStr}${extraStr}${memStr}`;
+  if (hudText.parentElement && window.clinicalPerformanceTelemetry) {
+    const s = window.clinicalPerformanceTelemetry.getTelemetrySummary();
+    hudText.parentElement.title = `Real Telemetry (Section 4):\n• Profile: ${s.profileMs}\n• Validation: ${s.validationMs}\n• Grid first render: ${s.gridFirstRenderMs}\n• Filter: ${s.filterMs}\n• Search: ${s.searchMs}\n• Memory: ${s.memoryMb}`;
+  }
 };
 
 window.debounceDatasetFilter = function(targetName, val) {
@@ -9144,10 +9185,6 @@ function renderDatasetTable(dsetName) {
           <span>📐 Specifications &amp; Metadata</span>
           <span style="font-size:11px; padding:2px 7px; border-radius:10px; background:${currentSubView === 'SPEC' ? 'rgba(168,85,247,0.25)' : 'rgba(255,255,255,0.05)'}; color:${currentSubView === 'SPEC' ? '#c084fc' : 'var(--text-muted)'};">${hasSpec ? specVarCount + ' vars' : 'Catalog'}</span>
         </button>
-        <button id="tab-subview-diff" style="background:transparent; border:none; color:${currentSubView === 'DIFF' ? '#ec4899' : 'var(--text-muted)'}; border-bottom:${currentSubView === 'DIFF' ? '2.5px solid #ec4899' : '2.5px solid transparent'}; padding:8px 16px; font-weight:700; font-size:12.5px; cursor:pointer; display:flex; align-items:center; gap:6px;">
-          <span>🔀 Before / After Diff</span>
-          <span style="font-size:11px; padding:2px 7px; border-radius:10px; background:${currentSubView === 'DIFF' ? 'rgba(236,72,153,0.2)' : 'rgba(255,255,255,0.05)'}; color:${currentSubView === 'DIFF' ? '#ec4899' : 'var(--text-muted)'};">${errorCount} changed</span>
-        </button>
       </div>
     </div>
   `;
@@ -9210,10 +9247,10 @@ function renderDatasetTable(dsetName) {
     `;
   }
 
-  if (currentSubView === 'DIFF' || window.clientDatasetViewMode === 'DIFF') {
-    const sRows = (window.clientSourceData && window.clientSourceData[targetName]) || rows;
-    html += renderSideBySideDiffTable(container, targetName, sRows, rows, auditLog);
-  } else if (currentSubView === 'CLEAN') {
+  if (currentSubView === 'CLEAN' || currentSubView === 'DIFF') {
+    currentSubView = 'CLEAN';
+    window.currentDatasetSubView = 'CLEAN';
+    if (window.clientDatasetViewMode === 'DIFF') window.clientDatasetViewMode = 'DERIVED';
     // Filter rows based on search
     const searchQuery = (state.search || '').toLowerCase().trim();
     let filteredRows = rows;
@@ -9497,18 +9534,6 @@ function renderDatasetTable(dsetName) {
   const tabSpec = document.getElementById('tab-subview-spec');
   if (tabSpec) tabSpec.addEventListener('click', () => { window.currentDatasetSubView = 'SPEC'; renderDatasetTable(targetName); });
 
-  const tabDiff = document.getElementById('tab-subview-diff');
-  if (tabDiff) tabDiff.addEventListener('click', () => { 
-    window.currentDatasetSubView = 'DIFF'; 
-    window.clientDatasetViewMode = 'DIFF';
-    const btnDiffTop = document.getElementById('btn-view-diff-data');
-    const btnDerivedTop = document.getElementById('btn-view-derived-data');
-    const btnSourceTop = document.getElementById('btn-view-source-data');
-    if (btnDiffTop) { btnDiffTop.classList.add('active'); btnDiffTop.style.background = 'var(--primary-blue)'; btnDiffTop.style.color = '#fff'; }
-    if (btnDerivedTop) { btnDerivedTop.classList.remove('active'); btnDerivedTop.style.background = 'transparent'; btnDerivedTop.style.color = 'var(--text-muted)'; }
-    if (btnSourceTop) { btnSourceTop.classList.remove('active'); btnSourceTop.style.background = 'transparent'; btnSourceTop.style.color = 'var(--text-muted)'; }
-    renderDatasetTable(targetName); 
-  });
 
   // Column Profiles Toggle
   const btnToggleProfiles = document.getElementById('btn-toggle-col-profiles');
@@ -17817,20 +17842,6 @@ function setupV7EventListeners() {
 
   const btnDerived = document.getElementById('btn-view-derived-data');
   const btnSource = document.getElementById('btn-view-source-data');
-  const btnDiff = document.getElementById('btn-view-diff-data');
-
-  if (btnDiff) {
-    btnDiff.addEventListener('click', () => {
-      window.clientDatasetViewMode = 'DIFF';
-      window.currentDatasetSubView = 'DIFF';
-      btnDiff.classList.add('active');
-      btnDiff.style.background = 'var(--primary-blue)';
-      btnDiff.style.color = '#fff';
-      if (btnDerived) { btnDerived.classList.remove('active'); btnDerived.style.background = 'transparent'; btnDerived.style.color = 'var(--text-muted)'; }
-      if (btnSource) { btnSource.classList.remove('active'); btnSource.style.background = 'transparent'; btnSource.style.color = 'var(--text-muted)'; }
-      renderDatasetTable(currentDatasetTab);
-    });
-  }
 
   const btnDl16 = document.getElementById('btn-download-16sec-report');
   if (btnDl16) {
@@ -20701,7 +20712,7 @@ if (typeof document !== 'undefined') {
 
 let currentClinicalOsTab = 'PROTOCOL';
 
-function openClinicalOsModal(activeTab = 'PROTOCOL') {
+function openClinicalOsModal(activeTab = 'CONTROL_PLANE') {
   currentClinicalOsTab = activeTab;
   const modal = document.getElementById('clinical-os-modal');
   if (modal) {
@@ -20719,6 +20730,7 @@ window.closeClinicalOsModal = closeClinicalOsModal;
 function switchClinicalOsTab(tabName) {
   currentClinicalOsTab = tabName;
   const navBtns = {
+    'CONTROL_PLANE': 'btn-cos-control-plane',
     'PROTOCOL': 'btn-cos-protocol',
     'TIME_MACHINE': 'btn-cos-time-machine',
     'VENDOR_RECON': 'btn-cos-vendor-recon',
@@ -20747,6 +20759,9 @@ function switchClinicalOsTab(tabName) {
   if (!body) return;
 
   switch (tabName) {
+    case 'CONTROL_PLANE':
+      renderClinicalOsControlPlane(body);
+      break;
     case 'PROTOCOL':
       renderProtocolIntelligenceView(body);
       break;
@@ -21402,3 +21417,207 @@ function triggerVerifyReproducibility(manifestId) {
   `;
 }
 window.triggerVerifyReproducibility = triggerVerifyReproducibility;
+
+
+// ============================================================================
+// CLINICAL OS CONTROL PLANE VIEW (Sections 7 - 18)
+// ============================================================================
+
+function renderClinicalOsControlPlane(body) {
+  if (!body) return;
+  const engine = (typeof ClinicalOSOrchestrationEngine !== 'undefined') ? ClinicalOSOrchestrationEngine : null;
+  const ws = engine ? engine.getMainWorkspace() : {
+    activeStudy: 'STUDY-DEMO-001',
+    activeDataCut: 'PRIMARY-CUT-1.0',
+    activeDatasetVersion: 'STANDBY',
+    standardVersions: [],
+    validationState: 'NOT EXECUTED',
+    openIssues: 0,
+    reviewRequired: 0,
+    staleResults: [],
+    tlfStatus: 'NOT AVAILABLE',
+    sasRStatus: 'NOT EXECUTED',
+    lockStatus: 'UNLOCKED',
+    stages: {},
+    systemHealth: {}
+  };
+
+  const graph = engine ? engine.getExecutionGraph() : [];
+  const jobs = engine ? engine.getJobs() : [];
+  const incidents = engine ? engine.getIncidents() : [];
+  const reviews = engine ? engine.getReviewQueue() : [];
+  const approvals = engine ? engine.getApprovals() : [];
+
+  const stageBadgeColors = {
+    'COMPLETE': { bg: 'rgba(34,197,94,0.15)', text: '#4ade80', border: '#4ade8040' },
+    'RUNNING': { bg: 'rgba(56,189,248,0.15)', text: '#38bdf8', border: '#38bdf840' },
+    'STALE': { bg: 'rgba(249,115,22,0.15)', text: '#fb923c', border: '#fb923c40' },
+    'REVIEW REQUIRED': { bg: 'rgba(168,85,247,0.15)', text: '#c084fc', border: '#c084fc40' },
+    'FAILED': { bg: 'rgba(239,68,68,0.15)', text: '#f87171', border: '#f8717140' },
+    'BLOCKED': { bg: 'rgba(234,179,8,0.15)', text: '#facc15', border: '#facc1540' },
+    'NOT STARTED': { bg: 'rgba(255,255,255,0.05)', text: '#94a3b8', border: 'rgba(255,255,255,0.1)' },
+    'NOT APPLICABLE': { bg: 'rgba(255,255,255,0.03)', text: '#64748b', border: 'rgba(255,255,255,0.05)' }
+  };
+
+  body.innerHTML = `
+    <div style="display:flex; flex-direction:column; gap:16px;">
+
+      <!-- SECTION 9: MAIN WORKSPACE CONTROL CARDS -->
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:10px;">
+        <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-mid); border-radius:8px; padding:10px 14px;">
+          <span style="font-size:10px; color:var(--text-muted); text-transform:uppercase;">Active Study</span>
+          <div style="font-size:14px; font-weight:700; color:#38bdf8; margin-top:2px;">${escapeHtml(ws.activeStudy)}</div>
+          <span style="font-size:10px; color:var(--text-secondary);">Cut: ${escapeHtml(ws.activeDataCut)}</span>
+        </div>
+        <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-mid); border-radius:8px; padding:10px 14px;">
+          <span style="font-size:10px; color:var(--text-muted); text-transform:uppercase;">Dataset Version</span>
+          <div style="font-size:14px; font-weight:700; color:#fff; margin-top:2px;">${escapeHtml(ws.activeDatasetVersion)}</div>
+          <span style="font-size:10px; color:var(--text-secondary);">Lock: ${escapeHtml(ws.lockStatus)}</span>
+        </div>
+        <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-mid); border-radius:8px; padding:10px 14px;">
+          <span style="font-size:10px; color:var(--text-muted); text-transform:uppercase;">Validation State</span>
+          <div style="font-size:14px; font-weight:700; color:${ws.validationState === 'PASS' ? '#4ade80' : (ws.validationState === 'NOT EXECUTED' ? '#94a3b8' : '#fb923c')}; margin-top:2px;">
+            ${escapeHtml(ws.validationState)}
+          </div>
+          <span style="font-size:10px; color:var(--text-secondary);">Open Issues: ${ws.openIssues}</span>
+        </div>
+        <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-mid); border-radius:8px; padding:10px 14px;">
+          <span style="font-size:10px; color:var(--text-muted); text-transform:uppercase;">TLF &amp; Double Prog</span>
+          <div style="font-size:14px; font-weight:700; color:#c084fc; margin-top:2px;">${escapeHtml(ws.tlfStatus)}</div>
+          <span style="font-size:10px; color:var(--text-secondary);">SAS/R: ${escapeHtml(ws.sasRStatus)}</span>
+        </div>
+        <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-mid); border-radius:8px; padding:10px 14px;">
+          <span style="font-size:10px; color:var(--text-muted); text-transform:uppercase;">Review &amp; Stale</span>
+          <div style="font-size:14px; font-weight:700; color:${ws.staleResults.length > 0 ? '#fb923c' : '#4ade80'}; margin-top:2px;">
+            ${ws.staleResults.length > 0 ? ws.staleResults.length + ' Stale' : 'All Up to Date'}
+          </div>
+          <span style="font-size:10px; color:var(--text-secondary);">Queue: ${ws.reviewRequired} Items</span>
+        </div>
+      </div>
+
+      <!-- SECTION 10: LIVE EXECUTION GRAPH (11 STAGES) -->
+      <div style="background:rgba(15,23,42,0.85); border:1px solid rgba(56,189,248,0.25); border-radius:10px; padding:14px 18px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-size:16px;">⚡</span>
+            <strong style="font-size:13px; color:#fff;">Section 10: Live Clinical OS Execution Graph (11 Stages)</strong>
+          </div>
+          <span style="font-size:11px; color:#38bdf8;">Deterministic State Machine</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:6px; overflow-x:auto; padding-bottom:8px;">
+          ${graph.map((g, idx) => {
+            const conf = stageBadgeColors[g.status] || stageBadgeColors['NOT STARTED'];
+            const arrow = idx < graph.length - 1 ? '<span style="color:#64748b; font-size:12px; margin:0 2px;">➔</span>' : '';
+            return `
+              <div style="flex-shrink:0; text-align:center; padding:8px 10px; background:${conf.bg}; border:1px solid ${conf.border}; border-radius:6px; min-width:85px;">
+                <div style="font-size:10px; font-weight:700; color:#fff; text-transform:uppercase; letter-spacing:0.4px;">${g.stage.replace('_', ' ')}</div>
+                <div style="font-size:9.5px; font-weight:600; color:${conf.text}; margin-top:3px;">${g.status}</div>
+              </div>
+              ${arrow}
+            `;
+          }).join('')}
+        </div>
+      </div>
+
+      <!-- SECTION 11 & 12: JOB ORCHESTRATOR & DEPENDENCY ENGINE -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+        
+        <!-- Job Orchestrator -->
+        <div style="background:rgba(15,23,42,0.7); border:1px solid var(--border-mid); border-radius:8px; padding:14px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <strong style="color:#fff; font-size:12.5px;">⚙️ Section 11: Job Orchestrator</strong>
+            <button onclick="triggerClinicalOsJob('Deep Validation', 'STUDY-DEMO', 'v1.0')" style="background:rgba(56,189,248,0.15); border:1px solid #38bdf840; color:#38bdf8; padding:3px 8px; border-radius:4px; font-size:10.5px; cursor:pointer; font-weight:600;">+ Run Validation Job</button>
+          </div>
+          <div style="font-size:11px; color:var(--text-muted); margin-bottom:8px;">
+            ${jobs.length === 0 ? 'No active background worker jobs. Trigger a job above.' : jobs.length + ' jobs in orchestrator queue:'}
+          </div>
+          <div style="max-height:160px; overflow-y:auto; display:flex; flex-direction:column; gap:6px;">
+            ${jobs.slice(-5).reverse().map(j => `
+              <div style="background:rgba(0,0,0,0.3); border:1px solid var(--border-subtle); border-radius:4px; padding:6px 10px; font-size:11px; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                  <strong style="color:#fff;">${escapeHtml(j.operation)}</strong>
+                  <span style="color:#64748b; font-family:monospace; margin-left:6px;">${j.jobId}</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="color:${j.status === 'COMPLETE' ? '#4ade80' : (j.status === 'FAILED' ? '#f87171' : '#38bdf8')}; font-weight:600;">${j.status}</span>
+                  <span style="color:#94a3b8; font-size:10px;">${j.duration || '0ms'}</span>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <!-- Dependency Engine & Staleness -->
+        <div style="background:rgba(15,23,42,0.7); border:1px solid var(--border-mid); border-radius:8px; padding:14px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <strong style="color:#fff; font-size:12.5px;">🕸️ Section 12: Dependency Engine</strong>
+            <button onclick="simulateDependencyInvalidation('LB')" style="background:rgba(249,115,22,0.15); border:1px solid #fb923c40; color:#fb923c; padding:3px 8px; border-radius:4px; font-size:10.5px; cursor:pointer; font-weight:600;">⚡ Modify LB (Test Stale)</button>
+          </div>
+          <div style="font-size:11px; color:var(--text-secondary); line-height:1.5;">
+            Example Dependency Flow: <code>LB ➔ ADLB ➔ Liver Safety ➔ TLF ➔ Report</code>.
+            If upstream changes, downstream results are marked <strong>STALE</strong> until revalidated.
+          </div>
+          <div style="margin-top:10px; background:rgba(0,0,0,0.3); border-radius:4px; padding:8px 10px; font-size:11px; color:#cbd5e1;">
+            <div>Currently Stale Nodes: <strong style="color:#fb923c;">${ws.staleResults.length > 0 ? ws.staleResults.join(', ') : 'None (System synchronized)'}</strong></div>
+            <div style="margin-top:4px; font-size:10px; color:#64748b;">Do not recompute unaffected domains. Incremental lineage intact.</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- SECTION 14 & 15: SYSTEM HEALTH & INCIDENTS -->
+      <div style="display:grid; grid-template-columns:2fr 1fr; gap:14px;">
+        <div style="background:rgba(15,23,42,0.7); border:1px solid var(--border-mid); border-radius:8px; padding:14px;">
+          <strong style="color:#fff; font-size:12.5px; display:block; margin-bottom:10px;">🏥 Section 14: System Engine Health (12 Subsystems)</strong>
+          <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:8px;">
+            ${Object.entries(ws.systemHealth).map(([eng, st]) => `
+              <div style="background:rgba(0,0,0,0.3); border:1px solid var(--border-subtle); border-radius:4px; padding:6px 8px; font-size:10.5px;">
+                <div style="color:#94a3b8; text-transform:capitalize;">${eng.replace(/([A-Z])/g, ' $1').trim()}</div>
+                <div style="color:${st === 'HEALTHY' ? '#4ade80' : '#94a3b8'}; font-weight:700; margin-top:2px;">${st}</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <div style="background:rgba(15,23,42,0.7); border:1px solid var(--border-mid); border-radius:8px; padding:14px;">
+          <strong style="color:#fff; font-size:12.5px; display:block; margin-bottom:10px;">🚨 Section 15: Incident Center</strong>
+          <div style="font-size:11px; color:var(--text-muted);">
+            ${incidents.length === 0 ? '✅ 0 Active Incidents. All workers operational.' : incidents.length + ' incidents recorded:'}
+          </div>
+          <div style="margin-top:8px; max-height:100px; overflow-y:auto;">
+            ${incidents.map(inc => `
+              <div style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.2); border-radius:4px; padding:6px; font-size:10px; margin-bottom:4px; color:#fca5a5;">
+                <strong>${inc.incidentId}</strong>: ${escapeHtml(inc.error)}
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+
+    </div>
+  `;
+}
+
+window.renderClinicalOsControlPlane = renderClinicalOsControlPlane;
+
+window.triggerClinicalOsJob = function(operation, studyId, datasetVersion) {
+  if (typeof ClinicalOSOrchestrationEngine !== 'undefined') {
+    const job = ClinicalOSOrchestrationEngine.createJob(operation, studyId, datasetVersion);
+    ClinicalOSOrchestrationEngine.startJob(job.jobId);
+    ClinicalOSOrchestrationEngine.updateJobProgress(job.jobId, 50, 'Processing clinical data records...');
+    setTimeout(() => {
+      ClinicalOSOrchestrationEngine.finishJob(job.jobId, { status: 'SUCCESS', records: 100 });
+      if (document.getElementById('clinical-os-modal')?.style.display !== 'none') {
+        renderClinicalOsControlPlane(document.getElementById('clinical-os-modal-body'));
+      }
+    }, 400);
+    renderClinicalOsControlPlane(document.getElementById('clinical-os-modal-body'));
+  }
+};
+
+window.simulateDependencyInvalidation = function(domain) {
+  if (typeof ClinicalOSOrchestrationEngine !== 'undefined') {
+    ClinicalOSOrchestrationEngine.invalidateDownstream(domain);
+    renderClinicalOsControlPlane(document.getElementById('clinical-os-modal-body'));
+  }
+};

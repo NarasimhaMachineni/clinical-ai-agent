@@ -84,7 +84,7 @@ eval(`
 `);
 
 // 3. Test openLineageExplanationModal -> showModalElement -> closeLineageModal -> hideModalElement
-console.log('\n--- Testing Before / After Diff Lineage Inspector Modal Lifecycle ---');
+console.log('\n--- Testing Lineage & Provenance Inspector Modal Lifecycle ---');
 showModalElement('lineage-modal');
 assert.strictEqual(elements['lineage-modal'].style.display, 'flex');
 assert(!elements['lineage-modal'].classList.contains('hidden'));

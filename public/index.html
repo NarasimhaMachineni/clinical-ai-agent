@@ -93,12 +93,12 @@
               <div class="metric-sub" id="metric-sub-teae" style="font-size:10px; color:var(--text-muted); margin-top:2px;">Source: Standby</div>
             </div>
             <div class="metric-card" id="card-metric-hyslaw" onclick="openMetricDrillDown('LIVER_SAFETY')" style="cursor:pointer;" title="Click to view liver safety surveillance">
-              <span class="metric-val" id="metric-hyslaw" style="font-size:12px;">NOT CONFIGURED</span>
+              <span class="metric-val" id="metric-hyslaw" style="font-size:12px;">NOT ASSESSED</span>
               <span class="metric-lbl" id="metric-lbl-hyslaw">Liver Toxicity Alerts</span>
               <div class="metric-sub" id="metric-sub-hyslaw" style="font-size:10px; color:var(--text-muted); margin-top:2px;">Hy's Law Screening</div>
             </div>
             <div class="metric-card full-span" id="card-metric-p21" onclick="openMetricDrillDown('RULE_CHECKS')" style="cursor:pointer;" title="Click to view executed CDISC / FDA rule checks">
-              <span class="metric-val" id="metric-p21">⚪ Standby</span>
+              <span class="metric-val" id="metric-p21">NOT EXECUTED</span>
               <span class="metric-lbl" id="metric-lbl-p21">FDA Rules Checked</span>
               <div class="metric-sub" id="metric-sub-p21" style="font-size:10px; color:var(--text-muted); margin-top:2px;">Real Rule Execution</div>
             </div>
@@ -332,13 +332,12 @@
                     </div>
                   </div>
 
-                  <!-- View Mode Toolbar (Section 34 Before/After Diff, Source, Corrected) -->
+                  <!-- View Mode Toolbar (Source vs Corrected Dataset) -->
                   <div class="view-mode-toolbar" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px; padding:6px 10px; background:rgba(0,0,0,0.25); border-radius:6px; border:1px solid rgba(255,255,255,0.08);">
                     <div style="display:flex; align-items:center; gap:8px;">
                       <span style="font-size:11px; color:var(--text-muted); font-weight:600; text-transform:uppercase;">View Mode:</span>
                       <button class="btn-toggle-view active" id="btn-view-derived-data" style="cursor:pointer; font-size:11px; padding:4px 12px; border-radius:4px; background:var(--primary-blue); color:#fff; border:none; font-weight:600;" title="View Clean Corrected GxP Clinical Dataset">✨ Corrected Data</button>
                       <button class="btn-toggle-view" id="btn-view-source-data" style="cursor:pointer; font-size:11px; padding:4px 12px; border-radius:4px; background:transparent; color:var(--text-muted); border:1px solid rgba(255,255,255,0.12); font-weight:600;" title="View Raw Unaltered Source Data (Read-Only)">🔒 Original Source Data</button>
-                      <button class="btn-toggle-view" id="btn-view-diff-data" style="cursor:pointer; font-size:11px; padding:4px 12px; border-radius:4px; background:transparent; color:var(--text-muted); border:1px solid rgba(255,255,255,0.12); font-weight:600;" title="Side-by-side Before/After diff of all corrected cells (Section 34)">🔀 Before / After Diff</button>
                     </div>
                     <div id="dataset-registry-mini-badge" style="font-size:11px; color:#38bdf8; font-weight:600;">
                       🔒 Read-Only Source Preserved
@@ -1253,7 +1252,8 @@
       
       <!-- Subnavigation Tabs -->
       <div style="background:rgba(2,6,23,0.9); padding:8px 18px; border-bottom:1px solid var(--border-mid); display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
-        <button class="clinical-os-nav-btn active" id="btn-cos-protocol" onclick="switchClinicalOsTab('PROTOCOL')" style="background:var(--primary-blue); color:#fff; border:none; padding:5px 12px; border-radius:5px; font-size:11.5px; font-weight:600; cursor:pointer;">📑 Protocol &amp; Amendments</button>
+        <button class="clinical-os-nav-btn active" id="btn-cos-control-plane" onclick="switchClinicalOsTab('CONTROL_PLANE')" style="background:var(--primary-blue); color:#fff; border:none; padding:5px 12px; border-radius:5px; font-size:11.5px; font-weight:600; cursor:pointer;">🏛️ Master Workspace &amp; Live Graph</button>
+        <button class="clinical-os-nav-btn" id="btn-cos-protocol" onclick="switchClinicalOsTab('PROTOCOL')" style="background:rgba(255,255,255,0.06); color:#cbd5e1; border:1px solid var(--border-subtle); padding:5px 12px; border-radius:5px; font-size:11.5px; font-weight:600; cursor:pointer;">📑 Protocol &amp; Amendments</button>
         <button class="clinical-os-nav-btn" id="btn-cos-time-machine" onclick="switchClinicalOsTab('TIME_MACHINE')" style="background:rgba(255,255,255,0.06); color:#cbd5e1; border:1px solid var(--border-subtle); padding:5px 12px; border-radius:5px; font-size:11.5px; font-weight:600; cursor:pointer;">⏱️ Time Machine &amp; Multi-Cut</button>
         <button class="clinical-os-nav-btn" id="btn-cos-vendor-recon" onclick="switchClinicalOsTab('VENDOR_RECON')" style="background:rgba(255,255,255,0.06); color:#cbd5e1; border:1px solid var(--border-subtle); padding:5px 12px; border-radius:5px; font-size:11.5px; font-weight:600; cursor:pointer;">🏢 Vendor &amp; Lab Reconciliation</button>
         <button class="clinical-os-nav-btn" id="btn-cos-observability" onclick="switchClinicalOsTab('OBSERVABILITY')" style="background:rgba(255,255,255,0.06); color:#cbd5e1; border:1px solid var(--border-subtle); padding:5px 12px; border-radius:5px; font-size:11.5px; font-weight:600; cursor:pointer;">📡 Observability &amp; Drift</button>
