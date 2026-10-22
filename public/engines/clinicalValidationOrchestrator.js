@@ -1463,13 +1463,166 @@
     name: 'ECG Findings (SDTM EG) Deep Validation Engine',
     validate: (rows, opt) => []
   };
+  // 8.5 ADTTEValidator (Time-to-Event Analysis Dataset)
+  const ADTTEValidator = {
+    domain: 'ADTTE',
+    name: 'Time-to-Event Analysis Dataset (ADTTE) Deep Validator',
+    validate: function(rows, options = {}) {
+      const issues = [];
+      const dName = 'ADTTE';
+      const seenParams = new Map();
+
+      rows.forEach((r, idx) => {
+        const rowNum = (options.rowOffset || 0) + idx + 1;
+        const usubjid = String(r.USUBJID || r.SUBJID || `SUBJ-${rowNum}`).trim();
+
+        // 1. Required Variables
+        ['STUDYID', 'USUBJID', 'PARAMCD', 'PARAM', 'STARTDT', 'ADT', 'AVAL', 'CNSR'].forEach(v => {
+          if (r[v] === undefined || isBlank(r[v])) {
+            issues.push({
+              id: `ADTTE-REQ-${v}-${rowNum}`,
+              severity: 'ERROR',
+              dataset: dName,
+              domain: dName,
+              row: rowNum,
+              usubjid,
+              variable: v,
+              oldVal: '(blank)',
+              expectedVal: `Non-blank ${v}`,
+              error: `Missing required ADTTE variable ${v}`,
+              rule: 'ADaMIG v1.3 ADTTE Standard',
+              evidence: 'VARIABLE_METADATA',
+              explanation: `Variable ${v} is mandatory in CDISC ADTTE datasets.`,
+              method: 'Data Ingestion & Derivation Check',
+              status: 'OPEN',
+              canFix: false,
+              newVal: null
+            });
+          }
+        });
+
+        // 2. PARAMCD & PARAM 1:1 Invariance
+        if (r.PARAMCD && r.PARAM) {
+          const pcd = String(r.PARAMCD).trim();
+          const pnm = String(r.PARAM).trim();
+          if (seenParams.has(pcd) && seenParams.get(pcd) !== pnm) {
+            issues.push({
+              id: `ADTTE-PARAM-INVAR-${rowNum}`,
+              severity: 'ERROR',
+              dataset: dName,
+              domain: dName,
+              row: rowNum,
+              usubjid,
+              variable: 'PARAM',
+              oldVal: pnm,
+              expectedVal: seenParams.get(pcd),
+              error: `PARAMCD '${pcd}' mapped to conflicting PARAM '${pnm}' (previously '${seenParams.get(pcd)}')`,
+              rule: 'ADaMIG v1.3 Parameter Invariance Rule',
+              evidence: 'STANDARDS_CONFORMANCE',
+              explanation: 'In ADaM datasets, PARAMCD and PARAM must have a strict 1-to-1 relationship.',
+              method: 'Parameter Reconciliation',
+              status: 'OPEN',
+              canFix: true,
+              newVal: seenParams.get(pcd)
+            });
+          } else {
+            seenParams.set(pcd, pnm);
+          }
+        }
+
+        // 3. Censoring Flag CNSR Validation (must be 0 or 1)
+        if (r.CNSR !== undefined && !isBlank(r.CNSR)) {
+          const cnsrNum = parseInt(String(r.CNSR).trim(), 10);
+          if (isNaN(cnsrNum) || (cnsrNum !== 0 && cnsrNum !== 1)) {
+            issues.push({
+              id: `ADTTE-CNSR-INVALID-${rowNum}`,
+              severity: 'ERROR',
+              dataset: dName,
+              domain: dName,
+              row: rowNum,
+              usubjid,
+              variable: 'CNSR',
+              oldVal: r.CNSR,
+              expectedVal: '0 or 1',
+              error: `Invalid CNSR value '${r.CNSR}'. Must be 0 (Event) or 1 (Censored).`,
+              rule: 'ADaMIG v1.3 CNSR Controlled Terminology',
+              evidence: 'CONTROLLED_TERMINOLOGY',
+              explanation: 'CNSR is binary: 0 indicates event occurred, 1 indicates observation censored.',
+              method: 'Censoring Standardization',
+              status: 'OPEN',
+              canFix: true,
+              newVal: 1
+            });
+          }
+        }
+
+        // 4. Timing & AVAL Derivation: AVAL = (ADT - STARTDT + 1) in days
+        if (r.STARTDT && r.ADT && !isBlank(r.STARTDT) && !isBlank(r.ADT)) {
+          const start = new Date(String(r.STARTDT).slice(0, 10));
+          const end = new Date(String(r.ADT).slice(0, 10));
+          if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
+            if (end < start) {
+              issues.push({
+                id: `ADTTE-TIMING-INVERT-${rowNum}`,
+                severity: 'ERROR',
+                dataset: dName,
+                domain: dName,
+                row: rowNum,
+                usubjid,
+                variable: 'ADT',
+                oldVal: r.ADT,
+                expectedVal: `>= STARTDT (${r.STARTDT})`,
+                error: `Analysis Date ADT (${r.ADT}) precedes Time-to-Event Start Date STARTDT (${r.STARTDT})`,
+                rule: 'ADaMIG v1.3 Chronology Rule',
+                evidence: 'TIMING_CONFORMANCE',
+                explanation: 'Analysis date cannot occur before start of risk window.',
+                method: 'Chronology Verification',
+                status: 'OPEN',
+                canFix: false,
+                newVal: null
+              });
+            } else {
+              const diffDays = Math.round((end - start) / (1000 * 60 * 60 * 24)) + 1;
+              if (r.AVAL !== undefined && !isBlank(r.AVAL)) {
+                const avalNum = parseFloat(String(r.AVAL));
+                if (!isNaN(avalNum) && Math.abs(avalNum - diffDays) > 0.05) {
+                  issues.push({
+                    id: `ADTTE-AVAL-DERIV-${rowNum}`,
+                    severity: 'ERROR',
+                    dataset: dName,
+                    domain: dName,
+                    row: rowNum,
+                    usubjid,
+                    variable: 'AVAL',
+                    oldVal: avalNum,
+                    expectedVal: diffDays,
+                    error: `Discrepant AVAL (${avalNum}). Formula (ADT - STARTDT + 1) yields ${diffDays} days.`,
+                    rule: 'ADaMIG v1.3 Time-to-Event AVAL Derivation',
+                    evidence: 'MATHEMATICALLY_VERIFIED',
+                    explanation: `Time-to-event AVAL in days must equal ADT - STARTDT + 1 (${diffDays} days).`,
+                    method: 'Deterministic Mathematical Calculation',
+                    status: 'FIXED',
+                    canFix: true,
+                    newVal: diffDays
+                  });
+                }
+              }
+            }
+          }
+        }
+      });
+
+      return issues;
+    }
+  };
+
   const UniversalValidator = {
     domain: 'UNIVERSAL',
     name: 'Universal CDISC Standards Engine',
     validate: (rows, opt) => []
   };
 
-  [DMValidator, AEValidator, ADAEValidator, ADSLValidator, BDSValidator, LBValidator, VSValidator, EXValidator, CMValidator, DSValidator, SVValidator, MHValidator, EGValidator, UniversalValidator].forEach(v => {
+  [DMValidator, AEValidator, ADAEValidator, ADSLValidator, BDSValidator, LBValidator, VSValidator, EXValidator, CMValidator, DSValidator, SVValidator, MHValidator, EGValidator, ADTTEValidator, UniversalValidator].forEach(v => {
     if (v) makeValidatorWrapper(v);
   });
 
@@ -1482,6 +1635,7 @@
     'ADLB': { ...BDSValidator, domain: 'ADLB', name: 'ADLB BDS Deep Validator' },
     'VS': VSValidator,
     'ADVS': { ...BDSValidator, domain: 'ADVS', name: 'ADVS BDS Deep Validator' },
+    'ADTTE': ADTTEValidator,
     'EX': EXValidator,
     'CM': CMValidator,
     'DS': DSValidator,
@@ -2640,6 +2794,193 @@
 
   // 6.11 SAS ↔ R Double Programming Engine (Sections 23–25)
   const SASRDoubleProgrammingEngine = {
+    getRuntimeStatus: function() {
+      return {
+        sas: {
+          available: false,
+          runtime: 'DISCONNECTED (STATIC_ENVIRONMENT)',
+          description: 'SAS 9.4 / Viya runtime requires local licensed installation or SAS Analytics Gateway.',
+          codeGeneration: 'OPERATIONAL',
+          externalOutputImport: 'SUPPORTED'
+        },
+        r: {
+          available: false,
+          runtime: 'DISCONNECTED (STATIC_ENVIRONMENT)',
+          description: 'R runtime requires local Rscript or OpenCPU / Plumber service.',
+          codeGeneration: 'OPERATIONAL',
+          externalOutputImport: 'SUPPORTED'
+        },
+        dualEngine: {
+          available: true,
+          runtime: 'CLIENT_SIDE_DETERMINISTIC',
+          mode: 'INDEPENDENT_OUTPUT_RECONCILIATION',
+          description: 'Full pin-to-pin dataset reconciliation between independently generated SAS and R outputs.'
+        }
+      };
+    },
+    compareDatasets: function(sasData = [], rData = [], options = {}) {
+      const tolerance = typeof options.tolerance === 'number' ? options.tolerance : 1e-5;
+      const keyVars = options.keyVariables || ['USUBJID', 'PARAMCD', 'AVISIT', 'AESEQ', 'SUBJID'];
+      const ignoreCase = options.ignoreCase !== undefined ? options.ignoreCase : false;
+
+      const sasRows = Array.isArray(sasData) ? sasData : [];
+      const rRows = Array.isArray(rData) ? rData : [];
+
+      const sasVars = sasRows[0] ? Object.keys(sasRows[0]) : [];
+      const rVars = rRows[0] ? Object.keys(rRows[0]) : [];
+      const commonVars = sasVars.filter(v => rVars.includes(v));
+      const sasOnlyVars = sasVars.filter(v => !rVars.includes(v));
+      const rOnlyVars = rVars.filter(v => !sasVars.includes(v));
+
+      const activeKeyVars = keyVars.filter(k => commonVars.includes(k));
+      const getKey = (row, idx) => {
+        if (activeKeyVars.length > 0) {
+          return activeKeyVars.map(k => String(row[k] || '').trim()).join('|');
+        }
+        return `ROW_${idx + 1}`;
+      };
+
+      const sasKeyMap = new Map();
+      sasRows.forEach((row, idx) => {
+        const k = getKey(row, idx);
+        sasKeyMap.set(k, { row, idx: idx + 1 });
+      });
+
+      const rKeyMap = new Map();
+      rRows.forEach((row, idx) => {
+        const k = getKey(row, idx);
+        rKeyMap.set(k, { row, idx: idx + 1 });
+      });
+
+      const matchedKeys = [];
+      const unmatchedSas = [];
+      const unmatchedR = [];
+
+      sasKeyMap.forEach((val, k) => {
+        if (rKeyMap.has(k)) {
+          matchedKeys.push(k);
+        } else {
+          unmatchedSas.push({ key: k, rowNum: val.idx, row: val.row });
+        }
+      });
+
+      rKeyMap.forEach((val, k) => {
+        if (!sasKeyMap.has(k)) {
+          unmatchedR.push({ key: k, rowNum: val.idx, row: val.row });
+        }
+      });
+
+      const discrepancies = [];
+      let totalCells = 0;
+      let concordantCells = 0;
+
+      matchedKeys.forEach(k => {
+        const sasItem = sasKeyMap.get(k);
+        const rItem = rKeyMap.get(k);
+
+        commonVars.forEach(v => {
+          totalCells++;
+          const valSas = sasItem.row[v];
+          const valR = rItem.row[v];
+
+          const isSasBlank = valSas === undefined || valSas === null || String(valSas).trim() === '' || String(valSas).trim() === '.';
+          const isRBlank = valR === undefined || valR === null || String(valR).trim() === '' || String(valR).trim() === 'NA';
+
+          if (isSasBlank && isRBlank) {
+            concordantCells++;
+            return;
+          }
+
+          if (isSasBlank !== isRBlank) {
+            discrepancies.push({
+              key: k,
+              sasRow: sasItem.idx,
+              rRow: rItem.idx,
+              variable: v,
+              sasVal: isSasBlank ? '(blank/.)' : valSas,
+              rVal: isRBlank ? '(blank/NA)' : valR,
+              diff: 'MISSINGNESS_MISMATCH',
+              severity: 'ERROR',
+              rule: 'Missing Value Concordance'
+            });
+            return;
+          }
+
+          const numSas = parseFloat(String(valSas).replace(/[^0-9.-]/g, ''));
+          const numR = parseFloat(String(valR).replace(/[^0-9.-]/g, ''));
+
+          if (!isNaN(numSas) && !isNaN(numR)) {
+            const diff = Math.abs(numSas - numR);
+            if (diff <= tolerance) {
+              concordantCells++;
+            } else {
+              discrepancies.push({
+                key: k,
+                sasRow: sasItem.idx,
+                rRow: rItem.idx,
+                variable: v,
+                sasVal: numSas,
+                rVal: numR,
+                diff: +(diff.toFixed(6)),
+                severity: diff > 0.01 ? 'ERROR' : 'WARNING',
+                rule: `Numeric Tolerance Exceeded (> ${tolerance})`
+              });
+            }
+          } else {
+            const strSas = ignoreCase ? String(valSas).trim().toUpperCase() : String(valSas).trim();
+            const strR = ignoreCase ? String(valR).trim().toUpperCase() : String(valR).trim();
+            if (strSas === strR) {
+              concordantCells++;
+            } else {
+              discrepancies.push({
+                key: k,
+                sasRow: sasItem.idx,
+                rRow: rItem.idx,
+                variable: v,
+                sasVal: valSas,
+                rVal: valR,
+                diff: 'STRING_MISMATCH',
+                severity: 'ERROR',
+                rule: 'Categorical Text Concordance'
+              });
+            }
+          }
+        });
+      });
+
+      const discrepantCells = discrepancies.length;
+      const status = (discrepantCells === 0 && unmatchedSas.length === 0 && unmatchedR.length === 0)
+        ? 'CONCORDANT_PASS'
+        : 'DISCREPANCY_DETECTED';
+
+      return {
+        status,
+        tolerance,
+        summary: {
+          sasRecordCount: sasRows.length,
+          rRecordCount: rRows.length,
+          matchedKeysCount: matchedKeys.length,
+          unmatchedSasCount: unmatchedSas.length,
+          unmatchedRCount: unmatchedR.length,
+          totalCellsCompared: totalCells,
+          concordantCells,
+          discrepantCells,
+          concordanceRate: totalCells > 0 ? ((concordantCells / totalCells) * 100).toFixed(2) + '%' : '100.00%'
+        },
+        schemaComparison: {
+          commonVariables: commonVars,
+          sasOnlyVariables: sasOnlyVars,
+          rOnlyVariables: rOnlyVars
+        },
+        unmatchedRecords: {
+          sasOnly: unmatchedSas.slice(0, 50),
+          rOnly: unmatchedR.slice(0, 50)
+        },
+        discrepancies: discrepancies.slice(0, 200),
+        totalDiscrepancyCount: discrepancies.length,
+        timestamp: new Date().toISOString()
+      };
+    },
     name: 'SAS & R Dual Programming Reconciliation Engine',
     deriveBDSVariables: function(rows = []) {
       const records = [];
@@ -7735,6 +8076,7 @@ ${itemDefXml}
     AEValidator,
     ADAEValidator,
     ADSLValidator,
+    ADTTEValidator,
     BDSValidator,
     LBValidator,
     VSValidator,

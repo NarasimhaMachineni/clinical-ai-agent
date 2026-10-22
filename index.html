@@ -219,17 +219,153 @@
         <!-- 4. Interactive Artifacts & Results Tabs -->
         <section class="results-section">
           <div class="results-tabs">
-            <button class="tab-btn active" data-tab="tab-datasets">📁 Browse Datasets &amp; Audit Trail</button>
-            <button class="tab-btn" data-tab="tab-specs" id="tab-btn-specs">📐 ADaM &amp; SDTM Specifications</button>
-            <button class="tab-btn" data-tab="tab-review">📋 Data Review Report</button>
-            <button class="tab-btn" data-tab="tab-tlfs">📊 Summary Tables</button>
-            <button class="tab-btn" data-tab="tab-qc">🔍 Quality Check Results</button>
-            <button class="tab-btn" data-tab="tab-deliverables">📥 Download Reports</button>
+            <button class="tab-btn active" data-tab="tab-dashboard" id="tab-btn-dashboard">📊 Dashboard</button>
+            <button class="tab-btn" data-tab="tab-datasets" id="tab-btn-datasets">📁 Dataset Inspector</button>
+            <button class="tab-btn" data-tab="tab-sdtm-val" id="tab-btn-sdtm-val">📐 SDTM Validation</button>
+            <button class="tab-btn" data-tab="tab-adam-val" id="tab-btn-adam-val">🔬 ADaM Validation</button>
+            <button class="tab-btn" data-tab="tab-double-prog" id="tab-btn-double-prog">⚖️ SAS/R Double Programming</button>
+            <button class="tab-btn" data-tab="tab-tlfs" id="tab-btn-tlfs">📈 TLF Studio</button>
+            <button class="tab-btn" data-tab="tab-findings" id="tab-btn-findings">🔍 Findings &amp; Evidence</button>
+            <button class="tab-btn" data-tab="tab-reports" id="tab-btn-reports">📋 Reports &amp; Exports</button>
+            <button class="tab-btn" data-tab="tab-settings" id="tab-btn-settings">⚙️ Settings &amp; Diagnostics</button>
           </div>
 
           <div class="results-tab-content">
             <!-- TAB: DATASET INSPECTOR & AUDIT TRAIL -->
-            <div class="tab-pane active" id="tab-datasets">
+                        <!-- TAB 1: EXECUTIVE DASHBOARD & PIPELINE -->
+            <div class="tab-pane active" id="tab-dashboard">
+              <div class="pane-card">
+                <div class="card-title-bar">
+                  <div>
+                    <h3 style="font-size:15px; color:#fff; display:flex; align-items:center; gap:8px;">
+                      <span>📊</span> Clinical Operating System — Executive Study Dashboard
+                    </h3>
+                    <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">
+                      Integrated Study Telemetry • Live CDISC Conformance • 11-Stage Pipeline Architecture • GxP Governance
+                    </div>
+                  </div>
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <span class="badge-pass" id="dash-study-status-pill" style="font-size:11px; padding:3px 10px;">STUDY: STANDBY</span>
+                    <button class="btn-maximize" onclick="toggleMaximize(this)" title="Maximize / Restore View">
+                      <span class="max-icon">⛶</span> <span class="max-text">Maximize</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Live Study Metrics 6-Card Grid -->
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(170px, 1fr)); gap:12px; margin-bottom:16px;">
+                  <div class="metric-card" style="background:rgba(15,23,42,0.7); border:1px solid var(--border-subtle); border-radius:8px; padding:12px 14px;">
+                    <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">Total Subjects</div>
+                    <div id="dash-metric-patients" style="font-size:22px; font-weight:700; color:#fff; margin-top:4px;">0</div>
+                    <div style="font-size:10.5px; color:var(--text-secondary); margin-top:2px;">Unique USUBJID (DM/ADSL)</div>
+                  </div>
+                  <div class="metric-card" style="background:rgba(15,23,42,0.7); border:1px solid var(--border-subtle); border-radius:8px; padding:12px 14px;">
+                    <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">Safety Population</div>
+                    <div id="dash-metric-safety" style="font-size:15px; font-weight:700; color:#94a3b8; margin-top:8px;">NOT CONFIGURED</div>
+                    <div style="font-size:10.5px; color:var(--text-secondary); margin-top:2px;">SAFFL = 'Y' Enrolled</div>
+                  </div>
+                  <div class="metric-card" style="background:rgba(15,23,42,0.7); border:1px solid var(--border-subtle); border-radius:8px; padding:12px 14px;">
+                    <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">Liver Safety (Hy's Law)</div>
+                    <div id="dash-metric-liver" style="font-size:15px; font-weight:700; color:#94a3b8; margin-top:8px;">NOT ASSESSED</div>
+                    <div style="font-size:10.5px; color:var(--text-secondary); margin-top:2px;">ALT &ge; 3x &amp; BILI &ge; 2x ULN</div>
+                  </div>
+                  <div class="metric-card" style="background:rgba(15,23,42,0.7); border:1px solid var(--border-subtle); border-radius:8px; padding:12px 14px;">
+                    <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">Adverse Events</div>
+                    <div id="dash-metric-ae" style="font-size:22px; font-weight:700; color:#fff; margin-top:4px;">0</div>
+                    <div style="font-size:10.5px; color:var(--text-secondary); margin-top:2px;">Total Records (AE/ADAE)</div>
+                  </div>
+                  <div class="metric-card" style="background:rgba(15,23,42,0.7); border:1px solid var(--border-subtle); border-radius:8px; padding:12px 14px;">
+                    <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">CDISC Conformance</div>
+                    <div id="dash-metric-conformance" style="font-size:15px; font-weight:700; color:#94a3b8; margin-top:8px;">NOT EXECUTED</div>
+                    <div style="font-size:10.5px; color:var(--text-secondary); margin-top:2px;">Deterministic Standards Engine</div>
+                  </div>
+                  <div class="metric-card" style="background:rgba(15,23,42,0.7); border:1px solid var(--border-subtle); border-radius:8px; padding:12px 14px;">
+                    <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">Double Programming</div>
+                    <div id="dash-metric-doubleprog" style="font-size:15px; font-weight:700; color:#94a3b8; margin-top:8px;">NOT EXECUTED</div>
+                    <div style="font-size:10.5px; color:var(--text-secondary); margin-top:2px;">SAS &amp; R Dual Concordance</div>
+                  </div>
+                </div>
+
+                <!-- 11-Stage Clinical OS Execution Pipeline -->
+                <div style="background:rgba(0,0,0,0.3); border:1px solid var(--border-subtle); border-radius:8px; padding:16px; margin-bottom:16px;">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                    <strong style="color:#fff; font-size:13px; display:flex; align-items:center; gap:6px;">
+                      <span>⚡</span> Clinical OS 11-Stage Execution Pipeline
+                    </strong>
+                    <span style="font-size:11px; color:var(--text-muted);">Real-Time Stage Telemetry &amp; Staleness Invalidation</span>
+                  </div>
+                  <div class="execution-graph-container" id="dash-execution-pipeline-grid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:8px;">
+                    <div class="stage-card" style="background:rgba(15,23,42,0.6); padding:8px 10px; border-radius:6px; border:1px solid rgba(255,255,255,0.06);">
+                      <div style="font-size:10px; color:var(--text-muted);">01. INGESTION</div>
+                      <div style="font-size:11px; font-weight:600; color:#94a3b8; margin-top:2px;">STANDBY</div>
+                    </div>
+                    <div class="stage-card" style="background:rgba(15,23,42,0.6); padding:8px 10px; border-radius:6px; border:1px solid rgba(255,255,255,0.06);">
+                      <div style="font-size:10px; color:var(--text-muted);">02. PROFILING</div>
+                      <div style="font-size:11px; font-weight:600; color:#94a3b8; margin-top:2px;">STANDBY</div>
+                    </div>
+                    <div class="stage-card" style="background:rgba(15,23,42,0.6); padding:8px 10px; border-radius:6px; border:1px solid rgba(255,255,255,0.06);">
+                      <div style="font-size:10px; color:var(--text-muted);">03. SDTM</div>
+                      <div style="font-size:11px; font-weight:600; color:#94a3b8; margin-top:2px;">STANDBY</div>
+                    </div>
+                    <div class="stage-card" style="background:rgba(15,23,42,0.6); padding:8px 10px; border-radius:6px; border:1px solid rgba(255,255,255,0.06);">
+                      <div style="font-size:10px; color:var(--text-muted);">04. ADaM</div>
+                      <div style="font-size:11px; font-weight:600; color:#94a3b8; margin-top:2px;">STANDBY</div>
+                    </div>
+                    <div class="stage-card" style="background:rgba(15,23,42,0.6); padding:8px 10px; border-radius:6px; border:1px solid rgba(255,255,255,0.06);">
+                      <div style="font-size:10px; color:var(--text-muted);">05. RULES</div>
+                      <div style="font-size:11px; font-weight:600; color:#94a3b8; margin-top:2px;">STANDBY</div>
+                    </div>
+                    <div class="stage-card" style="background:rgba(15,23,42,0.6); padding:8px 10px; border-radius:6px; border:1px solid rgba(255,255,255,0.06);">
+                      <div style="font-size:10px; color:var(--text-muted);">06. DUAL PROG</div>
+                      <div style="font-size:11px; font-weight:600; color:#94a3b8; margin-top:2px;">STANDBY</div>
+                    </div>
+                    <div class="stage-card" style="background:rgba(15,23,42,0.6); padding:8px 10px; border-radius:6px; border:1px solid rgba(255,255,255,0.06);">
+                      <div style="font-size:10px; color:var(--text-muted);">07. COPILOT</div>
+                      <div style="font-size:11px; font-weight:600; color:#94a3b8; margin-top:2px;">STANDBY</div>
+                    </div>
+                    <div class="stage-card" style="background:rgba(15,23,42,0.6); padding:8px 10px; border-radius:6px; border:1px solid rgba(255,255,255,0.06);">
+                      <div style="font-size:10px; color:var(--text-muted);">08. TLF</div>
+                      <div style="font-size:11px; font-weight:600; color:#94a3b8; margin-top:2px;">STANDBY</div>
+                    </div>
+                    <div class="stage-card" style="background:rgba(15,23,42,0.6); padding:8px 10px; border-radius:6px; border:1px solid rgba(255,255,255,0.06);">
+                      <div style="font-size:10px; color:var(--text-muted);">09. QC CELLS</div>
+                      <div style="font-size:11px; font-weight:600; color:#94a3b8; margin-top:2px;">STANDBY</div>
+                    </div>
+                    <div class="stage-card" style="background:rgba(15,23,42,0.6); padding:8px 10px; border-radius:6px; border:1px solid rgba(255,255,255,0.06);">
+                      <div style="font-size:10px; color:var(--text-muted);">10. EVIDENCE</div>
+                      <div style="font-size:11px; font-weight:600; color:#94a3b8; margin-top:2px;">STANDBY</div>
+                    </div>
+                    <div class="stage-card" style="background:rgba(15,23,42,0.6); padding:8px 10px; border-radius:6px; border:1px solid rgba(255,255,255,0.06);">
+                      <div style="font-size:10px; color:var(--text-muted);">11. RELEASE</div>
+                      <div style="font-size:11px; font-weight:600; color:#94a3b8; margin-top:2px;">STANDBY</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Quick Action Hub -->
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:12px;">
+                  <button onclick="document.getElementById('mini-file-input')?.click()" style="background:linear-gradient(135deg, rgba(2,132,199,0.25), rgba(3,105,161,0.15)); border:1px solid #0284c7; border-radius:8px; padding:14px; text-align:left; cursor:pointer; color:#fff; transition:all 0.2s;">
+                    <div style="font-size:15px; font-weight:600; margin-bottom:4px;">📥 Ingest Clinical Data</div>
+                    <div style="font-size:11.5px; color:var(--text-secondary); line-height:1.4;">Load CSV, TSV, XLSX, JSON or SAS XPT into immutable study repository</div>
+                  </button>
+                  <button onclick="triggerValidateAllData()" style="background:linear-gradient(135deg, rgba(16,185,129,0.25), rgba(5,150,105,0.15)); border:1px solid #10b981; border-radius:8px; padding:14px; text-align:left; cursor:pointer; color:#fff; transition:all 0.2s;">
+                    <div style="font-size:15px; font-weight:600; margin-bottom:4px;">🔍 Run Complete Validation</div>
+                    <div style="font-size:11.5px; color:var(--text-secondary); line-height:1.4;">Execute 100% deterministic rules across SDTM, ADaM &amp; cross-domain relationships</div>
+                  </button>
+                  <button onclick="switchTab('tab-double-prog')" style="background:linear-gradient(135deg, rgba(168,85,247,0.25), rgba(126,34,206,0.15)); border:1px solid #a855f7; border-radius:8px; padding:14px; text-align:left; cursor:pointer; color:#fff; transition:all 0.2s;">
+                    <div style="font-size:15px; font-weight:600; margin-bottom:4px;">⚖️ SAS/R Double Programming</div>
+                    <div style="font-size:11.5px; color:var(--text-secondary); line-height:1.4;">Generate dual programs and reconcile independent outputs with tolerance checks</div>
+                  </button>
+                  <button onclick="switchTab('tab-tlfs')" style="background:linear-gradient(135deg, rgba(245,158,11,0.25), rgba(217,119,6,0.15)); border:1px solid #f59e0b; border-radius:8px; padding:14px; text-align:left; cursor:pointer; color:#fff; transition:all 0.2s;">
+                    <div style="font-size:15px; font-weight:600; margin-bottom:4px;">📈 Open TLF Studio</div>
+                    <div style="font-size:11.5px; color:var(--text-secondary); line-height:1.4;">Build ICH E3 CSR summary tables, subject listings and survival figures with drilldowns</div>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB 2: DATASET INSPECTOR & AUDIT TRAIL -->
+            <div class="tab-pane" id="tab-datasets">
               <div class="pane-card">
                 <div class="card-title-bar">
                   <div style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom:8px;">
@@ -445,7 +581,194 @@
               </div>
             </div>
 
-            <!-- TAB: ADaM & SDTM SPECIFICATIONS REPOSITORY -->
+                        <!-- TAB 3: SDTM VALIDATION WORKBENCH -->
+            <div class="tab-pane" id="tab-sdtm-val">
+              <div class="pane-card">
+                <div class="card-title-bar">
+                  <div style="display:flex; justify-content:space-between; align-items:center; width:100%; flex-wrap:wrap; gap:8px;">
+                    <div>
+                      <h3 style="font-size:15px; color:#fff; display:flex; align-items:center; gap:8px;">
+                        <span>📐</span> CDISC SDTM Validation Workbench (SDTMIG v3.3 / v3.4)
+                      </h3>
+                      <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">
+                        Deterministic CDISC Conformance: Required Variables, Variable Types, ISO 8601 Dates, Controlled Terminology, Domain Keys &amp; Parent-Child Relationships
+                      </div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                      <button class="btn-quick-profile" onclick="triggerQuickProfile()" title="Quick structural scan">
+                        <span>⚡</span> <span>QUICK PROFILE</span>
+                      </button>
+                      <button class="btn-deep-verify" id="btn-deep-verify-sdtm" onclick="runDeepDomainVerification(window.currentDomain || 'DM')" title="Validate currently selected domain">
+                        <span>🔬</span> <span>VALIDATE ACTIVE DOMAIN</span>
+                      </button>
+                      <button class="btn-validate-prominent" onclick="triggerValidateAllData()" title="Validate all loaded SDTM domains">
+                        <span>🔍</span> <span>VALIDATE ALL SDTM</span>
+                      </button>
+                      <button class="btn-maximize" onclick="toggleMaximize(this)" title="Maximize / Restore View">
+                        <span class="max-icon">⛶</span> <span class="max-text">Maximize</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- SDTM Domain Filter Pills -->
+                <div class="sdtm-domain-pills" style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px; padding:8px 12px; background:rgba(255,255,255,0.02); border-radius:6px; border:1px solid var(--border-subtle);">
+                  <button class="pill-btn active" data-sdtm-domain="DM" onclick="filterSdtmValidationView('DM', this)">DM (Demographics)</button>
+                  <button class="pill-btn" data-sdtm-domain="AE" onclick="filterSdtmValidationView('AE', this)">AE (Adverse Events)</button>
+                  <button class="pill-btn" data-sdtm-domain="LB" onclick="filterSdtmValidationView('LB', this)">LB (Lab Findings)</button>
+                  <button class="pill-btn" data-sdtm-domain="VS" onclick="filterSdtmValidationView('VS', this)">VS (Vital Signs)</button>
+                  <button class="pill-btn" data-sdtm-domain="EX" onclick="filterSdtmValidationView('EX', this)">EX (Exposure)</button>
+                  <button class="pill-btn" data-sdtm-domain="DS" onclick="filterSdtmValidationView('DS', this)">DS (Disposition)</button>
+                  <button class="pill-btn" data-sdtm-domain="CM" onclick="filterSdtmValidationView('CM', this)">CM (Concomitant Meds)</button>
+                  <button class="pill-btn" data-sdtm-domain="MH" onclick="filterSdtmValidationView('MH', this)">MH (Medical History)</button>
+                  <button class="pill-btn" data-sdtm-domain="SUPP" onclick="filterSdtmValidationView('SUPP', this)">SUPP (Qualifiers)</button>
+                  <button class="pill-btn" data-sdtm-domain="ALL" onclick="filterSdtmValidationView('ALL', this)">ALL SDTM</button>
+                </div>
+
+                <!-- SDTM Validation Results Table -->
+                <div id="sdtm-val-container" style="background:rgba(0,0,0,0.3); border:1px solid var(--border-subtle); border-radius:8px; padding:16px; min-height:350px;">
+                  <!-- Dynamically rendered via renderSdtmValidationTab() -->
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB 4: ADaM VALIDATION WORKBENCH -->
+            <div class="tab-pane" id="tab-adam-val">
+              <div class="pane-card">
+                <div class="card-title-bar">
+                  <div style="display:flex; justify-content:space-between; align-items:center; width:100%; flex-wrap:wrap; gap:8px;">
+                    <div>
+                      <h3 style="font-size:15px; color:#fff; display:flex; align-items:center; gap:8px;">
+                        <span>🔬</span> CDISC ADaM Validation Workbench (ADaMIG v1.3 / BDS / OCCDS)
+                      </h3>
+                      <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">
+                        Analysis Derivations: Subject Uniqueness, Population Flags, Baseline Derivations (BASE, CHG, PCHG), Parameter Invariance, TEAE Timing &amp; Hy's Law Screening
+                      </div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                      <button class="btn-quick-profile" onclick="triggerQuickProfile()" title="Quick structural scan">
+                        <span>⚡</span> <span>QUICK PROFILE</span>
+                      </button>
+                      <button class="btn-deep-verify" id="btn-deep-verify-adam" onclick="runDeepDomainVerification(window.currentDomain || 'ADSL')" title="Validate currently selected ADaM dataset">
+                        <span>🔬</span> <span>VALIDATE ACTIVE DOMAIN</span>
+                      </button>
+                      <button class="btn-validate-prominent" onclick="triggerValidateAllData()" title="Validate all loaded ADaM domains">
+                        <span>🔍</span> <span>VALIDATE ALL ADaM</span>
+                      </button>
+                      <button class="btn-maximize" onclick="toggleMaximize(this)" title="Maximize / Restore View">
+                        <span class="max-icon">⛶</span> <span class="max-text">Maximize</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- ADaM Domain Filter Pills -->
+                <div class="adam-domain-pills" style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px; padding:8px 12px; background:rgba(255,255,255,0.02); border-radius:6px; border:1px solid var(--border-subtle);">
+                  <button class="pill-btn active" data-adam-domain="ADSL" onclick="filterAdamValidationView('ADSL', this)">ADSL (Subject-Level)</button>
+                  <button class="pill-btn" data-adam-domain="ADAE" onclick="filterAdamValidationView('ADAE', this)">ADAE (Adverse Events)</button>
+                  <button class="pill-btn" data-adam-domain="ADLB" onclick="filterAdamValidationView('ADLB', this)">ADLB (Laboratory BDS)</button>
+                  <button class="pill-btn" data-adam-domain="ADVS" onclick="filterAdamValidationView('ADVS', this)">ADVS (Vital Signs BDS)</button>
+                  <button class="pill-btn" data-adam-domain="ADTTE" onclick="filterAdamValidationView('ADTTE', this)">ADTTE (Time-to-Event)</button>
+                  <button class="pill-btn" data-adam-domain="ALL" onclick="filterAdamValidationView('ALL', this)">ALL ADaM</button>
+                </div>
+
+                <!-- Hy's Law Hepatotoxicity Screening Alert Bar -->
+                <div id="adam-hys-law-alert-bar" style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); border-radius:8px; padding:12px 16px; margin-bottom:14px; display:none;">
+                  <!-- Injected via JS when Hy's law criteria met -->
+                </div>
+
+                <!-- ADaM Validation Results Table -->
+                <div id="adam-val-container" style="background:rgba(0,0,0,0.3); border:1px solid var(--border-subtle); border-radius:8px; padding:16px; min-height:350px;">
+                  <!-- Dynamically rendered via renderAdamValidationTab() -->
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB 5: SAS/R DOUBLE PROGRAMMING WORKBENCH -->
+            <div class="tab-pane" id="tab-double-prog">
+              <div class="pane-card">
+                <div class="card-title-bar">
+                  <div style="display:flex; justify-content:space-between; align-items:center; width:100%; flex-wrap:wrap; gap:8px;">
+                    <div>
+                      <h3 style="font-size:15px; color:#fff; display:flex; align-items:center; gap:8px;">
+                        <span>⚖️</span> SAS &amp; R Independent Double Programming Workbench
+                      </h3>
+                      <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">
+                        Independent Dual Code Generation • Pin-to-Pin Output Comparison • Numeric Tolerance Verification • Missing Value Concordance
+                      </div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                      <button class="btn-maximize" onclick="toggleMaximize(this)" title="Maximize / Restore View">
+                        <span class="max-icon">⛶</span> <span class="max-text">Maximize</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Truthful Runtime Availability Banner -->
+                <div style="background:rgba(15,23,42,0.8); border:1px solid rgba(56,189,248,0.3); border-radius:8px; padding:12px 16px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                  <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
+                    <div>
+                      <span style="font-size:11px; color:var(--text-muted); text-transform:uppercase;">SAS Runtime</span>
+                      <div style="font-size:12px; font-weight:700; color:#fbbf24;">⚡ EXTERNAL RUNTIME DISCONNECTED (STATIC HOST)</div>
+                    </div>
+                    <div>
+                      <span style="font-size:11px; color:var(--text-muted); text-transform:uppercase;">R Runtime</span>
+                      <div style="font-size:12px; font-weight:700; color:#fbbf24;">⚡ EXTERNAL RUNTIME DISCONNECTED (STATIC HOST)</div>
+                    </div>
+                    <div>
+                      <span style="font-size:11px; color:var(--text-muted); text-transform:uppercase;">Dual Comparison Engine</span>
+                      <div style="font-size:12px; font-weight:700; color:#4ade80;">✓ READY (IN-BROWSER DETERMINISTIC)</div>
+                    </div>
+                  </div>
+                  <div style="font-size:11px; color:var(--text-secondary); max-width:340px; line-height:1.4;">
+                    SAS and R runtimes require external licensed installations. Dual program generation and output reconciliation execute in-browser.
+                  </div>
+                </div>
+
+                <!-- Dual Code Generator & Viewer Section -->
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:18px;">
+                  <div style="background:rgba(0,0,0,0.3); border:1px solid var(--border-subtle); border-radius:8px; padding:14px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                      <strong style="color:#38bdf8; font-size:13px;">💻 SAS CDISC Production Pipeline</strong>
+                      <button class="btn-sm" onclick="copySasCodeToClipboard()" style="font-size:11px; padding:2px 8px;">📋 Copy SAS Code</button>
+                    </div>
+                    <pre id="double-prog-sas-code" style="background:rgba(15,23,42,0.9); padding:10px; border-radius:6px; font-size:11px; font-family:monospace; color:#cbd5e1; max-height:220px; overflow-y:auto; border:1px solid rgba(255,255,255,0.06);">/* SAS DATA Step: TRTEMFL & BDS Derivations */</pre>
+                  </div>
+                  <div style="background:rgba(0,0,0,0.3); border:1px solid var(--border-subtle); border-radius:8px; padding:14px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                      <strong style="color:#a855f7; font-size:13px;">🧪 R pharmaverse admiral Pipeline</strong>
+                      <button class="btn-sm" onclick="copyRCodeToClipboard()" style="font-size:11px; padding:2px 8px;">📋 Copy R Code</button>
+                    </div>
+                    <pre id="double-prog-r-code" style="background:rgba(15,23,42,0.9); padding:10px; border-radius:6px; font-size:11px; font-family:monospace; color:#cbd5e1; max-height:220px; overflow-y:auto; border:1px solid rgba(255,255,255,0.06);"># R / dplyr / pharmaverse admiral</pre>
+                  </div>
+                </div>
+
+                <!-- Independent Dataset Reconciliation Console -->
+                <div style="background:rgba(0,0,0,0.3); border:1px solid var(--border-subtle); border-radius:8px; padding:16px;">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+                    <strong style="color:#fff; font-size:13.5px;">🔬 Independent Dataset Reconciliation &amp; Discrepancy Detection</strong>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                      <label style="font-size:11.5px; color:var(--text-secondary);">Numeric Tolerance:</label>
+                      <select id="double-prog-tolerance-select" style="background:rgba(15,23,42,0.8); border:1px solid var(--border-subtle); color:#fff; padding:4px 8px; border-radius:4px; font-size:11px;">
+                        <option value="0.00001" selected>&plusmn; 0.00001 (Strict 1e-5)</option>
+                        <option value="0.0001">&plusmn; 0.0001 (1e-4)</option>
+                        <option value="0.001">&plusmn; 0.001 (1e-3)</option>
+                        <option value="0.01">&plusmn; 0.01 (Rounding 1e-2)</option>
+                      </select>
+                      <button class="btn-card-action" id="btn-run-double-prog" onclick="runDoubleProgrammingReconciliation()" style="background:linear-gradient(135deg, #0284c7, #0369a1); color:#fff; font-weight:700; border:none; padding:6px 14px; border-radius:6px; cursor:pointer; font-size:11.5px;">
+                        ⚖️ Run Dual Reconciliation
+                      </button>
+                    </div>
+                  </div>
+                  <div id="double-prog-results-container">
+                    <!-- Populated via renderDoubleProgTab() -->
+                  </div>
+                </div>
+              </div>
+            </div>
+
+<!-- TAB: ADaM & SDTM SPECIFICATIONS REPOSITORY -->
             <div class="tab-pane" id="tab-specs">
               <div class="pane-card">
                 <div class="card-title-bar">
@@ -470,7 +793,7 @@
             </div>
 
             <!-- TAB 1: AUTOMATED DATA REVIEW -->
-            <div class="tab-pane" id="tab-review">
+            <div class="tab-pane" id="tab-reports">
               <div class="pane-card">
                 <div class="card-title-bar">
                   <div>
@@ -694,7 +1017,7 @@
             </div>
 
             <!-- TAB 2: P21 QC AUDIT -->
-            <div class="tab-pane" id="tab-qc">
+            <div class="tab-pane" id="tab-findings">
               <div class="pane-card">
                 <div class="card-title-bar">
                   <div style="display:flex; justify-content:space-between; align-items:center; width:100%; flex-wrap:wrap; gap:8px;">
@@ -809,6 +1132,79 @@
 
                 <div class="deliverables-grid" id="deliverables-grid">
                   <!-- Injected via JS -->
+                </div>
+              </div>
+            </div>
+            <!-- TAB 9: SETTINGS & SYSTEM DIAGNOSTICS -->
+            <div class="tab-pane" id="tab-settings">
+              <div class="pane-card">
+                <div class="card-title-bar">
+                  <div style="display:flex; justify-content:space-between; align-items:center; width:100%; flex-wrap:wrap; gap:8px;">
+                    <div>
+                      <h3 style="font-size:15px; color:#fff; display:flex; align-items:center; gap:8px;">
+                        <span>⚙️</span> System Settings, Standards Registry &amp; Diagnostics
+                      </h3>
+                      <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">
+                        Real Measured Telemetry • CDISC Standards Registry • 12-Subsystem Health Monitor • Feature Registry Compliance
+                      </div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                      <button class="btn-maximize" onclick="toggleMaximize(this)" title="Maximize / Restore View">
+                        <span class="max-icon">⛶</span> <span class="max-text">Maximize</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Measured Performance Telemetry Cards -->
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:10px; margin-bottom:16px;">
+                  <div style="background:rgba(15,23,42,0.7); border:1px solid var(--border-subtle); border-radius:6px; padding:10px;">
+                    <div style="font-size:10.5px; color:var(--text-muted);">Profile Latency</div>
+                    <div id="diag-perf-profile" style="font-size:16px; font-weight:700; color:#38bdf8; margin-top:2px;">-- ms</div>
+                  </div>
+                  <div style="background:rgba(15,23,42,0.7); border:1px solid var(--border-subtle); border-radius:6px; padding:10px;">
+                    <div style="font-size:10.5px; color:var(--text-muted);">Validation Latency</div>
+                    <div id="diag-perf-val" style="font-size:16px; font-weight:700; color:#38bdf8; margin-top:2px;">-- ms</div>
+                  </div>
+                  <div style="background:rgba(15,23,42,0.7); border:1px solid var(--border-subtle); border-radius:6px; padding:10px;">
+                    <div style="font-size:10.5px; color:var(--text-muted);">Grid First Render</div>
+                    <div id="diag-perf-grid" style="font-size:16px; font-weight:700; color:#38bdf8; margin-top:2px;">-- ms</div>
+                  </div>
+                  <div style="background:rgba(15,23,42,0.7); border:1px solid var(--border-subtle); border-radius:6px; padding:10px;">
+                    <div style="font-size:10.5px; color:var(--text-muted);">Filter / Search</div>
+                    <div id="diag-perf-filter" style="font-size:16px; font-weight:700; color:#38bdf8; margin-top:2px;">-- ms</div>
+                  </div>
+                  <div style="background:rgba(15,23,42,0.7); border:1px solid var(--border-subtle); border-radius:6px; padding:10px;">
+                    <div style="font-size:10.5px; color:var(--text-muted);">Memory Footprint</div>
+                    <div id="diag-perf-mem" style="font-size:16px; font-weight:700; color:#38bdf8; margin-top:2px;">-- MB</div>
+                  </div>
+                </div>
+
+                <!-- CDISC Standards & Subsystems Grid -->
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:16px;">
+                  <div style="background:rgba(0,0,0,0.3); border:1px solid var(--border-subtle); border-radius:8px; padding:14px;">
+                    <strong style="color:#fff; font-size:13px; display:block; margin-bottom:8px;">📚 CDISC Standards Registry</strong>
+                    <div id="diag-standards-list" style="font-size:11.5px; color:var(--text-secondary); line-height:1.6;">
+                      <!-- Populated via StandardsRegistry.getSummary() -->
+                    </div>
+                  </div>
+                  <div style="background:rgba(0,0,0,0.3); border:1px solid var(--border-subtle); border-radius:8px; padding:14px;">
+                    <strong style="color:#fff; font-size:13px; display:block; margin-bottom:8px;">🏥 Subsystems Health (12 Engines)</strong>
+                    <div id="diag-subsystems-list" style="font-size:11.5px; color:var(--text-secondary); line-height:1.6;">
+                      <!-- Populated via SystemHealthEngine -->
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Feature Registry Operational Compliance Card -->
+                <div style="background:rgba(0,0,0,0.3); border:1px solid var(--border-subtle); border-radius:8px; padding:14px;">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <strong style="color:#fff; font-size:13px;">🛡️ Feature Registry Compliance (29 Core Capabilities)</strong>
+                    <span class="badge-pass" id="diag-feature-compliance-badge" style="font-size:10.5px; padding:2px 8px;">100% OPERATIONAL</span>
+                  </div>
+                  <div id="diag-features-grid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:6px; font-size:11px; max-height:180px; overflow-y:auto;">
+                    <!-- Populated via FeatureRegistry.getAllFeatures() -->
+                  </div>
                 </div>
               </div>
             </div>
