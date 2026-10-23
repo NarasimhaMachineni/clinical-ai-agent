@@ -9972,7 +9972,7 @@ function setupTabs() {
 }
 
 function switchTab(tabId) {
-  // Alias map for seamless backward compatibility
+  // Alias map for seamless backward compatibility & product transformation
   const aliases = {
     'tab-specs': 'tab-sdtm-val',
     'tab-qc': 'tab-findings',
@@ -9982,17 +9982,31 @@ function switchTab(tabId) {
     'tab-standards': 'tab-sdtm-val',
     'tab-safety': 'tab-adam-val',
     'tab-double-qc': 'tab-double-prog',
-    'tab-code-workbench': 'tab-double-prog'
+    'tab-code-workbench': 'tab-double-prog',
+    'tab-home': 'tab-dashboard',
+    'tab-data-hub': 'tab-datasets',
+    'tab-sdtm-studio': 'tab-sdtm-val',
+    'tab-adam-studio': 'tab-adam-val',
+    'tab-sas-r-lab': 'tab-double-prog',
+    'tab-tlf-canvas': 'tab-tlfs',
+    'tab-findings-hub': 'tab-findings'
   };
   const effectiveTabId = aliases[tabId] || tabId;
 
+  // Sync results-tabs buttons
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
-
   const btn = document.querySelector(`.tab-btn[data-tab="${effectiveTabId}"]`) ||
               document.querySelector(`.tab-btn[data-tab="${tabId}"]`);
   if (btn) btn.classList.add('active');
 
+  // Sync compact sidebar nav items
+  document.querySelectorAll('.sidebar-nav-item').forEach(b => b.classList.remove('active'));
+  const navBtn = document.querySelector(`.sidebar-nav-item[data-tab="${effectiveTabId}"]`) ||
+                 document.querySelector(`.sidebar-nav-item[data-tab="${tabId}"]`);
+  if (navBtn) navBtn.classList.add('active');
+
+  // Activate destination pane
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
   const pane = document.getElementById(effectiveTabId) || document.getElementById(tabId);
   if (pane) pane.classList.add('active');
 
@@ -10014,9 +10028,14 @@ function switchTab(tabId) {
   } else if (effectiveTabId === 'tab-reports') {
     if (typeof updateReviewTabUI === 'function') updateReviewTabUI();
     if (typeof renderDeliverablesList === 'function') renderDeliverablesList();
+  } else if (effectiveTabId === 'tab-study-insights') {
+    if (typeof renderStudyInsightsTab === 'function') renderStudyInsightsTab();
   } else if (effectiveTabId === 'tab-settings') {
     if (typeof renderSettingsTab === 'function') renderSettingsTab();
   }
+
+  // Keep Clinical Journey Pathway status updated
+  if (typeof updateJourneyPathwayStatus === 'function') updateJourneyPathwayStatus();
 }
 
 function updateReviewTabUI() {
@@ -22068,3 +22087,532 @@ function renderSettingsTab() {
   }
 }
 window.renderSettingsTab = renderSettingsTab;
+
+
+/* =================================================================
+   PRODUCT TRANSFORMATION v16.0 — CLINICAL WORKBENCH INTERACTION ENGINE
+   ================================================================= */
+
+// 1. Sidebar Collapse / Expand Toggle
+function toggleSidebar() {
+  const sidebar = document.getElementById('agent-sidebar');
+  const icon = document.getElementById('sidebar-toggle-icon');
+  if (!sidebar) return;
+  const isCollapsed = sidebar.classList.toggle('collapsed');
+  if (icon) {
+    icon.textContent = isCollapsed ? '▶' : '◀';
+  }
+}
+window.toggleSidebar = toggleSidebar;
+
+// 2. Theme Toggle (Soft Sky Blue & Deep Navy Light / Dark)
+function toggleTheme() {
+  const isLight = document.body.classList.toggle('light-theme');
+  const icon = document.getElementById('theme-icon');
+  if (icon) {
+    icon.textContent = isLight ? '☀️' : '🌙';
+  }
+  try {
+    localStorage.setItem('clinicalops_theme', isLight ? 'light' : 'dark');
+  } catch (e) {}
+}
+window.toggleTheme = toggleTheme;
+
+// Initialize saved theme on page load
+try {
+  const savedTheme = localStorage.getItem('clinicalops_theme');
+  if (savedTheme === 'light') {
+    document.body.classList.add('light-theme');
+    const icon = document.getElementById('theme-icon');
+    if (icon) icon.textContent = '☀️';
+  }
+} catch (e) {}
+
+// 3. Study Selector & Workspace Switcher
+function onStudySelectorChange(studyId) {
+  if (studyId === 'CUSTOM') {
+    const customId = prompt('Enter New Clinical Study Protocol ID (e.g. STUDY-ONC-301):', 'STUDY-ONC-301');
+    if (customId && customId.trim()) {
+      window.currentStudyId = customId.trim();
+      appendTerminalLog('STATE', 'STUDY_INIT', `Initialized new study workspace: ${window.currentStudyId}`);
+    }
+  } else {
+    window.currentStudyId = studyId;
+    appendTerminalLog('STATE', 'STUDY_SELECT', `Switched active study workspace to: ${studyId}`);
+  }
+  const pill = document.getElementById('dash-study-status-pill');
+  if (pill) {
+    pill.textContent = `STUDY: ${window.currentStudyId || 'CDISCPILOT01'}`;
+  }
+  if (typeof updateDashboardTabUI === 'function') updateDashboardTabUI();
+  if (typeof updateJourneyPathwayStatus === 'function') updateJourneyPathwayStatus();
+}
+window.onStudySelectorChange = onStudySelectorChange;
+
+function openStudySelectorModal() {
+  const selector = document.getElementById('study-selector');
+  if (selector) {
+    selector.focus();
+    selector.click();
+  }
+}
+window.openStudySelectorModal = openStudySelectorModal;
+
+// 4. Global Command & Metadata Search (Ctrl+K)
+function handleGlobalSearch(query) {
+  if (!query || !query.trim()) return;
+  const q = query.trim().toLowerCase();
+
+  // Search in tabs
+  const tabMap = {
+    'home': 'tab-dashboard', 'dashboard': 'tab-dashboard', 'overview': 'tab-dashboard',
+    'data': 'tab-datasets', 'hub': 'tab-datasets', 'dataset': 'tab-datasets', 'import': 'tab-datasets', 'upload': 'tab-datasets',
+    'sdtm': 'tab-sdtm-val', 'domain': 'tab-sdtm-val',
+    'adam': 'tab-adam-val', 'derivation': 'tab-adam-val', 'bds': 'tab-adam-val',
+    'sas': 'tab-double-prog', 'r': 'tab-double-prog', 'double': 'tab-double-prog', 'compare': 'tab-double-prog',
+    'tlf': 'tab-tlfs', 'table': 'tab-tlfs', 'listing': 'tab-tlfs', 'figure': 'tab-tlfs',
+    'finding': 'tab-findings', 'findings': 'tab-findings', 'issue': 'tab-findings', 'defect': 'tab-findings',
+    'report': 'tab-reports', 'reports': 'tab-reports', 'export': 'tab-reports', 'audit': 'tab-reports',
+    'insight': 'tab-study-insights', 'insights': 'tab-study-insights', 'ai': 'tab-study-insights', 'copilot': 'tab-study-insights',
+    'setting': 'tab-settings', 'settings': 'tab-settings', 'diagnostics': 'tab-settings'
+  };
+
+  for (const [key, tabId] of Object.entries(tabMap)) {
+    if (q.includes(key)) {
+      switchTab(tabId);
+      appendTerminalLog('NAV', 'SEARCH_JUMP', `Global search routed to: ${tabId} for query "${query}"`);
+      return;
+    }
+  }
+
+  // If query matches a domain name (DM, AE, LB, VS, ADSL, ADAE, ADTTE)
+  if (clientRealData && clientRealData[q.toUpperCase()]) {
+    window.currentDatasetKey = q.toUpperCase();
+    switchTab('tab-datasets');
+    appendTerminalLog('DATA', 'SEARCH_DOMAIN', `Opened domain ${q.toUpperCase()} via global search`);
+    return;
+  }
+
+  // If query is a rule or question, jump to Study Insights
+  switchTab('tab-study-insights');
+  const copilotInput = document.getElementById('copilot-query-input');
+  if (copilotInput) {
+    copilotInput.value = query;
+    handleCopilotQuerySubmit();
+  }
+}
+window.handleGlobalSearch = handleGlobalSearch;
+
+// Bind Ctrl+K and search input
+document.addEventListener('keydown', (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+    e.preventDefault();
+    const searchInput = document.getElementById('global-command-search') || document.getElementById('clinical-command-input');
+    if (searchInput) {
+      searchInput.focus();
+      searchInput.select();
+    }
+  }
+});
+
+const globalSearchEl = document.getElementById('global-command-search');
+if (globalSearchEl) {
+  globalSearchEl.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleGlobalSearch(globalSearchEl.value);
+    }
+  });
+}
+
+// 5. Clinical Journey Pathway Dynamic Status Engine
+function updateJourneyPathwayStatus() {
+  const store = (typeof StudyDataStore !== 'undefined') ? StudyDataStore : null;
+  const domains = Object.keys(clientRealData || {}).filter(k => Array.isArray(clientRealData[k]) && clientRealData[k].length > 0);
+  const totalDatasets = domains.length;
+  const totalRecords = domains.reduce((sum, k) => sum + clientRealData[k].length, 0);
+
+  // Stage 1: Upload Status
+  const stUpload = document.getElementById('journey-status-upload');
+  if (stUpload) {
+    if (totalDatasets > 0) {
+      stUpload.textContent = `${totalDatasets} Datasets Loaded (${totalRecords} rows)`;
+      stUpload.className = 'stage-step-status ready';
+    } else {
+      stUpload.textContent = 'Ready for Data';
+      stUpload.className = 'stage-step-status ready';
+    }
+  }
+
+  // Stage 2: Validate Status
+  const stValidate = document.getElementById('journey-status-validate');
+  if (stValidate) {
+    const findings = (typeof StudyFindingsHub !== 'undefined') ? StudyFindingsHub.getAllFindings() : [];
+    if (findings.length > 0) {
+      const errCount = findings.filter(f => f.severity === 'ERROR' || f.severity === 'Error').length;
+      stValidate.textContent = `Evaluated (${findings.length} findings, ${errCount} errors)`;
+      stValidate.className = errCount > 0 ? 'stage-step-status attention' : 'stage-step-status ready';
+    } else if (totalDatasets > 0) {
+      stValidate.textContent = 'Ready to Validate';
+      stValidate.className = 'stage-step-status in-progress';
+    } else {
+      stValidate.textContent = 'Standby';
+      stValidate.className = 'stage-step-status';
+    }
+  }
+
+  // Stage 3: Compare Status (Double Programming)
+  const stCompare = document.getElementById('journey-status-compare');
+  if (stCompare) {
+    if (typeof SASRDoubleProgrammingEngine !== 'undefined' && SASRDoubleProgrammingEngine.lastComparison) {
+      const comp = SASRDoubleProgrammingEngine.lastComparison;
+      if (comp.concordant) {
+        stCompare.textContent = '100% Concordant';
+        stCompare.className = 'stage-step-status ready';
+      } else {
+        stCompare.textContent = `${comp.discrepancies.length} Discrepancies`;
+        stCompare.className = 'stage-step-status attention';
+      }
+    } else if (totalDatasets > 0) {
+      stCompare.textContent = 'Dual Prog Ready';
+      stCompare.className = 'stage-step-status in-progress';
+    } else {
+      stCompare.textContent = 'Standby';
+      stCompare.className = 'stage-step-status';
+    }
+  }
+
+  // Stage 4: Generate Status (TLFs)
+  const stGenerate = document.getElementById('journey-status-generate');
+  if (stGenerate) {
+    if (typeof TlfDrillDownEngine !== 'undefined' && TlfDrillDownEngine.lastGeneratedTlf) {
+      stGenerate.textContent = 'CSR Outputs Generated';
+      stGenerate.className = 'stage-step-status ready';
+    } else if (totalDatasets > 0) {
+      stGenerate.textContent = 'TLF Shells Ready';
+      stGenerate.className = 'stage-step-status in-progress';
+    } else {
+      stGenerate.textContent = 'Standby';
+      stGenerate.className = 'stage-step-status';
+    }
+  }
+
+  // Stage 5: Review Status (Findings Hub)
+  const stReview = document.getElementById('journey-status-review');
+  if (stReview) {
+    const findings = (typeof StudyFindingsHub !== 'undefined') ? StudyFindingsHub.getAllFindings() : [];
+    const openFindings = findings.filter(f => f.status !== 'RESOLVED' && f.status !== 'APPROVED');
+    if (openFindings.length > 0) {
+      stReview.textContent = `Review Queue (${openFindings.length})`;
+      stReview.className = 'stage-step-status attention';
+    } else if (findings.length > 0) {
+      stReview.textContent = 'All Adjudicated';
+      stReview.className = 'stage-step-status ready';
+    } else {
+      stReview.textContent = 'Standby';
+      stReview.className = 'stage-step-status';
+    }
+  }
+
+  // Stage 6: Export Status (Reports)
+  const stExport = document.getElementById('journey-status-export');
+  if (stExport) {
+    if (totalDatasets > 0) {
+      stExport.textContent = 'Package Ready';
+      stExport.className = 'stage-step-status ready';
+    } else {
+      stExport.textContent = 'Standby';
+      stExport.className = 'stage-step-status';
+    }
+  }
+
+  // Notification Bell Unread Pill
+  const unreadPill = document.getElementById('topbar-unread-count');
+  if (unreadPill) {
+    const findings = (typeof StudyFindingsHub !== 'undefined') ? StudyFindingsHub.getAllFindings() : [];
+    const openCount = findings.filter(f => f.status !== 'RESOLVED' && f.status !== 'APPROVED').length;
+    unreadPill.textContent = openCount;
+    unreadPill.style.display = openCount > 0 ? 'inline-block' : 'none';
+  }
+
+  // Onboarding Banner
+  const onboardingBanner = document.getElementById('dashboard-onboarding-banner');
+  if (onboardingBanner) {
+    onboardingBanner.style.display = totalDatasets === 0 ? 'flex' : 'none';
+  }
+}
+window.updateJourneyPathwayStatus = updateJourneyPathwayStatus;
+
+// 6. Demonstration Cohort Loader (CDISC Pilot 01 Clearly Labeled Demo Data)
+function loadSampleCohortData() {
+  appendTerminalLog('STATE', 'SAMPLE_COHORT', 'Loading demonstration CDISC Pilot 01 cohort (clearly labeled synthetic demo data)...');
+  
+  if (typeof loadSampleADaMWithErrors === 'function') {
+    loadSampleADaMWithErrors();
+  }
+
+  if (!clientRealData.DM || clientRealData.DM.length === 0) {
+    clientRealData.DM = [
+      { STUDYID: 'CDISCPILOT01', USUBJID: 'CDISCPILOT01-01-1018', SUBJID: '1018', RFSTDTC: '2024-01-15', ARM: 'Placebo', AGE: 63, SEX: 'F', COUNTRY: 'USA' },
+      { STUDYID: 'CDISCPILOT01', USUBJID: 'CDISCPILOT01-01-1024', SUBJID: '1024', RFSTDTC: '2024-02-01', ARM: 'Active Drug 54mg', AGE: 71, SEX: 'M', COUNTRY: 'USA' },
+      { STUDYID: 'CDISCPILOT01', USUBJID: 'CDISCPILOT01-01-1033', SUBJID: '1033', RFSTDTC: '2024-02-10', ARM: 'Active Drug 81mg', AGE: 58, SEX: 'F', COUNTRY: 'USA' }
+    ];
+  }
+
+  if (!clientRealData.ADSL || clientRealData.ADSL.length === 0) {
+    clientRealData.ADSL = [
+      { STUDYID: 'CDISCPILOT01', USUBJID: 'CDISCPILOT01-01-1018', TRTP: 'Placebo', SAFFL: 'Y', ITTFL: 'Y', AGE: 63, SEX: 'F' },
+      { STUDYID: 'CDISCPILOT01', USUBJID: 'CDISCPILOT01-01-1024', TRTP: 'Active Drug 54mg', SAFFL: 'Y', ITTFL: 'Y', AGE: 71, SEX: 'M' },
+      { STUDYID: 'CDISCPILOT01', USUBJID: 'CDISCPILOT01-01-1033', TRTP: 'Active Drug 81mg', SAFFL: 'Y', ITTFL: 'Y', AGE: 58, SEX: 'F' }
+    ];
+  }
+
+  if (typeof StudyDataStore !== 'undefined') {
+    Object.keys(clientRealData).forEach(domain => {
+      StudyDataStore.setDataset(domain, clientRealData[domain], { source: 'DEMO_SYNTHETIC', immutable: true });
+    });
+  }
+
+  if (typeof recalculateDynamicStudyMetrics === 'function') recalculateDynamicStudyMetrics();
+  if (typeof updateDashboardTabUI === 'function') updateDashboardTabUI();
+  if (typeof updateJourneyPathwayStatus === 'function') updateJourneyPathwayStatus();
+  switchTab('tab-dashboard');
+}
+window.loadSampleCohortData = loadSampleCohortData;
+
+// 7. Study Insights & Clinical AI Copilot Engine
+const cdiscRuleKnowledgebase = {
+  'SDTM-DM-001': {
+    domain: 'DM',
+    title: 'Demographics Required Keys & Controlled Terminology',
+    severity: 'Error',
+    agency: 'FDA TRC (Technical Reject Criteria) TR0012',
+    standard: 'SDTM IG 3.3 §4.1.1',
+    description: 'DM.AGE must be a non-negative numeric (AGE >= 0) and DM.SEX must strictly conform to CDISC Controlled Terminology codelist C66731 (M, F, U, UNDIFFERENTIATED).',
+    remediation: 'Review raw EDC export. Map EDC sex values via controlled terminology dictionary. For missing AGE or negative values, flag as REVIEW_REQUIRED without inventing arbitrary values.'
+  },
+  'SDTM-AE-001': {
+    domain: 'AE',
+    title: 'Adverse Event Chronological Consistency',
+    severity: 'Error',
+    agency: 'FDA TCG §4.1.3',
+    standard: 'SDTM IG 3.3 §5.1.2',
+    description: 'Adverse event start date (AESTDTC) must precede or equal adverse event end date (AEENDTC). Both dates must adhere to ISO 8601 (YYYY-MM-DD).',
+    remediation: 'Flag inverted dates. Issue clinical query to site investigator. Do not alter end dates without documented evidence.'
+  },
+  'ADAM-TTE-001': {
+    domain: 'ADTTE',
+    title: 'Time-to-Event Censoring & Derivation Integrity',
+    severity: 'Error',
+    agency: 'FDA Statistical Review Guidelines',
+    standard: 'ADaM IG 1.1 §3.3.4',
+    description: 'Binary censoring flag CNSR must be 0 (documented event) or 1 (censored). AVAL must accurately represent duration from STARTDT to ADT according to SAP definition.',
+    remediation: 'Verify SAP-specified censoring hierarchy for lost to follow-up, withdrawal, and study termination.'
+  },
+  'ADSL-POP-001': {
+    domain: 'ADSL',
+    title: 'Analysis Population Flags (SAFFL & ITTFL) Conformance',
+    severity: 'Warning / High Priority',
+    agency: 'FDA TCG §4.1.2 & ICH E9 §5.2',
+    standard: 'ADaM IG 1.3 §3.1',
+    description: 'ITTFL must equal "Y" for all randomized subjects. SAFFL must equal "Y" for all subjects who received at least one dose of investigational product.',
+    remediation: 'Cross-reference subject dosing records in EX domain. A subject with documented exposure (EXDOSE > 0) cannot have SAFFL="N".'
+  },
+  'LB-HYS-001': {
+    domain: 'ADLB / LB',
+    title: 'Hy\'s Law Liver Safety Surveillance & DILI Screening',
+    severity: 'Critical Safety Signal',
+    agency: 'FDA DILI Guidance (July 2009)',
+    standard: 'ICH E2A & FDA Premarketing Liver Safety',
+    description: 'Concomitant or near-concomitant elevation of ALT >= 3x ULN and Total Bilirubin >= 2x ULN without initial cholestasis (ALP < 2x ULN).',
+    remediation: 'Immediately notify Medical Monitor and Data Monitoring Committee (DMC). Initiate close hepatic panel monitoring.'
+  }
+};
+
+function askClinicalCopilotPrompt(promptText) {
+  const input = document.getElementById('copilot-query-input');
+  if (input) input.value = promptText;
+  handleCopilotQuerySubmit();
+}
+window.askClinicalCopilotPrompt = askClinicalCopilotPrompt;
+
+function handleCopilotQuerySubmit() {
+  const input = document.getElementById('copilot-query-input');
+  const responseBox = document.getElementById('copilot-response-container');
+  if (!input || !responseBox) return;
+
+  const query = input.value.trim();
+  if (!query) return;
+
+  const qLower = query.toLowerCase();
+  let htmlResult = '';
+
+  if (qLower.includes('mmrm') || qLower.includes('glimmix') || qLower.includes('kenward')) {
+    htmlResult = `
+      <div style="margin-bottom:8px;">
+        <span class="copilot-badge-tag badge-fact">[DETERMINISTIC FACT]</span>
+        <span class="copilot-badge-tag badge-draft">[AI CODE DRAFT — REQUIRES INDEPENDENT VALIDATION]</span>
+      </div>
+      <p style="margin-bottom:8px;"><strong>Mixed Model Repeated Measures (MMRM) with Kenward-Roger DDFM:</strong></p>
+      <p style="font-size:12px; color:var(--text-secondary); margin-bottom:8px;">
+        In clinical trial continuous efficacy endpoints (e.g. ADVS/ADLB change from baseline CHG across visits AVISIT), MMRM using Restricted Maximum Likelihood (REML) with Kenward-Roger degrees of freedom adjusts for small-sample downward bias in estimated covariance matrices, preventing inflated Type I error.
+      </p>
+      <pre style="background:#090d16; border:1px solid rgba(255,255,255,0.1); border-radius:6px; padding:10px; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:#93c5fd; overflow-x:auto;">
+/* Production SAS Macro: MMRM Primary Efficacy Model */
+proc mixed data=work.advs_bds method=reml;
+  class usubjid trtp avisit;
+  model chg = base trtp avisit trtp*avisit / ddfm=kr solution;
+  repeated avisit / subject=usubjid type=ar(1) r rcorr;
+  lsmeans trtp*avisit / pdiff cl alpha=0.05;
+run;
+      </pre>
+    `;
+  } else if (qLower.includes('kaplan') || qLower.includes('survival') || qLower.includes('adtte') || qLower.includes('survfit')) {
+    htmlResult = `
+      <div style="margin-bottom:8px;">
+        <span class="copilot-badge-tag badge-fact">[DETERMINISTIC FACT]</span>
+        <span class="copilot-badge-tag badge-draft">[AI CODE DRAFT — REQUIRES INDEPENDENT VALIDATION]</span>
+      </div>
+      <p style="margin-bottom:8px;"><strong>Kaplan-Meier Survival Analysis for ADaM ADTTE:</strong></p>
+      <p style="font-size:12px; color:var(--text-secondary); margin-bottom:8px;">
+        In ADTTE time-to-event datasets, <code>CNSR = 0</code> indicates documented event occurrence, whereas <code>CNSR = 1</code> indicates right-censoring. In R's <code>survival</code> package, event status must be coded where 1 = event, so <code>1 - CNSR</code> is mathematically passed to <code>Surv(AVAL, 1 - CNSR)</code>.
+      </p>
+      <pre style="background:#090d16; border:1px solid rgba(255,255,255,0.1); border-radius:6px; padding:10px; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:#6ee7b7; overflow-x:auto;">
+# Independent R Validation: Kaplan-Meier & Cox Proportional Hazards
+library(survival)
+
+# 1. Fit Kaplan-Meier survival curves by planned treatment
+km_fit <- survfit(Surv(AVAL, 1 - CNSR) ~ TRTP, data = adtte_pfs)
+
+# 2. Independent Log-Rank Test
+logrank_test <- survdiff(Surv(AVAL, 1 - CNSR) ~ TRTP, data = adtte_pfs)
+
+# 3. Cox Model for Hazard Ratio & 95% Confidence Interval
+cox_model <- coxph(Surv(AVAL, 1 - CNSR) ~ TRTP, data = adtte_pfs)
+summary(cox_model)
+      </pre>
+    `;
+  } else if (qLower.includes("hy's") || qLower.includes('hys') || qLower.includes('dili') || qLower.includes('liver')) {
+    htmlResult = `
+      <div style="margin-bottom:8px;">
+        <span class="copilot-badge-tag badge-fact">[DETERMINISTIC FACT]</span>
+        <span class="copilot-badge-tag badge-spec">[CDISC SPECIFICATION]</span>
+      </div>
+      <p style="margin-bottom:8px;"><strong>Hy's Law Liver Safety Surveillance (FDA DILI Guidance, July 2009):</strong></p>
+      <div style="font-size:12px; color:var(--text-secondary); line-height:1.5;">
+        <p>A clinical laboratory signal of Drug-Induced Liver Injury (DILI) meeting Hy's Law criteria requires three concomitant conditions:</p>
+        <ul style="margin:8px 0 8px 18px;">
+          <li><strong>Aminotransferase Elevation:</strong> ALT or AST &ge; 3x Upper Limit of Normal (ULN).</li>
+          <li><strong>Bilirubin Elevation:</strong> Total Bilirubin (TBIL) &ge; 2x ULN without initial cholestasis.</li>
+          <li><strong>Absence of Cholestasis:</strong> Alkaline Phosphatase (ALP) &lt; 2x ULN.</li>
+        </ul>
+        <p style="color:#f87171; font-weight:600;">Clinical Significance: Pure hepatocellular injury with jaundice carries approximately 10% case fatality rate. Flagged cases must be reported immediately to the DMC and Medical Monitor.</p>
+      </div>
+    `;
+  } else if (qLower.includes('population') || qLower.includes('saffl') || qLower.includes('ittfl') || qLower.includes('pprotfl')) {
+    htmlResult = `
+      <div style="margin-bottom:8px;">
+        <span class="copilot-badge-tag badge-fact">[DETERMINISTIC FACT]</span>
+        <span class="copilot-badge-tag badge-spec">[CDISC SPECIFICATION]</span>
+      </div>
+      <p style="margin-bottom:8px;"><strong>ADSL Population Flags Derivation Rules:</strong></p>
+      <div style="font-size:12px; color:var(--text-secondary); line-height:1.5;">
+        <ul style="margin:8px 0 8px 18px;">
+          <li><strong>ITTFL (Intent-to-Treat):</strong> Set to 'Y' for all randomized subjects, regardless of whether treatment was administered (ICH E9 §5.2).</li>
+          <li><strong>SAFFL (Safety Population):</strong> Set to 'Y' for all randomized or enrolled subjects who received at least one dose of study treatment (EXDOSE &gt; 0 or EXOCCUR='Y') per FDA TCG §4.1.2.</li>
+          <li><strong>PPROTFL (Per-Protocol):</strong> Set to 'Y' for subjects in Safety population who completed minimal protocol duration and have no major protocol deviations.</li>
+        </ul>
+      </div>
+    `;
+  } else if (qLower.includes('sdtm-dm-001') || qLower.includes('missing age') || qLower.includes('sex')) {
+    const r = cdiscRuleKnowledgebase['SDTM-DM-001'];
+    htmlResult = `
+      <div style="margin-bottom:8px;">
+        <span class="copilot-badge-tag badge-spec">[CDISC SPECIFICATION]</span>
+        <span class="copilot-badge-tag badge-fact">[DETERMINISTIC FACT]</span>
+      </div>
+      <p style="margin-bottom:6px;"><strong>${r.title} (${r.standard}):</strong></p>
+      <div style="font-size:12px; color:var(--text-secondary); line-height:1.5;">
+        <p><strong>Agency Severity:</strong> <span style="color:#ef4444; font-weight:700;">${r.agency}</span></p>
+        <p><strong>Rule Definition:</strong> ${r.description}</p>
+        <p style="margin-top:6px;"><strong>Remediation Protocol:</strong> ${r.remediation}</p>
+      </div>
+    `;
+  } else if (qLower.includes('summarize') || qLower.includes('summary') || qLower.includes('dataset') || qLower.includes('profile')) {
+    const domains = Object.keys(clientRealData || {}).filter(k => Array.isArray(clientRealData[k]) && clientRealData[k].length > 0);
+    const totalRecords = domains.reduce((sum, k) => sum + clientRealData[k].length, 0);
+    const store = (typeof StudyDataStore !== 'undefined') ? StudyDataStore : null;
+    const ptCount = store ? store.getPatientCount() : 0;
+    htmlResult = `
+      <div style="margin-bottom:8px;">
+        <span class="copilot-badge-tag badge-fact">[DETERMINISTIC FACT]</span>
+      </div>
+      <p style="margin-bottom:6px;"><strong>Live Study Datasets Telemetry:</strong></p>
+      <div style="font-size:12px; color:var(--text-secondary); line-height:1.5;">
+        <p><strong>Study Protocol:</strong> ${window.currentStudyId || 'CDISCPILOT01'}</p>
+        <p><strong>Total Loaded Domains:</strong> ${domains.length} (${domains.join(', ') || 'None'})</p>
+        <p><strong>Total Clinical Records:</strong> ${totalRecords}</p>
+        <p><strong>Unique Enrolled Subjects (USUBJID):</strong> ${ptCount}</p>
+      </div>
+    `;
+  } else {
+    htmlResult = `
+      <div style="margin-bottom:8px;">
+        <span class="copilot-badge-tag badge-draft">[AI ASSISTANT RESPONSE]</span>
+      </div>
+      <p style="margin-bottom:6px;"><strong>Clinical Query Analysis:</strong></p>
+      <div style="font-size:12px; color:var(--text-secondary); line-height:1.5;">
+        <p>Evaluating clinical inquiry: "<em>${escapeHtml(query)}</em>".</p>
+        <p style="margin-top:4px;">In ClinicalOps AI, all transformations and validations operate under deterministic CDISC IG rules with cryptographic audit trails. Use the recommended query chips above for deep-dive statistical models (MMRM, Kaplan-Meier, Hy's Law) or enter an official Rule ID in the Rule Search below.</p>
+      </div>
+    `;
+  }
+
+  responseBox.innerHTML = htmlResult;
+}
+window.handleCopilotQuerySubmit = handleCopilotQuerySubmit;
+
+function handleRuleSearchSubmit() {
+  const input = document.getElementById('rule-search-input');
+  const resultBox = document.getElementById('rule-search-result');
+  if (!input || !resultBox) return;
+
+  const ruleId = input.value.trim().toUpperCase();
+  if (!ruleId) return;
+
+  const rule = cdiscRuleKnowledgebase[ruleId];
+  if (rule) {
+    resultBox.innerHTML = `
+      <div style="margin-bottom:4px; display:flex; justify-content:space-between; align-items:center;">
+        <strong style="color:#38bdf8; font-size:13px;">${ruleId}: ${rule.title}</strong>
+        <span style="font-size:10px; padding:2px 8px; border-radius:4px; background:rgba(239,68,68,0.2); color:#fca5a5; font-weight:700;">${rule.severity}</span>
+      </div>
+      <div style="font-size:11.5px; color:var(--text-secondary); margin-bottom:6px;">
+        <strong>Domain:</strong> ${rule.domain} • <strong>Standard:</strong> ${rule.standard} • <strong>Agency Impact:</strong> ${rule.agency}
+      </div>
+      <div style="font-size:12px; color:#cbd5e1; margin-bottom:6px;">
+        ${rule.description}
+      </div>
+      <div style="font-size:11.5px; color:#6ee7b7; background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.2); padding:6px 10px; border-radius:4px;">
+        <strong>Remediation:</strong> ${rule.remediation}
+      </div>
+    `;
+  } else {
+    resultBox.innerHTML = `
+      <div style="color:#f87171; font-size:12px;">
+        Rule ID <strong>${escapeHtml(ruleId)}</strong> not found in active core dictionary. Supported rule lookups include: 
+        <span style="color:#7dd3fc; cursor:pointer;" onclick="document.getElementById('rule-search-input').value='SDTM-DM-001';handleRuleSearchSubmit();">SDTM-DM-001</span>, 
+        <span style="color:#7dd3fc; cursor:pointer;" onclick="document.getElementById('rule-search-input').value='SDTM-AE-001';handleRuleSearchSubmit();">SDTM-AE-001</span>, 
+        <span style="color:#7dd3fc; cursor:pointer;" onclick="document.getElementById('rule-search-input').value='ADAM-TTE-001';handleRuleSearchSubmit();">ADAM-TTE-001</span>, 
+        <span style="color:#7dd3fc; cursor:pointer;" onclick="document.getElementById('rule-search-input').value='ADSL-POP-001';handleRuleSearchSubmit();">ADSL-POP-001</span>, 
+        <span style="color:#7dd3fc; cursor:pointer;" onclick="document.getElementById('rule-search-input').value='LB-HYS-001';handleRuleSearchSubmit();">LB-HYS-001</span>.
+      </div>
+    `;
+  }
+}
+window.handleRuleSearchSubmit = handleRuleSearchSubmit;
+
+function renderStudyInsightsTab() {
+  if (typeof updateJourneyPathwayStatus === 'function') updateJourneyPathwayStatus();
+}
+window.renderStudyInsightsTab = renderStudyInsightsTab;

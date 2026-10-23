@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ClinicalOps AI Agent — Autonomous PC Task Engine &amp; GitHub Sync</title>
+  <title>ClinicalOps AI — From Data to Decisions | Clinical Statistical Programming &amp; Validation Workbench</title>
   <link rel="stylesheet" href="style.css?v=17.0">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,8 +19,8 @@
       <div class="header-brand">
         <div class="brand-icon">🧬</div>
         <div class="brand-text">
-          <h1>ClinicalOps AI Agent</h1>
-          <span class="brand-edition-tag">Gem Edition — Production Operations</span>
+          <h1>ClinicalOps AI — From Data to Decisions</h1>
+          <span class="brand-edition-tag">Intelligent Clinical Statistical Programming &amp; Validation Workbench</span>
         </div>
       </div>
       <div class="header-center-controls">
@@ -28,8 +28,33 @@
           <span class="source-dot" id="source-dot" style="background:#64748b; box-shadow:0 0 6px #64748b;"></span>
           <span class="source-text" id="source-indicator-text">CLINICAL ENGINE: ⚪ STANDBY — NO DATA LOADED</span>
         </div>
+        <select id="study-selector" class="topbar-study-selector" onchange="onStudySelectorChange(this.value)" title="Active Clinical Study Workspace">
+          <option value="CDISCPILOT01" selected>CDISC Pilot Study 01 (CDISCPILOT01)</option>
+          <option value="STUDY-ONC-202">Oncology Phase II (STUDY-ONC-202)</option>
+          <option value="CV-OUT-401">Cardiovascular Outcome (CV-OUT-401)</option>
+          <option value="CUSTOM">+ New Study Workspace...</option>
+        </select>
+        <div class="topbar-search-container" title="Global Search (Ctrl+K)">
+          <span style="font-size:12px; color:var(--sky-400);">🔍</span>
+          <input type="text" id="global-command-search" class="topbar-search-input" placeholder="Search datasets, rules, findings, commands..." autocomplete="off">
+          <kbd class="search-kbd-hint">Ctrl+K</kbd>
+        </div>
       </div>
-      <div class="header-right-actions" style="display:flex; align-items:center; gap:12px;">
+      <div class="header-right-actions" style="display:flex; align-items:center; gap:8px;">
+        <div class="topbar-badge-bell" id="topbar-notifications-btn" onclick="switchTab('tab-findings')" title="Active Findings &amp; Notifications">
+          <span>🔔</span>
+          <span class="topbar-unread-pill" id="topbar-unread-count">0</span>
+        </div>
+        <button class="topbar-theme-btn" id="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Light / Dark Theme" style="background:rgba(255,255,255,0.06); border:1px solid var(--border-subtle); color:var(--text-secondary); padding:5px 8px; border-radius:6px; cursor:pointer;">
+          <span id="theme-icon">🌙</span>
+        </button>
+        <div class="topbar-user-pill" title="Current Authenticated User Role">
+          <div class="topbar-user-avatar">AM</div>
+          <div style="display:flex; flex-direction:column; line-height:1.2;">
+            <span style="font-weight:600; color:#fff; font-size:11px;">Dr. Alex Morgan</span>
+            <span style="font-size:9px; color:var(--text-muted);">Lead Stat Programmer</span>
+          </div>
+        </div>
         <button class="btn-header-nav" id="btn-view-study-map" onclick="openStudyMapModal()" title="View Visual Study Map & Lineage Graph" style="display:flex; align-items:center; gap:5px; background:rgba(59,130,246,0.15); border:1px solid rgba(59,130,246,0.4); color:#93c5fd; padding:5px 10px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">
           <span>🗺️</span> <span>Study Map</span>
         </button>
@@ -66,8 +91,110 @@
       <!-- =========================================================
            LEFT SIDEBAR: DAILY TASKS, PC FOLDER & GITHUB SYNC
            ========================================================= -->
-      <aside class="agent-sidebar">
+      <aside class="agent-sidebar" id="agent-sidebar">
         
+        <!-- Sidebar Navigation Header -->
+        <div class="sidebar-header-row">
+          <span class="sidebar-brand-label">Navigation</span>
+          <button class="sidebar-toggle-btn" id="sidebar-toggle-btn" onclick="toggleSidebar()" title="Collapse / Expand Sidebar">
+            <span id="sidebar-toggle-icon">◀</span>
+          </button>
+        </div>
+
+        <!-- 10 Primary Navigation Workspaces -->
+        <ul class="sidebar-nav-list" id="sidebar-nav-list">
+          <li>
+            <button class="sidebar-nav-item active" data-tab="tab-dashboard" id="nav-btn-home" onclick="switchTab('tab-dashboard')" title="Home — Executive Overview &amp; Clinical Journey">
+              <span class="nav-item-icon">🏠</span>
+              <span class="nav-item-text">
+                <span class="nav-item-title">Home</span>
+                <span class="nav-item-sub">Overview</span>
+              </span>
+            </button>
+          </li>
+          <li>
+            <button class="sidebar-nav-item" data-tab="tab-datasets" id="nav-btn-data-hub" onclick="switchTab('tab-datasets')" title="Data Hub — Datasets, Ingestion &amp; Repository">
+              <span class="nav-item-icon">📥</span>
+              <span class="nav-item-text">
+                <span class="nav-item-title">Data Hub</span>
+                <span class="nav-item-sub">Datasets &amp; Specs</span>
+              </span>
+            </button>
+          </li>
+          <li>
+            <button class="sidebar-nav-item" data-tab="tab-sdtm-val" id="nav-btn-sdtm-studio" onclick="switchTab('tab-sdtm-val')" title="SDTM Studio — Domain Validation &amp; Conformance">
+              <span class="nav-item-icon">📐</span>
+              <span class="nav-item-text">
+                <span class="nav-item-title">SDTM Studio</span>
+                <span class="nav-item-sub">Domain Checks</span>
+              </span>
+            </button>
+          </li>
+          <li>
+            <button class="sidebar-nav-item" data-tab="tab-adam-val" id="nav-btn-adam-studio" onclick="switchTab('tab-adam-val')" title="ADaM Studio — Derivations, BDS &amp; Lineage">
+              <span class="nav-item-icon">🔬</span>
+              <span class="nav-item-text">
+                <span class="nav-item-title">ADaM Studio</span>
+                <span class="nav-item-sub">Derivations &amp; BDS</span>
+              </span>
+            </button>
+          </li>
+          <li>
+            <button class="sidebar-nav-item" data-tab="tab-double-prog" id="nav-btn-sas-r-lab" onclick="switchTab('tab-double-prog')" title="SAS/R Lab — Double Programming &amp; Reconciliation">
+              <span class="nav-item-icon">⚖️</span>
+              <span class="nav-item-text">
+                <span class="nav-item-title">SAS/R Lab</span>
+                <span class="nav-item-sub">Dual Programming</span>
+              </span>
+            </button>
+          </li>
+          <li>
+            <button class="sidebar-nav-item" data-tab="tab-tlfs" id="nav-btn-tlf-canvas" onclick="switchTab('tab-tlfs')" title="TLF Canvas — Study Reporting, Tables &amp; Figures">
+              <span class="nav-item-icon">📊</span>
+              <span class="nav-item-text">
+                <span class="nav-item-title">TLF Canvas</span>
+                <span class="nav-item-sub">Tables &amp; Figures</span>
+              </span>
+            </button>
+          </li>
+          <li>
+            <button class="sidebar-nav-item" data-tab="tab-findings" id="nav-btn-findings-hub" onclick="switchTab('tab-findings')" title="Findings Hub — Issues, Adjudication &amp; Evidence">
+              <span class="nav-item-icon">🔍</span>
+              <span class="nav-item-text">
+                <span class="nav-item-title">Findings Hub</span>
+                <span class="nav-item-sub">Issues &amp; Evidence</span>
+              </span>
+            </button>
+          </li>
+          <li>
+            <button class="sidebar-nav-item" data-tab="tab-reports" id="nav-btn-reports" onclick="switchTab('tab-reports')" title="Reports — Audit Trail, Conformance &amp; Exports">
+              <span class="nav-item-icon">📋</span>
+              <span class="nav-item-text">
+                <span class="nav-item-title">Reports</span>
+                <span class="nav-item-sub">Exports &amp; Audit</span>
+              </span>
+            </button>
+          </li>
+          <li>
+            <button class="sidebar-nav-item" data-tab="tab-study-insights" id="nav-btn-study-insights" onclick="switchTab('tab-study-insights')" title="Study Insights — AI Copilot, Rule Lookup &amp; SAS/R Code">
+              <span class="nav-item-icon">💡</span>
+              <span class="nav-item-text">
+                <span class="nav-item-title">Study Insights</span>
+                <span class="nav-item-sub">AI Copilot &amp; Rules</span>
+              </span>
+            </button>
+          </li>
+          <li>
+            <button class="sidebar-nav-item" data-tab="tab-settings" id="nav-btn-settings" onclick="switchTab('tab-settings')" title="Settings — Diagnostics, Telemetry &amp; Standards Registry">
+              <span class="nav-item-icon">⚙️</span>
+              <span class="nav-item-text">
+                <span class="nav-item-title">Settings</span>
+                <span class="nav-item-sub">Diagnostics &amp; Config</span>
+              </span>
+            </button>
+          </li>
+        </ul>
+
         <!-- Live Metrics Box -->
         <div class="sidebar-block">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
@@ -227,13 +354,123 @@
             <button class="tab-btn" data-tab="tab-tlfs" id="tab-btn-tlfs">📈 TLF Studio</button>
             <button class="tab-btn" data-tab="tab-findings" id="tab-btn-findings">🔍 Findings &amp; Evidence</button>
             <button class="tab-btn" data-tab="tab-reports" id="tab-btn-reports">📋 Reports &amp; Exports</button>
+            <button class="tab-btn" data-tab="tab-study-insights" id="tab-btn-study-insights">💡 Study Insights</button>
             <button class="tab-btn" data-tab="tab-settings" id="tab-btn-settings">⚙️ Settings &amp; Diagnostics</button>
           </div>
 
           <div class="results-tab-content">
             <!-- TAB: DATASET INSPECTOR & AUDIT TRAIL -->
-                        <!-- TAB 1: EXECUTIVE DASHBOARD & PIPELINE -->
+                        <!-- TAB 1: EXECUTIVE DASHBOARD & THE CLINICAL JOURNEY -->
             <div class="tab-pane active" id="tab-dashboard">
+              
+              <!-- SIGNATURE HERO: THE CLINICAL JOURNEY (6-STAGE INTERACTIVE PATHWAY) -->
+              <div class="clinical-journey-hero" id="clinical-journey-hero">
+                <div class="journey-hero-header">
+                  <div class="journey-hero-eyebrow">
+                    <span>✨</span>
+                    <span>Intelligent Clinical Workflow</span>
+                  </div>
+                  <h2 class="journey-hero-headline">Your Clinical Data Journey, Simplified with AI</h2>
+                  <p class="journey-hero-subtext">
+                    Validate clinical datasets, trace every derivation, reconcile independent programs, and produce review-ready outputs in one connected workspace.
+                  </p>
+                </div>
+
+                <!-- 6-Stage Interactive Pathway -->
+                <div class="journey-pathway-track" id="journey-pathway-track">
+                  <!-- Stage 1: Upload -->
+                  <div class="journey-stage-step" id="journey-stage-upload" onclick="switchTab('tab-datasets')" title="Stage 1: Ingest SAS7BDAT, XPT, Excel, CSV datasets &amp; specifications">
+                    <div class="stage-step-top">
+                      <span class="stage-step-num">01</span>
+                      <span class="stage-step-icon">📥</span>
+                    </div>
+                    <div class="stage-step-title">Upload</div>
+                    <div class="stage-step-status ready" id="journey-status-upload">Ready for Data</div>
+                  </div>
+
+                  <!-- Stage 2: Validate -->
+                  <div class="journey-stage-step" id="journey-stage-validate" onclick="switchTab('tab-sdtm-val')" title="Stage 2: Deterministic SDTM &amp; ADaM conformance rule checks">
+                    <div class="stage-step-top">
+                      <span class="stage-step-num">02</span>
+                      <span class="stage-step-icon">📐</span>
+                    </div>
+                    <div class="stage-step-title">Validate</div>
+                    <div class="stage-step-status" id="journey-status-validate">Standby</div>
+                  </div>
+
+                  <!-- Stage 3: Compare -->
+                  <div class="journey-stage-step" id="journey-stage-compare" onclick="switchTab('tab-double-prog')" title="Stage 3: Independent SAS &amp; R double programming reconciliation">
+                    <div class="stage-step-top">
+                      <span class="stage-step-num">03</span>
+                      <span class="stage-step-icon">⚖️</span>
+                    </div>
+                    <div class="stage-step-title">Compare</div>
+                    <div class="stage-step-status" id="journey-status-compare">Standby</div>
+                  </div>
+
+                  <!-- Stage 4: Generate -->
+                  <div class="journey-stage-step" id="journey-stage-generate" onclick="switchTab('tab-tlfs')" title="Stage 4: Specification-driven CSR Tables, Listings &amp; Figures">
+                    <div class="stage-step-top">
+                      <span class="stage-step-num">04</span>
+                      <span class="stage-step-icon">📊</span>
+                    </div>
+                    <div class="stage-step-title">Generate</div>
+                    <div class="stage-step-status" id="journey-status-generate">Standby</div>
+                  </div>
+
+                  <!-- Stage 5: Review -->
+                  <div class="journey-stage-step" id="journey-stage-review" onclick="switchTab('tab-findings')" title="Stage 5: Clinical discrepancies, controlled reviews &amp; audit evidence">
+                    <div class="stage-step-top">
+                      <span class="stage-step-num">05</span>
+                      <span class="stage-step-icon">🔍</span>
+                    </div>
+                    <div class="stage-step-title">Review</div>
+                    <div class="stage-step-status" id="journey-status-review">Standby</div>
+                  </div>
+
+                  <!-- Stage 6: Export -->
+                  <div class="journey-stage-step" id="journey-stage-export" onclick="switchTab('tab-reports')" title="Stage 6: Regulatory evidence package, audit logs &amp; deliverables">
+                    <div class="stage-step-top">
+                      <span class="stage-step-num">06</span>
+                      <span class="stage-step-icon">📋</span>
+                    </div>
+                    <div class="stage-step-title">Export</div>
+                    <div class="stage-step-status" id="journey-status-export">Standby</div>
+                  </div>
+                </div>
+
+                <!-- Primary & Secondary Actions -->
+                <div class="journey-action-bar">
+                  <button class="btn-journey-primary" onclick="document.getElementById('mini-file-input')?.click()" title="Browse or drop clinical data files to start">
+                    <span>📥</span>
+                    <span>Upload Clinical Data</span>
+                  </button>
+                  <button class="btn-journey-secondary" onclick="openStudySelectorModal()" title="Select or create a clinical study workspace">
+                    <span>📂</span>
+                    <span>Open Study</span>
+                  </button>
+                  <button class="btn-journey-secondary" onclick="triggerValidateAllData()" title="Execute deterministic CDISC checks on loaded datasets">
+                    <span>🔍</span>
+                    <span>Continue Validation</span>
+                  </button>
+                  <button class="btn-journey-secondary" onclick="switchTab('tab-findings')" title="View open validation findings">
+                    <span>🚨</span>
+                    <span>View Findings</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Onboarding State Banner (Shown when no datasets are loaded) -->
+              <div id="dashboard-onboarding-banner" style="background:rgba(2,132,199,0.08); border:1px solid rgba(2,132,199,0.25); border-radius:10px; padding:16px 20px; margin-bottom:16px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+                <div>
+                  <div style="font-weight:700; color:#38bdf8; font-size:13px; margin-bottom:3px;">No study data yet. Upload your SDTM or ADaM datasets to begin.</div>
+                  <div style="font-size:11.5px; color:var(--text-secondary);">Follow the 3-step journey: 1. Select Study • 2. Ingest SAS / XPT / Excel / CSV • 3. Run Deterministic CDISC Validation</div>
+                </div>
+                <button onclick="loadSampleCohortData()" class="btn-journey-secondary" style="font-size:11.5px; background:rgba(56,189,248,0.15); border-color:rgba(56,189,248,0.35); color:#7dd3fc;">
+                  <span>🧪</span> <span>Load CDISC Pilot 01 Sample Cohort (Demonstration Data)</span>
+                </button>
+              </div>
+
               <div class="pane-card">
                 <div class="card-title-bar">
                   <div>
@@ -1136,7 +1373,101 @@
               </div>
             </div>
             <!-- TAB 9: SETTINGS & SYSTEM DIAGNOSTICS -->
-            <div class="tab-pane" id="tab-settings">
+            
+            <!-- TAB 9: STUDY INSIGHTS & CLINICAL AI COPILOT -->
+            <div class="tab-pane" id="tab-study-insights">
+              <div class="pane-card">
+                <div class="card-title-bar">
+                  <div>
+                    <h3 style="font-size:15px; color:#fff; display:flex; align-items:center; gap:8px;">
+                      <span>💡</span> Study Insights &amp; Clinical AI Copilot
+                    </h3>
+                    <div style="font-size:11.5px; color:var(--text-secondary); margin-top:2px;">
+                      Contextual Statistical Reasoning • Official CDISC Rule Intelligence • Independent SAS/R Draft Code Generation
+                    </div>
+                  </div>
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <span class="badge-pass" style="font-size:11px; padding:3px 10px; background:rgba(56,189,248,0.15); color:#7dd3fc; border:1px solid rgba(56,189,248,0.3);">
+                      AI STATUS: DETERMINISTIC ENGINE ACTIVE
+                    </span>
+                    <button class="btn-maximize" onclick="toggleMaximize(this)" title="Maximize / Restore View">
+                      <span class="max-icon">⛶</span> <span class="max-text">Maximize</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="study-insights-container">
+                  <!-- Contextual Query Bar & Suggested Chips -->
+                  <div class="copilot-card">
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+                      <strong style="color:#fff; font-size:13px; display:flex; align-items:center; gap:6px;">
+                        <span>🤖</span> Ask ClinicalOps Assistant
+                      </strong>
+                      <span style="font-size:11px; color:var(--text-muted);">
+                        Distinguishes: <span class="copilot-badge-tag badge-fact">[DETERMINISTIC FACT]</span> <span class="copilot-badge-tag badge-spec">[CDISC SPEC]</span> <span class="copilot-badge-tag badge-draft">[AI CODE DRAFT]</span>
+                      </span>
+                    </div>
+
+                    <div style="display:flex; gap:8px; margin-bottom:10px;">
+                      <input type="text" id="copilot-query-input" placeholder="Ask about CDISC rules, MMRM statistical models, survival analysis, Hy's Law, or findings..." style="flex:1; background:rgba(15,23,42,0.8); border:1px solid var(--border-mid); border-radius:6px; color:#fff; padding:8px 12px; font-size:12.5px; outline:none;">
+                      <button onclick="handleCopilotQuerySubmit()" class="btn-journey-primary" style="padding:8px 16px;">
+                        <span>Ask Copilot</span>
+                      </button>
+                    </div>
+
+                    <!-- Suggested Prompts -->
+                    <div style="font-size:11px; color:var(--text-muted); margin-bottom:4px;">Recommended Clinical Queries:</div>
+                    <div class="copilot-prompt-chips-row">
+                      <button class="copilot-query-chip" onclick="askClinicalCopilotPrompt('Explain finding SDTM-DM-001 (Missing AGE / Invalid Sex)')">
+                        🔍 Explain finding SDTM-DM-001
+                      </button>
+                      <button class="copilot-query-chip" onclick="askClinicalCopilotPrompt('Draft SAS PROC GLIMMIX / MMRM code for change from baseline')">
+                        💻 Draft SAS MMRM / Kenward-Roger Code
+                      </button>
+                      <button class="copilot-query-chip" onclick="askClinicalCopilotPrompt('Draft R Kaplan-Meier survival analysis code for ADTTE')">
+                        📈 Draft R Kaplan-Meier Survival Code
+                      </button>
+                      <button class="copilot-query-chip" onclick="askClinicalCopilotPrompt('Explain Hy's Law liver safety screening thresholds and FDA DILI guidance')">
+                        🧪 Explain Hy's Law Safety Rule
+                      </button>
+                      <button class="copilot-query-chip" onclick="askClinicalCopilotPrompt('Explain ADSL population flag derivation rules (ITTFL, SAFFL, PPROTFL)')">
+                        📋 ADSL Population Flag Rules
+                      </button>
+                      <button class="copilot-query-chip" onclick="askClinicalCopilotPrompt('Summarize active study datasets and profiling metrics')">
+                        📊 Summarize Active Study Datasets
+                      </button>
+                    </div>
+
+                    <!-- Copilot Response Viewer -->
+                    <div id="copilot-response-container" class="copilot-response-box" style="margin-top:12px;">
+                      <div style="color:var(--text-secondary); font-style:italic;">
+                        Select a recommended query above or type a clinical statistical programming question.
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- CDISC Standards & Official Rule Search -->
+                  <div class="copilot-card">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                      <strong style="color:#fff; font-size:13px; display:flex; align-items:center; gap:6px;">
+                        <span>📚</span> CDISC Standards &amp; Regulatory Rule Search
+                      </strong>
+                      <span style="font-size:11px; color:var(--text-muted);">SDTM IG 3.3/3.4 • ADaM IG 1.1/1.3 • FDA TCG</span>
+                    </div>
+                    <div style="display:flex; gap:8px; margin-bottom:12px;">
+                      <input type="text" id="rule-search-input" placeholder="Enter Rule ID (e.g. SDTM-DM-001, ADAM-TTE-001, ADSL-POP-001, AE-DUR-001)..." style="flex:1; background:rgba(15,23,42,0.8); border:1px solid var(--border-mid); border-radius:6px; color:#fff; padding:8px 12px; font-size:12.5px; outline:none;">
+                      <button onclick="handleRuleSearchSubmit()" class="btn-journey-secondary">
+                        <span>Search Rule</span>
+                      </button>
+                    </div>
+                    <div id="rule-search-result" style="background:rgba(15,23,42,0.6); border:1px solid var(--border-subtle); border-radius:6px; padding:12px; font-size:12px;">
+                      <div style="color:var(--text-muted);">Enter a rule ID to inspect official CDISC criteria, agency severity, and recommended programmer action.</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+<div class="tab-pane" id="tab-settings">
               <div class="pane-card">
                 <div class="card-title-bar">
                   <div style="display:flex; justify-content:space-between; align-items:center; width:100%; flex-wrap:wrap; gap:8px;">
