@@ -45,7 +45,12 @@
           <span>🔔</span>
           <span class="topbar-unread-pill" id="topbar-unread-count">0</span>
         </div>
-        <button class="topbar-theme-btn" id="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Light / Dark Theme" style="background:rgba(255,255,255,0.06); border:1px solid var(--border-subtle); color:var(--text-secondary); padding:5px 8px; border-radius:6px; cursor:pointer;">
+        <div class="apple-theme-segmented" id="theme-segmented-control" title="Theme Selector (Light / Dark / Auto)">
+          <button class="theme-seg-btn" id="theme-btn-light" onclick="setAppTheme('light')"><span>☀️</span> <span>Light</span></button>
+          <button class="theme-seg-btn active" id="theme-btn-dark" onclick="setAppTheme('dark')"><span>🌙</span> <span>Dark</span></button>
+          <button class="theme-seg-btn" id="theme-btn-system" onclick="setAppTheme('system')"><span>💻</span> <span>Auto</span></button>
+        </div>
+        <button class="topbar-theme-btn" id="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Light / Dark Theme" style="background:rgba(255,255,255,0.06); border:1px solid var(--border-subtle); color:var(--text-secondary); padding:5px 8px; border-radius:6px; cursor:pointer; display:none;">
           <span id="theme-icon">🌙</span>
         </button>
         <div class="topbar-user-pill" title="Current Authenticated User Role">
@@ -79,6 +84,18 @@
         <button class="btn-header-nav" id="btn-system-health" onclick="openSystemHealthModal()" title="System Health Diagnostics & Self-Test" style="display:flex; align-items:center; gap:5px; background:rgba(34,197,94,0.15); border:1px solid rgba(34,197,94,0.4); color:#86efac; padding:5px 10px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">
           <span>🩺</span> <span>Health</span>
         </button>
+        <button class="btn-header-nav" id="btn-open-spec-drift" onclick="openSpecDriftModal()" title="Specification Drift Detector &amp; Blast Radius" style="display:flex; align-items:center; gap:5px; background:rgba(20,184,166,0.15); border:1px solid rgba(20,184,166,0.4); color:#5eead4; padding:5px 8px; border-radius:6px; font-size:11.5px; font-weight:600; cursor:pointer;">
+          <span>📐</span> <span>Drift</span>
+        </button>
+        <button class="btn-header-nav" id="btn-open-manifest" onclick="openReproducibilityManifestModal()" title="Reproducibility Manifest &amp; SHA-256 Vault" style="display:flex; align-items:center; gap:5px; background:rgba(168,85,247,0.15); border:1px solid rgba(168,85,247,0.4); color:#d8b4fe; padding:5px 8px; border-radius:6px; font-size:11.5px; font-weight:600; cursor:pointer;">
+          <span>🔐</span> <span>Manifest</span>
+        </button>
+        <button class="btn-header-nav" id="btn-open-rel-explorer" onclick="openDatasetRelationshipModal()" title="Dataset Relationship Explorer" style="display:flex; align-items:center; gap:5px; background:rgba(59,130,246,0.15); border:1px solid rgba(59,130,246,0.4); color:#93c5fd; padding:5px 8px; border-radius:6px; font-size:11.5px; font-weight:600; cursor:pointer;">
+          <span>🕸️</span> <span>Relations</span>
+        </button>
+        <button class="btn-header-nav" id="btn-open-regression-lab" onclick="openRegressionLabModal()" title="Validation Regression Lab (Run-to-Run Diff)" style="display:flex; align-items:center; gap:5px; background:rgba(245,158,11,0.15); border:1px solid rgba(245,158,11,0.4); color:#fde68a; padding:5px 8px; border-radius:6px; font-size:11.5px; font-weight:600; cursor:pointer;">
+          <span>🧪</span> <span>Regress</span>
+        </button>
         <button class="btn-header-clear" id="btn-clear-all-data" title="Purge all loaded datasets and reset agent to clean standby state">
           <span style="font-size:13px;">🗑️</span>
           <span>Clear / Reset Data</span>
@@ -95,7 +112,7 @@
         
         <!-- Sidebar Navigation Header -->
         <div class="sidebar-header-row">
-          <span class="sidebar-brand-label">Navigation</span>
+          <span class="sidebar-brand-label">Core Workspaces</span>
           <button class="sidebar-toggle-btn" id="sidebar-toggle-btn" onclick="toggleSidebar()" title="Collapse / Expand Sidebar">
             <span id="sidebar-toggle-icon">◀</span>
           </button>
@@ -820,6 +837,13 @@
 
                         <!-- TAB 3: SDTM VALIDATION WORKBENCH -->
             <div class="tab-pane" id="tab-sdtm-val">
+              <!-- Workspace 3 Sub-Navigation -->
+              <div class="workspace-subnav-bar">
+                <button class="workspace-subnav-pill active" onclick="switchTab('tab-sdtm-val')"><span>📐</span> <span>SDTM Conformance</span></button>
+                <button class="workspace-subnav-pill" onclick="switchTab('tab-adam-val')"><span>🔬</span> <span>ADaM &amp; Derivations</span></button>
+                <button class="workspace-subnav-pill" onclick="openRegressionLabModal()"><span>🧪</span> <span>Validation Regression Lab</span></button>
+                <button class="workspace-subnav-pill" onclick="openStudyMapModal()"><span>🕸️</span> <span>Lineage Graph</span></button>
+              </div>
               <div class="pane-card">
                 <div class="card-title-bar">
                   <div style="display:flex; justify-content:space-between; align-items:center; width:100%; flex-wrap:wrap; gap:8px;">
@@ -1031,6 +1055,12 @@
 
             <!-- TAB 1: AUTOMATED DATA REVIEW -->
             <div class="tab-pane" id="tab-reports">
+              <!-- Workspace 6 Sub-Navigation -->
+              <div class="workspace-subnav-bar">
+                <button class="workspace-subnav-pill active" onclick="switchTab('tab-reports')"><span>📋</span> <span>Regulatory Reports</span></button>
+                <button class="workspace-subnav-pill" onclick="switchTab('tab-findings')"><span>🔍</span> <span>Findings &amp; Remediation Queue</span></button>
+                <button class="workspace-subnav-pill" onclick="openReproducibilityManifestModal()"><span>🔐</span> <span>Reproducibility Manifest</span></button>
+              </div>
               <div class="pane-card">
                 <div class="card-title-bar">
                   <div>
@@ -1198,6 +1228,12 @@
 
             <!-- TAB 8: CSR TLF STUDIO (TABLES, LISTINGS & FIGURES) -->
             <div class="tab-pane" id="tab-tlfs">
+              <!-- Workspace 5 Sub-Navigation -->
+              <div class="workspace-subnav-bar">
+                <button class="workspace-subnav-pill active" onclick="switchTab('tab-tlfs')"><span>📊</span> <span>TLF Canvas</span></button>
+                <button class="workspace-subnav-pill" onclick="switchTab('tab-double-prog')"><span>⚖️</span> <span>SAS/R Double Programming</span></button>
+                <button class="workspace-subnav-pill" onclick="openTlfCellDrillDown('T14_1', 'ACTIVE', 'N_POP')"><span>🔍</span> <span>Verifiable Drilldown</span></button>
+              </div>
               <div class="pane-card">
                 <div class="card-title-bar">
                   <div style="display:flex; justify-content:space-between; align-items:flex-start; width:100%; flex-wrap:wrap; gap:8px;">
@@ -2004,6 +2040,137 @@
       </div>
     </div>
   </div>
+
+
+    <!-- =========================================================
+         CLINICALOPS AI AGENT 2.0: DIFFERENTIATOR MODALS
+         ========================================================= -->
+
+    <!-- 1. Specification Drift Detector Modal -->
+    <div class="modal-overlay" id="spec-drift-modal" style="display:none;" onclick="if(event.target === this) closeSpecDriftModal();">
+      <div class="modal-card" style="max-width:850px; width:95%;">
+        <div class="modal-header" style="border-bottom:1px solid var(--border-mid); padding:14px 18px; display:flex; justify-content:space-between; align-items:center;">
+          <h3 style="font-size:15px; margin:0; color:#fff; display:flex; align-items:center; gap:8px;">
+            <span>📐</span> Specification Drift Detector &amp; Blast Radius Analyzer
+          </h3>
+          <button onclick="closeSpecDriftModal()" style="background:transparent; border:none; color:var(--text-muted); font-size:20px; cursor:pointer;">✕</button>
+        </div>
+        <div class="modal-body" id="spec-drift-body" style="padding:18px 20px; font-size:12.5px; max-height:75vh; overflow-y:auto;">
+          <div style="margin-bottom:14px; color:var(--text-secondary); line-height:1.5;">
+            Compare approved study specifications across protocol amendments or standards versions to calculate downstream blast radius on datasets, derivation pipelines, and TLF shells.
+          </div>
+          <div style="display:flex; gap:10px; margin-bottom:16px;">
+            <div style="flex:1;">
+              <label style="font-size:11px; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Baseline Specification</label>
+              <select id="spec-drift-baseline" class="topbar-study-selector" style="width:100%; max-width:none; margin-top:4px;">
+                <option value="PROTOCOL_V1">Protocol v1.0 / SDTM IG 3.3 (Baseline)</option>
+                <option value="AMENDMENT_1">Protocol Amendment 1.0 (Intermediate)</option>
+              </select>
+            </div>
+            <div style="flex:1;">
+              <label style="font-size:11px; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Revised Specification</label>
+              <select id="spec-drift-revised" class="topbar-study-selector" style="width:100%; max-width:none; margin-top:4px;">
+                <option value="AMENDMENT_2" selected>Protocol Amendment 2.0 / SDTM IG 3.4 (Latest)</option>
+                <option value="CUSTOM_SPEC">Custom Define-XML 2.1 Specification...</option>
+              </select>
+            </div>
+            <div style="display:flex; align-items:flex-end;">
+              <button onclick="runSpecDriftAnalysis()" class="btn-journey-primary" style="padding:7px 14px; font-size:12px;">
+                <span>Run Drift Analysis</span>
+              </button>
+            </div>
+          </div>
+          <div id="spec-drift-results-container">
+            <div style="text-align:center; padding:30px; color:var(--text-muted);">
+              Click "Run Drift Analysis" to evaluate specification differences and calculate dependent object blast radius.
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer" style="padding:12px 18px; border-top:1px solid var(--border-mid); display:flex; justify-content:flex-end;">
+          <button class="btn-journey-secondary" onclick="closeSpecDriftModal()">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Validation Regression Lab Modal -->
+    <div class="modal-overlay" id="regression-lab-modal" style="display:none;" onclick="if(event.target === this) closeRegressionLabModal();">
+      <div class="modal-card" style="max-width:900px; width:95%;">
+        <div class="modal-header" style="border-bottom:1px solid var(--border-mid); padding:14px 18px; display:flex; justify-content:space-between; align-items:center;">
+          <h3 style="font-size:15px; margin:0; color:#fff; display:flex; align-items:center; gap:8px;">
+            <span>🧪</span> Validation Regression Lab — Run-to-Run Comparison
+          </h3>
+          <button onclick="closeRegressionLabModal()" style="background:transparent; border:none; color:var(--text-muted); font-size:20px; cursor:pointer;">✕</button>
+        </div>
+        <div class="modal-body" id="regression-lab-body" style="padding:18px 20px; font-size:12.5px; max-height:75vh; overflow-y:auto;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+            <div style="color:var(--text-secondary); line-height:1.4;">
+              Compare consecutive validation runs to track regression defects, newly introduced issues, and resolved clinical findings.
+            </div>
+            <button onclick="runRegressionComparison()" class="btn-journey-primary" style="padding:6px 12px; font-size:11.5px;">
+              <span>Compare Runs</span>
+            </button>
+          </div>
+          <div id="regression-lab-results-container">
+            <div style="text-align:center; padding:30px; color:var(--text-muted);">
+              Click "Compare Runs" to inspect validation run deltas.
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer" style="padding:12px 18px; border-top:1px solid var(--border-mid); display:flex; justify-content:flex-end;">
+          <button class="btn-journey-secondary" onclick="closeRegressionLabModal()">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Reproducibility Manifest Modal -->
+    <div class="modal-overlay" id="reproducibility-manifest-modal" style="display:none;" onclick="if(event.target === this) closeReproducibilityManifestModal();">
+      <div class="modal-card" style="max-width:850px; width:95%;">
+        <div class="modal-header" style="border-bottom:1px solid var(--border-mid); padding:14px 18px; display:flex; justify-content:space-between; align-items:center;">
+          <h3 style="font-size:15px; margin:0; color:#fff; display:flex; align-items:center; gap:8px;">
+            <span>🔐</span> Reproducibility Manifest &amp; Cryptographic Evidence Seal
+          </h3>
+          <button onclick="closeReproducibilityManifestModal()" style="background:transparent; border:none; color:var(--text-muted); font-size:20px; cursor:pointer;">✕</button>
+        </div>
+        <div class="modal-body" style="padding:18px 20px; font-size:12.5px; max-height:75vh; overflow-y:auto;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <span style="color:var(--text-secondary);">Tamper-evident snapshot manifest containing SHA-256 dataset hashes, standards metadata, and execution digests.</span>
+            <div style="display:flex; gap:6px;">
+              <button onclick="copyReproducibilityManifest()" class="btn-journey-secondary" style="font-size:11px; padding:5px 10px;">Copy JSON</button>
+              <button onclick="downloadReproducibilityManifest()" class="btn-journey-primary" style="font-size:11px; padding:5px 10px;">Download .JSON</button>
+            </div>
+          </div>
+          <div id="repro-manifest-container" class="repro-manifest-box">
+            Loading cryptographic manifest...
+          </div>
+        </div>
+        <div class="modal-footer" style="padding:12px 18px; border-top:1px solid var(--border-mid); display:flex; justify-content:flex-end;">
+          <button class="btn-journey-secondary" onclick="closeReproducibilityManifestModal()">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. Dataset Relationship Explorer Modal -->
+    <div class="modal-overlay" id="dataset-relationship-modal" style="display:none;" onclick="if(event.target === this) closeDatasetRelationshipModal();">
+      <div class="modal-card" style="max-width:920px; width:95%;">
+        <div class="modal-header" style="border-bottom:1px solid var(--border-mid); padding:14px 18px; display:flex; justify-content:space-between; align-items:center;">
+          <h3 style="font-size:15px; margin:0; color:#fff; display:flex; align-items:center; gap:8px;">
+            <span>🕸️</span> Dataset Relationship Explorer &amp; Referential Integrity
+          </h3>
+          <button onclick="closeDatasetRelationshipModal()" style="background:transparent; border:none; color:var(--text-muted); font-size:20px; cursor:pointer;">✕</button>
+        </div>
+        <div class="modal-body" id="dataset-relationship-body" style="padding:18px 20px; font-size:12.5px; max-height:75vh; overflow-y:auto;">
+          <div style="color:var(--text-secondary); margin-bottom:12px;">
+            Cross-domain key linkages, referential completeness, and orphaned subject detection across active datasets.
+          </div>
+          <div id="dataset-relationship-content">
+            Loading relationship graph...
+          </div>
+        </div>
+        <div class="modal-footer" style="padding:12px 18px; border-top:1px solid var(--border-mid); display:flex; justify-content:flex-end;">
+          <button class="btn-journey-secondary" onclick="closeDatasetRelationshipModal()">Close</button>
+        </div>
+      </div>
+    </div>
 
 </body>
 </html>

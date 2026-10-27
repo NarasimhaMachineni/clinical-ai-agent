@@ -3324,3 +3324,325 @@ body.light-theme .journey-stage-step {
   color: #fde68a;
   border: 1px solid rgba(245, 158, 11, 0.4);
 }
+
+
+/* =================================================================
+   CLINICALOPS AI AGENT 2.0 — APPLE-INSPIRED LIQUID GLASS DESIGN SYSTEM
+   Theme: Liquid Glass Ivory/Charcoal-Green (Light) & Deep Slate/Teal (Dark)
+   240 Hz-Ready Compositor Transitions • High-Contrast WCAG AA Accessibility
+   ================================================================= */
+
+:root {
+  /* Liquid Glass Surfaces (Dark Baseline) */
+  --glass-bg:          rgba(13, 22, 38, 0.76);
+  --glass-bg-raised:   rgba(17, 30, 53, 0.82);
+  --glass-border:      rgba(255, 255, 255, 0.08);
+  --glass-border-mid:  rgba(255, 255, 255, 0.14);
+  --glass-blur:        blur(16px);
+  --glass-shadow-sm:   0 2px 10px rgba(0, 0, 0, 0.25);
+  --glass-shadow-md:   0 8px 30px rgba(0, 0, 0, 0.35);
+  --glass-shadow-glow: 0 0 24px rgba(45, 212, 191, 0.12);
+
+  /* Clinical Emerald & Mint Accents */
+  --emerald-50:        #ecfdf5;
+  --emerald-100:       #d1fae5;
+  --emerald-400:       #34d399;
+  --emerald-500:       #10b981;
+  --emerald-600:       #059669;
+  --mint-accent:       #6ee7b7;
+  --teal-accent:       #2dd4bf;
+  --teal-glow:         rgba(45, 212, 191, 0.2);
+
+  /* Apple-inspired Motion Timings (240 Hz Smooth Compositor Curves) */
+  --ease-apple:        cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-bounce:       cubic-bezier(0.34, 1.56, 0.64, 1);
+  --duration-instant:  80ms;
+  --duration-hover:    140ms;
+  --duration-panel:    220ms;
+}
+
+/* Light Theme — Liquid Glass Ivory & Deep Charcoal-Green */
+body[data-theme="light"],
+body.light-theme {
+  --bg-base:           #fbfcfd;
+  --bg-surface:        rgba(255, 255, 255, 0.88);
+  --bg-raised:         #f1f5f9;
+  --bg-card:           rgba(255, 255, 255, 0.92);
+  --bg-hover:          #e6f0fa;
+  --text-primary:      #0e1e17;
+  --text-secondary:    #334d42;
+  --text-muted:        #5a7369;
+  --text-accent:       #059669;
+  --border-subtle:     rgba(14, 30, 23, 0.08);
+  --border-mid:        rgba(14, 30, 23, 0.14);
+  --border-accent:     rgba(5, 150, 105, 0.35);
+  --glass-bg:          rgba(255, 255, 255, 0.85);
+  --glass-bg-raised:   rgba(255, 255, 255, 0.95);
+  --glass-border:      rgba(14, 30, 23, 0.08);
+  --glass-border-mid:  rgba(14, 30, 23, 0.16);
+  --glass-shadow-sm:   0 2px 8px rgba(0, 0, 0, 0.04);
+  --glass-shadow-md:   0 8px 24px rgba(0, 0, 0, 0.06);
+  --glass-shadow-glow: 0 0 20px rgba(5, 150, 105, 0.08);
+  background-color:    var(--bg-base);
+  color:               var(--text-primary);
+}
+
+body[data-theme="light"] .agent-header,
+body.light-theme .agent-header {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-bottom: 1px solid var(--glass-border);
+}
+
+body[data-theme="light"] .agent-sidebar,
+body.light-theme .agent-sidebar {
+  background: rgba(248, 250, 252, 0.92);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-right: 1px solid var(--glass-border);
+}
+
+body[data-theme="light"] .pane-card,
+body[data-theme="light"] .clinical-journey-hero,
+body[data-theme="light"] .sidebar-block,
+body[data-theme="light"] .metric-card {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-color: var(--glass-border);
+  box-shadow: var(--glass-shadow-sm);
+}
+
+body[data-theme="light"] .sidebar-nav-item {
+  color: #334d42;
+}
+
+body[data-theme="light"] .sidebar-nav-item:hover {
+  background: rgba(5, 150, 105, 0.08);
+  color: #059669;
+  border-color: rgba(5, 150, 105, 0.2);
+}
+
+body[data-theme="light"] .sidebar-nav-item.active {
+  background: linear-gradient(135deg, rgba(5, 150, 105, 0.16), rgba(16, 185, 129, 0.08));
+  color: #047857;
+  border-color: rgba(5, 150, 105, 0.35);
+}
+
+body[data-theme="light"] .sidebar-nav-item.active::before {
+  background: #059669;
+}
+
+/* Apple-Inspired 3-Way Segmented Theme Switcher */
+.apple-theme-segmented {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid var(--border-subtle);
+  border-radius: 99px;
+  padding: 2px;
+  gap: 2px;
+}
+
+body[data-theme="light"] .apple-theme-segmented,
+body.light-theme .apple-theme-segmented {
+  background: rgba(241, 245, 249, 0.9);
+  border-color: rgba(14, 30, 23, 0.1);
+}
+
+.theme-seg-btn {
+  background: transparent;
+  border: none;
+  border-radius: 99px;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 500;
+  padding: 4px 9px;
+  cursor: pointer;
+  transition: all var(--duration-hover) var(--ease-apple);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.theme-seg-btn:hover {
+  color: var(--text-primary);
+}
+
+.theme-seg-btn.active {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+body[data-theme="light"] .theme-seg-btn.active,
+body.light-theme .theme-seg-btn.active {
+  background: #ffffff;
+  color: #0f1e17;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+/* Glass Cards and Layered Panels */
+.liquid-glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--glass-shadow-md);
+  transition: transform var(--duration-hover) var(--ease-apple),
+              border-color var(--duration-hover) var(--ease-apple);
+}
+
+.liquid-glass-card:hover {
+  border-color: var(--glass-border-mid);
+}
+
+/* 6-Workspace Sub-Navigation Segmented Pills */
+.workspace-subnav-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(15, 23, 42, 0.5);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 4px;
+  margin-bottom: 16px;
+  overflow-x: auto;
+}
+
+body[data-theme="light"] .workspace-subnav-bar,
+body.light-theme .workspace-subnav-bar {
+  background: rgba(241, 245, 249, 0.8);
+  border-color: rgba(14, 30, 23, 0.08);
+}
+
+.workspace-subnav-pill {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: 11.5px;
+  font-weight: 500;
+  padding: 5px 12px;
+  cursor: pointer;
+  transition: all var(--duration-hover) var(--ease-apple);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.workspace-subnav-pill:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.workspace-subnav-pill.active {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(14, 165, 233, 0.15));
+  border-color: rgba(16, 185, 129, 0.35);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+body[data-theme="light"] .workspace-subnav-pill.active,
+body.light-theme .workspace-subnav-pill.active {
+  background: #ffffff;
+  border-color: rgba(5, 150, 105, 0.3);
+  color: #047857;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+/* Evidence-Linked Finding Cell Pulse Effect */
+@keyframes cell-focus-pulse {
+  0% {
+    background-color: rgba(16, 185, 129, 0.5);
+    outline: 3px solid #10b981;
+  }
+  50% {
+    background-color: rgba(16, 185, 129, 0.25);
+    outline: 3px solid #34d399;
+  }
+  100% {
+    background-color: transparent;
+    outline: none;
+  }
+}
+
+.cell-evidence-highlight {
+  animation: cell-focus-pulse 2.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Specification Drift Detector Card */
+.spec-drift-card {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  transition: all var(--duration-hover) var(--ease-apple);
+}
+
+.spec-drift-card:hover {
+  border-color: var(--border-mid);
+  background: rgba(15, 23, 42, 0.85);
+}
+
+.drift-badge-impact {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.drift-badge-high {
+  background: rgba(239, 68, 68, 0.18);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+}
+
+.drift-badge-med {
+  background: rgba(245, 158, 11, 0.18);
+  color: #fde68a;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+}
+
+.drift-badge-low {
+  background: rgba(56, 189, 248, 0.18);
+  color: #7dd3fc;
+  border: 1px solid rgba(56, 189, 248, 0.35);
+}
+
+/* Reproducibility Manifest Box */
+.repro-manifest-box {
+  background: #060a12;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11.5px;
+  color: #cbd5e1;
+  max-height: 420px;
+  overflow-y: auto;
+  line-height: 1.6;
+}
+
+/* Accessibility: WCAG AA Focus Rings & Reduced Motion */
+:focus-visible {
+  outline: 2px solid var(--emerald-500);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
