@@ -3646,3 +3646,310 @@ body.light-theme .workspace-subnav-pill.active {
     scroll-behavior: auto !important;
   }
 }
+
+
+/* ==========================================================================
+   ENTERPRISE EDITION STYLES — CLINICALOPS AI AGENT
+   Workspaces, 5-Tier Detective, Risk Radar, Execution Adapters & Passport
+   ========================================================================== */
+
+/* 1. Enterprise End-to-End Study Pipeline Stepper */
+.enterprise-pipeline-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 10px 16px;
+  margin-bottom: 16px;
+  backdrop-filter: blur(var(--glass-blur));
+  overflow-x: auto;
+}
+
+.pipeline-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  transition: all var(--duration-hover) var(--ease-apple);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.pipeline-step:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--border-subtle);
+  color: var(--text-primary);
+}
+
+.pipeline-step.active {
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.35);
+  color: var(--emerald-500);
+}
+
+.pipeline-step-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.1);
+  color: inherit;
+}
+
+.pipeline-step.active .pipeline-step-badge {
+  background: var(--emerald-500);
+  color: #04100b;
+}
+
+.pipeline-step-arrow {
+  color: var(--text-muted);
+  font-size: 11px;
+  opacity: 0.5;
+}
+
+/* 2. Clinical Data Detective: 5-Tier Forensic Trace */
+.detective-lineage-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.detective-tier-card {
+  position: relative;
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  backdrop-filter: blur(var(--glass-blur));
+  transition: all var(--duration-hover) var(--ease-apple);
+}
+
+.detective-tier-card:hover {
+  border-color: var(--border-mid);
+  transform: translateY(-1px);
+}
+
+.detective-tier-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.detective-tier-num {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--teal-accent);
+}
+
+.detective-fact-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--emerald-500);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.detective-draft-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(168, 85, 247, 0.15);
+  color: #c084fc;
+  border: 1px solid rgba(168, 85, 247, 0.3);
+}
+
+.detective-tier-connector {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 14px;
+  color: var(--teal-accent);
+  opacity: 0.7;
+  font-size: 12px;
+}
+
+/* 3. Clinical Quality Risk Radar */
+.risk-radar-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.risk-radar-card {
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.risk-score-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+.risk-tier-1 {
+  background: rgba(239, 68, 68, 0.18);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.risk-tier-2 {
+  background: rgba(245, 158, 11, 0.18);
+  color: #fde68a;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+.risk-tier-3 {
+  background: rgba(56, 189, 248, 0.18);
+  color: #7dd3fc;
+  border: 1px solid rgba(56, 189, 248, 0.4);
+}
+
+.risk-tier-4 {
+  background: rgba(148, 163, 184, 0.15);
+  color: #cbd5e1;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+/* 4. Execution Adapters HUD */
+.adapter-hud-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.adapter-hud-card {
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.adapter-status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.adapter-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.adapter-status-dot.active {
+  background: var(--emerald-500);
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+}
+
+.adapter-status-dot.idle {
+  background: #94a3b8;
+}
+
+.sas-log-console {
+  background: #020617;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: #94a3b8;
+  max-height: 220px;
+  overflow-y: auto;
+  line-height: 1.5;
+}
+
+.sas-log-note { color: #38bdf8; }
+.sas-log-warn { color: #f59e0b; }
+.sas-log-err  { color: #ef4444; font-weight: bold; }
+
+/* 5. TLF Cell Drill-Down Table */
+.cell-drilldown-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  margin-top: 10px;
+}
+
+.cell-drilldown-table th,
+.cell-drilldown-table td {
+  padding: 8px 10px;
+  border: 1px solid var(--border-subtle);
+  text-align: left;
+}
+
+.cell-drilldown-table th {
+  background: rgba(255, 255, 255, 0.03);
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+/* 6. Evidence Passport GxP Seal */
+.evidence-passport-seal {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: var(--radius-lg);
+  margin-bottom: 14px;
+}
+
+.seal-icon-circle {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(16, 185, 129, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  color: var(--emerald-500);
+}
+
+.sha256-hash-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  padding: 2px 6px;
+  color: #94a3b8;
+  word-break: break-all;
+}

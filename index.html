@@ -96,6 +96,24 @@
         <button class="btn-header-nav" id="btn-open-regression-lab" onclick="openRegressionLabModal()" title="Validation Regression Lab (Run-to-Run Diff)" style="display:flex; align-items:center; gap:5px; background:rgba(245,158,11,0.15); border:1px solid rgba(245,158,11,0.4); color:#fde68a; padding:5px 8px; border-radius:6px; font-size:11.5px; font-weight:600; cursor:pointer;">
           <span>🧪</span> <span>Regress</span>
         </button>
+        <button class="btn-header-nav" id="btn-open-study-config" onclick="openStudyConfigModal()" title="Enterprise Study Configuration &amp; Metadata" style="display:flex; align-items:center; gap:5px; background:rgba(59,130,246,0.15); border:1px solid rgba(59,130,246,0.4); color:#93c5fd; padding:5px 8px; border-radius:6px; font-size:11.5px; font-weight:600; cursor:pointer;">
+          <span>⚙️</span> <span>Study Spec</span>
+        </button>
+        <button class="btn-header-nav" id="btn-open-data-detective" onclick="openDataDetectiveModal()" title="Clinical Data Detective — 5-Tier Forensic Trace" style="display:flex; align-items:center; gap:5px; background:rgba(20,184,166,0.15); border:1px solid rgba(20,184,166,0.4); color:#5eead4; padding:5px 8px; border-radius:6px; font-size:11.5px; font-weight:600; cursor:pointer;">
+          <span>🕵️</span> <span>Detective</span>
+        </button>
+        <button class="btn-header-nav" id="btn-open-change-impact" onclick="openChangeImpactModal()" title="Change Impact Simulator &amp; Blast Radius" style="display:flex; align-items:center; gap:5px; background:rgba(245,158,11,0.15); border:1px solid rgba(245,158,11,0.4); color:#fde68a; padding:5px 8px; border-radius:6px; font-size:11.5px; font-weight:600; cursor:pointer;">
+          <span>⚡</span> <span>Impact</span>
+        </button>
+        <button class="btn-header-nav" id="btn-open-risk-radar" onclick="openRiskRadarModal()" title="Clinical Quality Risk Radar &amp; Prioritization" style="display:flex; align-items:center; gap:5px; background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.4); color:#fca5a5; padding:5px 8px; border-radius:6px; font-size:11.5px; font-weight:600; cursor:pointer;">
+          <span>🎯</span> <span>Risk Radar</span>
+        </button>
+        <button class="btn-header-nav" id="btn-open-execution-adapters" onclick="openExecutionAdaptersModal()" title="SAS &amp; R Execution Adapters Architecture" style="display:flex; align-items:center; gap:5px; background:rgba(14,165,233,0.15); border:1px solid rgba(14,165,233,0.4); color:#7dd3fc; padding:5px 8px; border-radius:6px; font-size:11.5px; font-weight:600; cursor:pointer;">
+          <span>🔌</span> <span>Adapters</span>
+        </button>
+        <button class="btn-header-nav" id="btn-open-evidence-passport" onclick="openEvidencePassportModal()" title="GxP Evidence Passport &amp; SHA-256 Vault" style="display:flex; align-items:center; gap:5px; background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.4); color:#6ee7b7; padding:5px 8px; border-radius:6px; font-size:11.5px; font-weight:600; cursor:pointer;">
+          <span>🛡️</span> <span>Passport</span>
+        </button>
         <button class="btn-header-clear" id="btn-clear-all-data" title="Purge all loaded datasets and reset agent to clean standby state">
           <span style="font-size:13px;">🗑️</span>
           <span>Clear / Reset Data</span>
@@ -255,6 +273,40 @@
            MAIN WORKSPACE: COMMANDER, PIPELINE & ARTIFACTS
            ========================================================= -->
       <main class="agent-main">
+
+      <!-- ENTERPRISE END-TO-END STUDY PIPELINE STEPPER -->
+      <div class="enterprise-pipeline-bar" id="enterprise-pipeline-bar" role="navigation" aria-label="End-to-End Study Pipeline Stepper">
+        <div class="pipeline-step active" id="pipeline-step-1" onclick="switchTab('tab-datasets')" title="Step 1: Raw data ingestion, file upload, and columnar profiling">
+          <span class="pipeline-step-badge">1</span>
+          <span>Ingestion &amp; Profiling</span>
+        </div>
+        <span class="pipeline-step-arrow">→</span>
+        <div class="pipeline-step" id="pipeline-step-2" onclick="openStudyConfigModal()" title="Step 2: Study metadata, Protocol, Phase, Arms, Endpoints &amp; SAP specifications">
+          <span class="pipeline-step-badge">2</span>
+          <span>Study Specs &amp; Metadata</span>
+        </div>
+        <span class="pipeline-step-arrow">→</span>
+        <div class="pipeline-step" id="pipeline-step-3" onclick="switchTab('tab-sdtm-val')" title="Step 3: Source-to-target mapping, sequence numbers, ISO 8601 &amp; CDISC CT">
+          <span class="pipeline-step-badge">3</span>
+          <span>SDTM Mapping &amp; QC</span>
+        </div>
+        <span class="pipeline-step-arrow">→</span>
+        <div class="pipeline-step" id="pipeline-step-4" onclick="switchTab('tab-adam-val')" title="Step 4: ADSL, ADAE, BDS parameters, baseline flags, and population derivations">
+          <span class="pipeline-step-badge">4</span>
+          <span>ADaM Derivation &amp; QC</span>
+        </div>
+        <span class="pipeline-step-arrow">→</span>
+        <div class="pipeline-step" id="pipeline-step-5" onclick="switchTab('tab-tlfs')" title="Step 5: Specification-driven Tables, Listings, Figures with cell drill-down">
+          <span class="pipeline-step-badge">5</span>
+          <span>TLF Studio &amp; Cell QC</span>
+        </div>
+        <span class="pipeline-step-arrow">→</span>
+        <div class="pipeline-step" id="pipeline-step-6" onclick="openEvidencePassportModal()" title="Step 6: SAS/R independent concordance and GxP Evidence Passport with SHA-256 seal">
+          <span class="pipeline-step-badge">6</span>
+          <span>Concordance &amp; Release</span>
+        </div>
+      </div>
+
         
 
 
@@ -2168,6 +2220,202 @@
         </div>
         <div class="modal-footer" style="padding:12px 18px; border-top:1px solid var(--border-mid); display:flex; justify-content:flex-end;">
           <button class="btn-journey-secondary" onclick="closeDatasetRelationshipModal()">Close</button>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ENTERPRISE MODAL 1: Study Configuration & Metadata Manager -->
+    <div class="modal-overlay" id="study-config-modal" style="display:none;" onclick="if(event.target === this) closeStudyConfigModal();">
+      <div class="modal-card" style="max-width:960px; width:95%;">
+        <div class="modal-header" style="display:flex; justify-content:space-between; align-items:center; padding:16px 20px; border-bottom:1px solid var(--border-mid);">
+          <h3 style="margin:0; font-size:16px; font-weight:700; color:var(--text-primary); display:flex; align-items:center; gap:8px;">
+            <span>⚙️</span> Enterprise Study Configuration &amp; Metadata Manager
+          </h3>
+          <button onclick="closeStudyConfigModal()" style="background:transparent; border:none; color:var(--text-muted); font-size:20px; cursor:pointer;">✕</button>
+        </div>
+        <div class="modal-body" style="padding:18px 20px; font-size:12.5px; max-height:75vh; overflow-y:auto;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; background:rgba(59,130,246,0.08); padding:10px 14px; border-radius:8px; border:1px solid rgba(59,130,246,0.2);">
+            <div>
+              <strong style="color:#93c5fd;">Study Template Preset:</strong>
+              <span style="color:var(--text-muted); margin-left:6px;">Select an established clinical design archetype or customize below.</span>
+            </div>
+            <select id="study-config-preset-select" onchange="loadStudyConfigPreset(this.value)" style="background:var(--surface-card); border:1px solid var(--border-mid); color:var(--text-primary); padding:6px 10px; border-radius:6px; font-size:12px;">
+              <option value="ONC-301">Phase III Oncology Double-Blind Parallel (ONC-301)</option>
+              <option value="CARD-201">Phase II Cardiology 2x2 Crossover (CARD-201)</option>
+              <option value="IMM-101">Phase I Dose Escalation 3+3 (IMM-101)</option>
+            </select>
+          </div>
+          <div id="study-config-form-content">
+            <!-- Rendered by app.js -->
+          </div>
+        </div>
+        <div class="modal-footer" style="padding:12px 18px; border-top:1px solid var(--border-mid); display:flex; justify-content:space-between; align-items:center;">
+          <button class="btn-journey-secondary" onclick="exportStudyConfigJson()">📥 Export JSON Spec</button>
+          <div style="display:flex; gap:8px;">
+            <button class="btn-journey-secondary" onclick="closeStudyConfigModal()">Cancel</button>
+            <button class="btn-journey-primary" onclick="saveStudyConfigFromModal()">Save &amp; Apply Specifications</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ENTERPRISE MODAL 2: Clinical Data Detective (5-Tier Lineage Trace) -->
+    <div class="modal-overlay" id="data-detective-modal" style="display:none;" onclick="if(event.target === this) closeDataDetectiveModal();">
+      <div class="modal-card" style="max-width:960px; width:95%;">
+        <div class="modal-header" style="display:flex; justify-content:space-between; align-items:center; padding:16px 20px; border-bottom:1px solid var(--border-mid);">
+          <h3 style="margin:0; font-size:16px; font-weight:700; color:var(--text-primary); display:flex; align-items:center; gap:8px;">
+            <span>🕵️</span> Clinical Data Detective — 5-Tier Forensic Lineage Trace
+          </h3>
+          <button onclick="closeDataDetectiveModal()" style="background:transparent; border:none; color:var(--text-muted); font-size:20px; cursor:pointer;">✕</button>
+        </div>
+        <div class="modal-body" style="padding:18px 20px; font-size:12.5px; max-height:75vh; overflow-y:auto;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+            <div style="color:var(--text-secondary);">
+              Inspect deterministic cell calculation origins: <strong>TLF Output</strong> → <strong>Mathematical Formula</strong> → <strong>ADaM Analysis Dataset</strong> → <strong>SDTM Standard Domain</strong> → <strong>Source Raw / eCRF Audit</strong>.
+            </div>
+            <select id="detective-cell-target" onchange="renderDataDetectiveLineage(this.value)" style="background:var(--surface-card); border:1px solid var(--border-mid); color:var(--text-primary); padding:6px 10px; border-radius:6px; font-size:12px;">
+              <option value="T14_1_AGE_ACTIVE">Table 14-1.01: Active 100mg Mean Age (61.4 yrs)</option>
+              <option value="T14_2_NAUSEA_COUNT">Table 14-2.01: Nausea TEAE Active Count (12, 8.0%)</option>
+              <option value="T14_3_ALT_HIGH">Table 14-3.01: ALT Shift to High at Week 12 (4 subjects)</option>
+              <option value="T14_4_SYSBP_CHG">Table 14-4.01: Systolic BP Mean Change (-8.2 mmHg)</option>
+            </select>
+          </div>
+          <div id="data-detective-content">
+            <!-- 5-Tier Lineage populated dynamically -->
+          </div>
+        </div>
+        <div class="modal-footer" style="padding:12px 18px; border-top:1px solid var(--border-mid); display:flex; justify-content:flex-end;">
+          <button class="btn-journey-secondary" onclick="closeDataDetectiveModal()">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ENTERPRISE MODAL 3: Change Impact Simulator & Blast Radius -->
+    <div class="modal-overlay" id="change-impact-modal" style="display:none;" onclick="if(event.target === this) closeChangeImpactModal();">
+      <div class="modal-card" style="max-width:920px; width:95%;">
+        <div class="modal-header" style="display:flex; justify-content:space-between; align-items:center; padding:16px 20px; border-bottom:1px solid var(--border-mid);">
+          <h3 style="margin:0; font-size:16px; font-weight:700; color:var(--text-primary); display:flex; align-items:center; gap:8px;">
+            <span>⚡</span> Change Impact Simulator &amp; Blast Radius Engine
+          </h3>
+          <button onclick="closeChangeImpactModal()" style="background:transparent; border:none; color:var(--text-muted); font-size:20px; cursor:pointer;">✕</button>
+        </div>
+        <div class="modal-body" style="padding:18px 20px; font-size:12.5px; max-height:75vh; overflow-y:auto;">
+          <div style="margin-bottom:14px; color:var(--text-secondary);">
+            Simulate a specification, data, or code modification to calculate downstream blast radius, invalidate affected cached outputs, and recommend selective reruns.
+          </div>
+          <div style="display:flex; gap:10px; margin-bottom:16px;">
+            <select id="change-impact-scenario" style="flex:1; background:var(--surface-card); border:1px solid var(--border-mid); color:var(--text-primary); padding:8px 12px; border-radius:6px; font-size:12px;">
+              <option value="AE_DTC_FORMAT">Scenario A: Modify AE.AESTDTC Date Format (Non-ISO Partial String)</option>
+              <option value="ADAE_TRTEMFL_WINDOW">Scenario B: Alter ADAE TRTEMFL Window from 30 Days to 14 Days Post-Dose</option>
+              <option value="ADLB_BASE_DEF">Scenario C: Re-define Laboratory Baseline from Day 1 to Screening Visit</option>
+              <option value="DM_AGE_DATATYPE">Scenario D: Change DM.AGE Data Type from Integer to Character String</option>
+            </select>
+            <button class="btn-journey-primary" onclick="runChangeImpactSimulation()">Simulate Blast Radius</button>
+          </div>
+          <div id="change-impact-results-content">
+            <!-- Simulated results populated dynamically -->
+          </div>
+        </div>
+        <div class="modal-footer" style="padding:12px 18px; border-top:1px solid var(--border-mid); display:flex; justify-content:flex-end;">
+          <button class="btn-journey-secondary" onclick="closeChangeImpactModal()">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ENTERPRISE MODAL 4: Clinical Quality Risk Radar -->
+    <div class="modal-overlay" id="risk-radar-modal" style="display:none;" onclick="if(event.target === this) closeRiskRadarModal();">
+      <div class="modal-card" style="max-width:960px; width:95%;">
+        <div class="modal-header" style="display:flex; justify-content:space-between; align-items:center; padding:16px 20px; border-bottom:1px solid var(--border-mid);">
+          <h3 style="margin:0; font-size:16px; font-weight:700; color:var(--text-primary); display:flex; align-items:center; gap:8px;">
+            <span>🎯</span> Clinical Quality Risk Radar &amp; Anomaly Prioritization
+          </h3>
+          <button onclick="closeRiskRadarModal()" style="background:transparent; border:none; color:var(--text-muted); font-size:20px; cursor:pointer;">✕</button>
+        </div>
+        <div class="modal-body" style="padding:18px 20px; font-size:12.5px; max-height:75vh; overflow-y:auto;">
+          <div style="margin-bottom:14px; color:var(--text-secondary);">
+            Multi-factor clinical discrepancy prioritization based on endpoint impact, patient safety relevance, downstream dependencies, and regulatory severity.
+          </div>
+          <div id="risk-radar-content">
+            <!-- Risk radar cards & prioritized findings table -->
+          </div>
+        </div>
+        <div class="modal-footer" style="padding:12px 18px; border-top:1px solid var(--border-mid); display:flex; justify-content:flex-end;">
+          <button class="btn-journey-secondary" onclick="closeRiskRadarModal()">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ENTERPRISE MODAL 5: SAS & R Execution Adapters Architecture -->
+    <div class="modal-overlay" id="execution-adapters-modal" style="display:none;" onclick="if(event.target === this) closeExecutionAdaptersModal();">
+      <div class="modal-card" style="max-width:960px; width:95%;">
+        <div class="modal-header" style="display:flex; justify-content:space-between; align-items:center; padding:16px 20px; border-bottom:1px solid var(--border-mid);">
+          <h3 style="margin:0; font-size:16px; font-weight:700; color:var(--text-primary); display:flex; align-items:center; gap:8px;">
+            <span>🔌</span> SAS &amp; R Execution Adapters Architecture
+          </h3>
+          <button onclick="closeExecutionAdaptersModal()" style="background:transparent; border:none; color:var(--text-muted); font-size:20px; cursor:pointer;">✕</button>
+        </div>
+        <div class="modal-body" style="padding:18px 20px; font-size:12.5px; max-height:75vh; overflow-y:auto;">
+          <div style="margin-bottom:14px; color:var(--text-secondary);">
+            Runtime transparency: Client-side deterministic validation vs Server-side SAS 9.4/Viya and R 4.4 runtime execution adapters.
+          </div>
+          <div id="execution-adapters-content">
+            <!-- Adapters HUD rendered by app.js -->
+          </div>
+        </div>
+        <div class="modal-footer" style="padding:12px 18px; border-top:1px solid var(--border-mid); display:flex; justify-content:flex-end;">
+          <button class="btn-journey-secondary" onclick="closeExecutionAdaptersModal()">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ENTERPRISE MODAL 6: TLF Cell Subject Drill-Down -->
+    <div class="modal-overlay" id="tlf-cell-drilldown-modal" style="display:none;" onclick="if(event.target === this) closeTlfCellDrilldownModal();">
+      <div class="modal-card" style="max-width:960px; width:95%;">
+        <div class="modal-header" style="display:flex; justify-content:space-between; align-items:center; padding:16px 20px; border-bottom:1px solid var(--border-mid);">
+          <h3 style="margin:0; font-size:16px; font-weight:700; color:var(--text-primary); display:flex; align-items:center; gap:8px;">
+            <span>🔍</span> TLF Cell Contributing Record Inspector
+          </h3>
+          <button onclick="closeTlfCellDrilldownModal()" style="background:transparent; border:none; color:var(--text-muted); font-size:20px; cursor:pointer;">✕</button>
+        </div>
+        <div class="modal-body" style="padding:18px 20px; font-size:12.5px; max-height:75vh; overflow-y:auto;">
+          <div id="tlf-cell-drilldown-header" style="margin-bottom:12px; color:var(--text-secondary);">
+            Contributing patient records for selected table cell.
+          </div>
+          <div id="tlf-cell-drilldown-table-container">
+            <!-- Subject records table -->
+          </div>
+        </div>
+        <div class="modal-footer" style="padding:12px 18px; border-top:1px solid var(--border-mid); display:flex; justify-content:space-between; align-items:center;">
+          <button class="btn-journey-secondary" onclick="exportDrilldownCohortCsv()">📥 Export Cohort CSV</button>
+          <button class="btn-journey-secondary" onclick="closeTlfCellDrilldownModal()">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ENTERPRISE MODAL 7: Evidence Passport & SHA-256 Vault -->
+    <div class="modal-overlay" id="evidence-passport-modal" style="display:none;" onclick="if(event.target === this) closeEvidencePassportModal();">
+      <div class="modal-card" style="max-width:960px; width:95%;">
+        <div class="modal-header" style="display:flex; justify-content:space-between; align-items:center; padding:16px 20px; border-bottom:1px solid var(--border-mid);">
+          <h3 style="margin:0; font-size:16px; font-weight:700; color:var(--text-primary); display:flex; align-items:center; gap:8px;">
+            <span>🛡️</span> GxP Evidence Passport &amp; Reproducibility Vault
+          </h3>
+          <button onclick="closeEvidencePassportModal()" style="background:transparent; border:none; color:var(--text-muted); font-size:20px; cursor:pointer;">✕</button>
+        </div>
+        <div class="modal-body" style="padding:18px 20px; font-size:12.5px; max-height:75vh; overflow-y:auto;">
+          <div style="margin-bottom:14px; color:var(--text-secondary);">
+            Cryptographically sealed deliverable package containing file fingerprints, study specifications, standards versions, code checksums, validation reports, and electronic sign-offs.
+          </div>
+          <div id="evidence-passport-content">
+            <!-- Evidence passport body rendered by app.js -->
+          </div>
+        </div>
+        <div class="modal-footer" style="padding:12px 18px; border-top:1px solid var(--border-mid); display:flex; justify-content:space-between; align-items:center;">
+          <div style="display:flex; gap:8px;">
+            <button class="btn-journey-secondary" onclick="copyEvidencePassportJson()">📋 Copy JSON Passport</button>
+            <button class="btn-journey-secondary" onclick="downloadEvidencePassportJson()">📥 Download GxP Package</button>
+          </div>
+          <button class="btn-journey-primary" onclick="closeEvidencePassportModal()">Verified &amp; Sealed</button>
         </div>
       </div>
     </div>
