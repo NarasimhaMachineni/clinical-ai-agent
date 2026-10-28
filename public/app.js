@@ -10067,6 +10067,8 @@ function switchTab(tabId) {
     'tab-evidence-governance': 'tab-reports'
   };
   const effectiveTabId = aliases[tabId] || tabId;
+  if (typeof toggleMobileDrawer === 'function') toggleMobileDrawer(false);
+  if (typeof closeToolsMenu === 'function') closeToolsMenu();
 
   // Sync results-tabs buttons
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -22238,6 +22240,59 @@ function toggleSidebar() {
   }
 }
 window.toggleSidebar = toggleSidebar;
+
+// Mobile Drawer Navigation (Tablet & Mobile < 1024px)
+function toggleMobileDrawer(forceState) {
+  const sidebar = document.getElementById('agent-sidebar');
+  const backdrop = document.getElementById('sidebar-backdrop');
+  if (!sidebar) return;
+  const isOpen = (typeof forceState === 'boolean')
+    ? forceState
+    : !sidebar.classList.contains('mobile-drawer-open');
+  if (isOpen) {
+    sidebar.classList.add('mobile-drawer-open');
+    if (backdrop) backdrop.classList.add('active');
+  } else {
+    sidebar.classList.remove('mobile-drawer-open');
+    if (backdrop) backdrop.classList.remove('active');
+  }
+}
+window.toggleMobileDrawer = toggleMobileDrawer;
+
+// Clinical Tools Dropdown Menu (Header Compact Navigation)
+function toggleToolsMenu(forceState) {
+  const panel = document.getElementById('tools-dropdown-panel');
+  if (!panel) return;
+  const isShow = (typeof forceState === 'boolean')
+    ? forceState
+    : !panel.classList.contains('show');
+  if (isShow) {
+    panel.classList.add('show');
+  } else {
+    panel.classList.remove('show');
+  }
+}
+window.toggleToolsMenu = toggleToolsMenu;
+window.closeToolsMenu = function() { toggleToolsMenu(false); };
+
+window.purgeAllDataStore = function() {
+  if (typeof clearAllAgentData === 'function') {
+    clearAllAgentData(false);
+  }
+};
+
+// Global click-away listener for Tools Dropdown
+if (typeof document !== 'undefined') {
+  document.addEventListener('click', function(e) {
+    const dropdown = document.getElementById('topbar-tools-dropdown');
+    const panel = document.getElementById('tools-dropdown-panel');
+    if (panel && panel.classList.contains('show')) {
+      if (dropdown && !dropdown.contains(e.target)) {
+        panel.classList.remove('show');
+      }
+    }
+  });
+}
 
 // 2. Theme Toggle (Soft Sky Blue & Deep Navy Light / Dark)
 function toggleTheme() {

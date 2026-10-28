@@ -16,13 +16,19 @@
          TOP BAR: MISSION CONTROL
          ========================================================= -->
         <header class="agent-header">
-      <div class="header-brand">
-        <div class="brand-icon">🧬</div>
-        <div class="brand-text">
-          <h1>ClinicalOps AI — From Data to Decisions</h1>
-          <span class="brand-edition-tag">Intelligent Clinical Statistical Programming &amp; Validation Workbench</span>
+      <div class="header-left">
+        <button class="mobile-drawer-btn" id="mobile-menu-toggle" onclick="toggleMobileDrawer()" title="Toggle Navigation Drawer" aria-label="Toggle Navigation Drawer">
+          <span>☰</span>
+        </button>
+        <div class="header-brand">
+          <div class="brand-icon">🧬</div>
+          <div class="brand-text">
+            <h1>ClinicalOps AI — From Data to Decisions</h1>
+            <span class="brand-edition-tag">Intelligent Clinical Statistical Programming &amp; Validation Workbench</span>
+          </div>
         </div>
       </div>
+
       <div class="header-center-controls">
         <div class="data-source-status-pill" id="data-source-status-pill" title="System Data Source Mode (Section 27)">
           <span class="source-dot" id="source-dot" style="background:#64748b; box-shadow:0 0 6px #64748b;"></span>
@@ -35,91 +41,75 @@
           <option value="CUSTOM">+ New Study Workspace...</option>
         </select>
         <div class="topbar-search-container" title="Global Search (Ctrl+K)">
-          <span style="font-size:12px; color:var(--sky-400);">🔍</span>
+          <span style="font-size:13px; color:var(--sky-400);">🔍</span>
           <input type="text" id="global-command-search" class="topbar-search-input" placeholder="Search datasets, rules, findings, commands..." autocomplete="off">
           <kbd class="search-kbd-hint">Ctrl+K</kbd>
         </div>
       </div>
-      <div class="header-right-actions" style="display:flex; align-items:center; gap:8px;">
+
+      <div class="header-right-actions">
+        <!-- Active Notifications Bell -->
         <div class="topbar-badge-bell" id="topbar-notifications-btn" onclick="switchTab('tab-findings')" title="Active Findings &amp; Notifications">
           <span>🔔</span>
           <span class="topbar-unread-pill" id="topbar-unread-count">0</span>
         </div>
+
+        <!-- Theme Segmented Control -->
         <div class="apple-theme-segmented" id="theme-segmented-control" title="Theme Selector (Light / Dark / Auto)">
-          <button class="theme-seg-btn" id="theme-btn-light" onclick="setAppTheme('light')"><span>☀️</span> <span>Light</span></button>
-          <button class="theme-seg-btn active" id="theme-btn-dark" onclick="setAppTheme('dark')"><span>🌙</span> <span>Dark</span></button>
-          <button class="theme-seg-btn" id="theme-btn-system" onclick="setAppTheme('system')"><span>💻</span> <span>Auto</span></button>
+          <button class="theme-seg-btn" id="theme-btn-light" onclick="setAppTheme('light')"><span>☀️</span> <span class="theme-btn-label">Light</span></button>
+          <button class="theme-seg-btn active" id="theme-btn-dark" onclick="setAppTheme('dark')"><span>🌙</span> <span class="theme-btn-label">Dark</span></button>
+          <button class="theme-seg-btn" id="theme-btn-system" onclick="setAppTheme('system')"><span>💻</span> <span class="theme-btn-label">Auto</span></button>
         </div>
-        <button class="topbar-theme-btn" id="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Light / Dark Theme" style="background:rgba(255,255,255,0.06); border:1px solid var(--border-subtle); color:var(--text-secondary); padding:5px 8px; border-radius:6px; cursor:pointer; display:none;">
+        <button class="topbar-theme-btn" id="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Light / Dark Theme" style="display:none;">
           <span id="theme-icon">🌙</span>
         </button>
-        <div class="topbar-user-pill" title="Current Authenticated User Role">
-          <div class="topbar-user-avatar">AM</div>
-          <div style="display:flex; flex-direction:column; line-height:1.2;">
-            <span style="font-weight:600; color:#fff; font-size:11px;">Dr. Alex Morgan</span>
-            <span style="font-size:9px; color:var(--text-muted);">Lead Stat Programmer</span>
+
+        <!-- Compact Clinical Tools & Modals Menu -->
+        <div class="topbar-tools-dropdown" id="topbar-tools-dropdown">
+          <button class="btn-tools-menu" id="btn-tools-menu" onclick="toggleToolsMenu()" title="Open Clinical Tools &amp; Modals">
+            <span>⚡ Clinical Tools</span> <span style="font-size:10px;">▼</span>
+          </button>
+          <div class="tools-dropdown-panel" id="tools-dropdown-panel">
+            <div class="tools-panel-header">⚡ Clinical Diagnostics &amp; Specialized Modals</div>
+            <div class="tools-panel-grid">
+              <button class="btn-header-nav" id="btn-view-study-map" onclick="openStudyMapModal(); closeToolsMenu();" title="View Visual Study Map &amp; Lineage Graph"><span>🗺️</span> <span>Study Map</span></button>
+              <button class="btn-header-nav" id="btn-open-profiler" onclick="openDatasetProfilerModal(); closeToolsMenu();" title="Open Dataset Columnar Intelligence Profiler"><span>📊</span> <span>Profiler</span></button>
+              <button class="btn-header-nav" id="btn-open-subject-twin" onclick="openSubjectTwinModal(); closeToolsMenu();" title="View Subject Digital Twin &amp; Journey"><span>👯</span> <span>Digital Twin</span></button>
+              <button class="btn-header-nav" id="btn-open-double-prog" onclick="openDoubleProgrammingModal(); closeToolsMenu();" title="Open SAS &amp; R Double Programming Workbench"><span>👥</span> <span>Double Prog</span></button>
+              <button class="btn-header-nav" id="btn-open-clinical-os" onclick="openClinicalOsModal('PROTOCOL'); closeToolsMenu();" title="ClinicalOps AI OS NextGen Workbench"><span>🏛️</span> <span>Clinical OS</span></button>
+              <button class="btn-header-nav" id="btn-open-command-palette" onclick="openCommandCenterModal(); closeToolsMenu();" title="Open Command Center (Ctrl+K)"><span>⚡</span> <span>Command Center</span></button>
+              <button class="btn-header-nav" id="btn-toggle-study-lock" onclick="toggleStudyLock(); closeToolsMenu();" title="Study Database Lock / Freeze (21 CFR Part 11)"><span id="study-lock-icon">🔓</span> <span id="study-lock-label">PRE-LOCK</span></button>
+              <button class="btn-header-nav" id="btn-system-health" onclick="openSystemHealthModal(); closeToolsMenu();" title="System Health Diagnostics &amp; Self-Test"><span>🩺</span> <span>Health</span></button>
+              <button class="btn-header-nav" id="btn-open-cdisc-rules" onclick="openCdiscRulesModal(); closeToolsMenu();" title="Search Official CDISC Conformance Rules"><span>📖</span> <span>CDISC Rules</span></button>
+              <button class="btn-header-nav" id="btn-open-audit-trail" onclick="openAuditTrailModal(); closeToolsMenu();" title="Audit Trail &amp; Regulatory Event Log"><span>📜</span> <span>Audit Trail</span></button>
+              <button class="btn-header-nav" id="btn-open-spec-drift" onclick="openSpecDriftModal(); closeToolsMenu();" title="Specification Drift Detector &amp; Blast Radius"><span>📐</span> <span>Spec Drift</span></button>
+              <button class="btn-header-nav" id="btn-open-manifest" onclick="openReproducibilityManifestModal(); closeToolsMenu();" title="Reproducibility Manifest &amp; SHA-256 Vault"><span>🔐</span> <span>Manifest</span></button>
+              <button class="btn-header-nav" id="btn-open-rel-explorer" onclick="openDatasetRelationshipModal(); closeToolsMenu();" title="Dataset Relationship Explorer"><span>🕸️</span> <span>Relations</span></button>
+              <button class="btn-header-nav" id="btn-open-regression-lab" onclick="openRegressionLabModal(); closeToolsMenu();" title="Validation Regression Lab (Run-to-Run Diff)"><span>🧪</span> <span>Regress Lab</span></button>
+              <button class="btn-header-nav" id="btn-open-study-config" onclick="openStudyConfigModal(); closeToolsMenu();" title="Enterprise Study Configuration &amp; Metadata"><span>⚙️</span> <span>Study Spec</span></button>
+              <button class="btn-header-nav" id="btn-open-data-detective" onclick="openDataDetectiveModal(); closeToolsMenu();" title="Clinical Data Detective — 5-Tier Forensic Trace"><span>🕵️</span> <span>Detective</span></button>
+              <button class="btn-header-nav" id="btn-open-change-impact" onclick="openChangeImpactModal(); closeToolsMenu();" title="Change Impact Simulator &amp; Blast Radius"><span>⚡</span> <span>Impact Sim</span></button>
+              <button class="btn-header-nav" id="btn-open-risk-radar" onclick="openRiskRadarModal(); closeToolsMenu();" title="Clinical Quality Risk Radar &amp; Prioritization"><span>🎯</span> <span>Risk Radar</span></button>
+              <button class="btn-header-nav" id="btn-open-execution-adapters" onclick="openExecutionAdaptersModal(); closeToolsMenu();" title="SAS &amp; R Execution Adapters Architecture"><span>🔌</span> <span>Adapters</span></button>
+              <button class="btn-header-nav" id="btn-open-evidence-passport" onclick="openEvidencePassportModal(); closeToolsMenu();" title="GxP Evidence Passport &amp; SHA-256 Vault"><span>🛡️</span> <span>Passport</span></button>
+              <button class="btn-header-clear" id="btn-clear-all-data" onclick="closeToolsMenu();" title="Purge all loaded datasets and reset agent to clean standby state"><span>🗑️</span> <span>Reset Data</span></button>
+            </div>
           </div>
         </div>
-        <button class="btn-header-nav" id="btn-view-study-map" onclick="openStudyMapModal()" title="View Visual Study Map & Lineage Graph" style="display:flex; align-items:center; gap:5px; background:rgba(59,130,246,0.15); border:1px solid rgba(59,130,246,0.4); color:#93c5fd; padding:5px 10px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">
-          <span>🗺️</span> <span>Study Map</span>
-        </button>
-        <button class="btn-header-nav" id="btn-open-profiler" onclick="openDatasetProfilerModal()" title="Open Dataset Columnar Intelligence Profiler" style="display:flex; align-items:center; gap:5px; background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.4); color:#6ee7b7; padding:5px 10px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">
-          <span>📊</span> <span>Profiler</span>
-        </button>
-        <button class="btn-header-nav" id="btn-open-subject-twin" onclick="openSubjectTwinModal()" title="View Subject Digital Twin & Journey" style="display:flex; align-items:center; gap:5px; background:rgba(168,85,247,0.15); border:1px solid rgba(168,85,247,0.4); color:#d8b4fe; padding:5px 10px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">
-          <span>👯</span> <span>Digital Twin</span>
-        </button>
-        <button class="btn-header-nav" id="btn-open-double-prog" onclick="openDoubleProgrammingModal()" title="Open SAS & R Double Programming Workbench" style="display:flex; align-items:center; gap:5px; background:rgba(245,158,11,0.15); border:1px solid rgba(245,158,11,0.4); color:#fde68a; padding:5px 10px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">
-          <span>👥</span> <span>Double Prog</span>
-        </button>
-        <button class="btn-header-nav" id="btn-open-clinical-os" onclick="openClinicalOsModal('PROTOCOL')" title="ClinicalOps AI OS NextGen Workbench (Protocol Intelligence, Time Machine, Vendor Recon, Reviewer Mode, Observability)" style="display:flex; align-items:center; gap:5px; background:rgba(99,102,241,0.18); border:1px solid rgba(99,102,241,0.5); color:#a5b4fc; padding:5px 10px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">
-          <span>🏛️</span> <span>Clinical OS</span>
-        </button>
-        <button class="btn-header-nav" id="btn-open-command-palette" onclick="openCommandCenterModal()" title="Open Command Center (Ctrl+K)" style="display:flex; align-items:center; gap:5px; background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.4); color:#fca5a5; padding:5px 10px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">
-          <span>⚡</span> <kbd style="font-size:10.5px; background:rgba(0,0,0,0.3); padding:1px 4px; border-radius:3px;">Ctrl+K</kbd>
-        </button>
-        <button class="btn-header-nav" id="btn-toggle-study-lock" onclick="toggleStudyLock()" title="Study Database Lock / Freeze (21 CFR Part 11)" style="display:flex; align-items:center; gap:5px; background:rgba(234,179,8,0.15); border:1px solid rgba(234,179,8,0.4); color:#fef08a; padding:5px 10px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">
-          <span id="study-lock-icon">🔓</span> <span id="study-lock-label">PRE-LOCK</span>
-        </button>
-        <button class="btn-header-nav" id="btn-system-health" onclick="openSystemHealthModal()" title="System Health Diagnostics & Self-Test" style="display:flex; align-items:center; gap:5px; background:rgba(34,197,94,0.15); border:1px solid rgba(34,197,94,0.4); color:#86efac; padding:5px 10px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">
-          <span>🩺</span> <span>Health</span>
-        </button>
-        <button class="btn-header-nav" id="btn-open-spec-drift" onclick="openSpecDriftModal()" title="Specification Drift Detector &amp; Blast Radius" style="display:flex; align-items:center; gap:5px; background:rgba(20,184,166,0.15); border:1px solid rgba(20,184,166,0.4); color:#5eead4; padding:5px 8px; border-radius:6px; font-size:11.5px; font-weight:600; cursor:pointer;">
-          <span>📐</span> <span>Drift</span>
-        </button>
-        <button class="btn-header-nav" id="btn-open-manifest" onclick="openReproducibilityManifestModal()" title="Reproducibility Manifest &amp; SHA-256 Vault" style="display:flex; align-items:center; gap:5px; background:rgba(168,85,247,0.15); border:1px solid rgba(168,85,247,0.4); color:#d8b4fe; padding:5px 8px; border-radius:6px; font-size:11.5px; font-weight:600; cursor:pointer;">
-          <span>🔐</span> <span>Manifest</span>
-        </button>
-        <button class="btn-header-nav" id="btn-open-rel-explorer" onclick="openDatasetRelationshipModal()" title="Dataset Relationship Explorer" style="display:flex; align-items:center; gap:5px; background:rgba(59,130,246,0.15); border:1px solid rgba(59,130,246,0.4); color:#93c5fd; padding:5px 8px; border-radius:6px; font-size:11.5px; font-weight:600; cursor:pointer;">
-          <span>🕸️</span> <span>Relations</span>
-        </button>
-        <button class="btn-header-nav" id="btn-open-regression-lab" onclick="openRegressionLabModal()" title="Validation Regression Lab (Run-to-Run Diff)" style="display:flex; align-items:center; gap:5px; background:rgba(245,158,11,0.15); border:1px solid rgba(245,158,11,0.4); color:#fde68a; padding:5px 8px; border-radius:6px; font-size:11.5px; font-weight:600; cursor:pointer;">
-          <span>🧪</span> <span>Regress</span>
-        </button>
-        <button class="btn-header-nav" id="btn-open-study-config" onclick="openStudyConfigModal()" title="Enterprise Study Configuration &amp; Metadata" style="display:flex; align-items:center; gap:5px; background:rgba(59,130,246,0.15); border:1px solid rgba(59,130,246,0.4); color:#93c5fd; padding:5px 8px; border-radius:6px; font-size:11.5px; font-weight:600; cursor:pointer;">
-          <span>⚙️</span> <span>Study Spec</span>
-        </button>
-        <button class="btn-header-nav" id="btn-open-data-detective" onclick="openDataDetectiveModal()" title="Clinical Data Detective — 5-Tier Forensic Trace" style="display:flex; align-items:center; gap:5px; background:rgba(20,184,166,0.15); border:1px solid rgba(20,184,166,0.4); color:#5eead4; padding:5px 8px; border-radius:6px; font-size:11.5px; font-weight:600; cursor:pointer;">
-          <span>🕵️</span> <span>Detective</span>
-        </button>
-        <button class="btn-header-nav" id="btn-open-change-impact" onclick="openChangeImpactModal()" title="Change Impact Simulator &amp; Blast Radius" style="display:flex; align-items:center; gap:5px; background:rgba(245,158,11,0.15); border:1px solid rgba(245,158,11,0.4); color:#fde68a; padding:5px 8px; border-radius:6px; font-size:11.5px; font-weight:600; cursor:pointer;">
-          <span>⚡</span> <span>Impact</span>
-        </button>
-        <button class="btn-header-nav" id="btn-open-risk-radar" onclick="openRiskRadarModal()" title="Clinical Quality Risk Radar &amp; Prioritization" style="display:flex; align-items:center; gap:5px; background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.4); color:#fca5a5; padding:5px 8px; border-radius:6px; font-size:11.5px; font-weight:600; cursor:pointer;">
-          <span>🎯</span> <span>Risk Radar</span>
-        </button>
-        <button class="btn-header-nav" id="btn-open-execution-adapters" onclick="openExecutionAdaptersModal()" title="SAS &amp; R Execution Adapters Architecture" style="display:flex; align-items:center; gap:5px; background:rgba(14,165,233,0.15); border:1px solid rgba(14,165,233,0.4); color:#7dd3fc; padding:5px 8px; border-radius:6px; font-size:11.5px; font-weight:600; cursor:pointer;">
-          <span>🔌</span> <span>Adapters</span>
-        </button>
-        <button class="btn-header-nav" id="btn-open-evidence-passport" onclick="openEvidencePassportModal()" title="GxP Evidence Passport &amp; SHA-256 Vault" style="display:flex; align-items:center; gap:5px; background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.4); color:#6ee7b7; padding:5px 8px; border-radius:6px; font-size:11.5px; font-weight:600; cursor:pointer;">
-          <span>🛡️</span> <span>Passport</span>
-        </button>
-        <button class="btn-header-clear" id="btn-clear-all-data" title="Purge all loaded datasets and reset agent to clean standby state">
-          <span style="font-size:13px;">🗑️</span>
-          <span>Clear / Reset Data</span>
-        </button>
+
+        <!-- User Profile Pill -->
+        <div class="topbar-user-pill" title="Current Authenticated User Role">
+          <div class="topbar-user-avatar">AM</div>
+          <div class="topbar-user-details">
+            <span class="user-name">Dr. Alex Morgan</span>
+            <span class="user-role">Lead Stat Programmer</span>
+          </div>
+        </div>
       </div>
     </header>
+
+    <!-- Mobile Drawer Backdrop Overlay -->
+    <div class="sidebar-backdrop" id="sidebar-backdrop" onclick="toggleMobileDrawer(false)"></div>
 
     <div class="agent-body">
       
@@ -137,96 +127,106 @@
         </div>
 
         <!-- 10 Primary Navigation Workspaces -->
+        <div class="sidebar-workspaces-header">
+          <span class="sidebar-brand-label">6 Primary Workspaces</span>
+        </div>
         <ul class="sidebar-nav-list" id="sidebar-nav-list">
-          <li>
-            <button class="sidebar-nav-item active" data-tab="tab-dashboard" id="nav-btn-home" onclick="switchTab('tab-dashboard')" title="Home — Executive Overview &amp; Clinical Journey">
+          <!-- 1. Overview -->
+          <li class="sidebar-nav-group">
+            <button class="sidebar-nav-item active" data-tab="tab-dashboard" id="nav-btn-home" onclick="switchTab('tab-dashboard')" title="1. Overview — Executive Telemetry &amp; Clinical Journey">
               <span class="nav-item-icon">🏠</span>
               <span class="nav-item-text">
-                <span class="nav-item-title">Home</span>
-                <span class="nav-item-sub">Overview</span>
+                <span class="nav-item-title">1. Overview</span>
+                <span class="nav-item-sub">Telemetry &amp; Journey</span>
               </span>
             </button>
           </li>
-          <li>
-            <button class="sidebar-nav-item" data-tab="tab-datasets" id="nav-btn-data-hub" onclick="switchTab('tab-datasets')" title="Data Hub — Datasets, Ingestion &amp; Repository">
+
+          <!-- 2. Study Workspace -->
+          <li class="sidebar-nav-group">
+            <button class="sidebar-nav-item" data-tab="tab-datasets" id="nav-btn-data-hub" onclick="switchTab('tab-datasets')" title="2. Study Workspace — Datasets, Ingestion &amp; Column Profiling">
               <span class="nav-item-icon">📥</span>
               <span class="nav-item-text">
-                <span class="nav-item-title">Data Hub</span>
-                <span class="nav-item-sub">Datasets &amp; Specs</span>
+                <span class="nav-item-title">2. Study Workspace</span>
+                <span class="nav-item-sub">Data Hub &amp; Specs</span>
               </span>
             </button>
           </li>
-          <li>
-            <button class="sidebar-nav-item" data-tab="tab-sdtm-val" id="nav-btn-sdtm-studio" onclick="switchTab('tab-sdtm-val')" title="SDTM Studio — Domain Validation &amp; Conformance">
-              <span class="nav-item-icon">📐</span>
+
+          <!-- 3. Quality & Validation -->
+          <li class="sidebar-nav-group">
+            <button class="sidebar-nav-item" data-tab="tab-sdtm-val" id="nav-btn-sdtm-studio" onclick="switchTab('tab-sdtm-val')" title="3. Quality &amp; Validation — SDTM Conformance">
+              <span class="nav-item-icon">🛡️</span>
               <span class="nav-item-text">
-                <span class="nav-item-title">SDTM Studio</span>
-                <span class="nav-item-sub">Domain Checks</span>
+                <span class="nav-item-title">3. Quality &amp; Validation</span>
+                <span class="nav-item-sub">SDTM Conformance</span>
               </span>
             </button>
+            <div class="sidebar-sub-items">
+              <button class="sidebar-nav-item sidebar-sub-nav-item" data-tab="tab-adam-val" id="nav-btn-adam-studio" onclick="switchTab('tab-adam-val')" title="ADaM Studio — Derivations, BDS &amp; Lineage">
+                <span class="nav-item-icon">🔬</span>
+                <span class="nav-item-text">
+                  <span class="nav-item-title">ADaM Studio</span>
+                  <span class="nav-item-sub">Derivations &amp; BDS</span>
+                </span>
+              </button>
+              <button class="sidebar-nav-item sidebar-sub-nav-item" data-tab="tab-findings" id="nav-btn-findings-hub" onclick="switchTab('tab-findings')" title="Findings Hub — Issues, Adjudication &amp; Evidence">
+                <span class="nav-item-icon">🔍</span>
+                <span class="nav-item-text">
+                  <span class="nav-item-title">Findings Hub</span>
+                  <span class="nav-item-sub">Issues &amp; Evidence</span>
+                </span>
+              </button>
+            </div>
           </li>
-          <li>
-            <button class="sidebar-nav-item" data-tab="tab-adam-val" id="nav-btn-adam-studio" onclick="switchTab('tab-adam-val')" title="ADaM Studio — Derivations, BDS &amp; Lineage">
-              <span class="nav-item-icon">🔬</span>
-              <span class="nav-item-text">
-                <span class="nav-item-title">ADaM Studio</span>
-                <span class="nav-item-sub">Derivations &amp; BDS</span>
-              </span>
-            </button>
-          </li>
-          <li>
-            <button class="sidebar-nav-item" data-tab="tab-double-prog" id="nav-btn-sas-r-lab" onclick="switchTab('tab-double-prog')" title="SAS/R Lab — Double Programming &amp; Reconciliation">
+
+          <!-- 4. Programming & Impact -->
+          <li class="sidebar-nav-group">
+            <button class="sidebar-nav-item" data-tab="tab-double-prog" id="nav-btn-sas-r-lab" onclick="switchTab('tab-double-prog')" title="4. Programming &amp; Impact — SAS/R Dual Code &amp; Reconciliation">
               <span class="nav-item-icon">⚖️</span>
               <span class="nav-item-text">
-                <span class="nav-item-title">SAS/R Lab</span>
-                <span class="nav-item-sub">Dual Programming</span>
+                <span class="nav-item-title">4. Programming &amp; Impact</span>
+                <span class="nav-item-sub">SAS/R QC &amp; Adapters</span>
               </span>
             </button>
           </li>
-          <li>
-            <button class="sidebar-nav-item" data-tab="tab-tlfs" id="nav-btn-tlf-canvas" onclick="switchTab('tab-tlfs')" title="TLF Canvas — Study Reporting, Tables &amp; Figures">
+
+          <!-- 5. Analysis & Deliverables -->
+          <li class="sidebar-nav-group">
+            <button class="sidebar-nav-item" data-tab="tab-tlfs" id="nav-btn-tlf-canvas" onclick="switchTab('tab-tlfs')" title="5. Analysis &amp; Deliverables — CSR Tables, Listings &amp; Figures">
               <span class="nav-item-icon">📊</span>
               <span class="nav-item-text">
-                <span class="nav-item-title">TLF Canvas</span>
-                <span class="nav-item-sub">Tables &amp; Figures</span>
+                <span class="nav-item-title">5. Analysis &amp; Deliverables</span>
+                <span class="nav-item-sub">Tables, Listings, Figures</span>
               </span>
             </button>
           </li>
-          <li>
-            <button class="sidebar-nav-item" data-tab="tab-findings" id="nav-btn-findings-hub" onclick="switchTab('tab-findings')" title="Findings Hub — Issues, Adjudication &amp; Evidence">
-              <span class="nav-item-icon">🔍</span>
-              <span class="nav-item-text">
-                <span class="nav-item-title">Findings Hub</span>
-                <span class="nav-item-sub">Issues &amp; Evidence</span>
-              </span>
-            </button>
-          </li>
-          <li>
-            <button class="sidebar-nav-item" data-tab="tab-reports" id="nav-btn-reports" onclick="switchTab('tab-reports')" title="Reports — Audit Trail, Conformance &amp; Exports">
+
+          <!-- 6. Evidence & Governance -->
+          <li class="sidebar-nav-group">
+            <button class="sidebar-nav-item" data-tab="tab-reports" id="nav-btn-reports" onclick="switchTab('tab-reports')" title="6. Evidence &amp; Governance — Reports, Audit &amp; GxP Passport">
               <span class="nav-item-icon">📋</span>
               <span class="nav-item-text">
-                <span class="nav-item-title">Reports</span>
-                <span class="nav-item-sub">Exports &amp; Audit</span>
+                <span class="nav-item-title">6. Evidence &amp; Governance</span>
+                <span class="nav-item-sub">Reports &amp; Passport</span>
               </span>
             </button>
-          </li>
-          <li>
-            <button class="sidebar-nav-item" data-tab="tab-study-insights" id="nav-btn-study-insights" onclick="switchTab('tab-study-insights')" title="Study Insights — AI Copilot, Rule Lookup &amp; SAS/R Code">
-              <span class="nav-item-icon">💡</span>
-              <span class="nav-item-text">
-                <span class="nav-item-title">Study Insights</span>
-                <span class="nav-item-sub">AI Copilot &amp; Rules</span>
-              </span>
-            </button>
-          </li>
-          <li>
-            <button class="sidebar-nav-item" data-tab="tab-settings" id="nav-btn-settings" onclick="switchTab('tab-settings')" title="Settings — Diagnostics, Telemetry &amp; Standards Registry">
-              <span class="nav-item-icon">⚙️</span>
-              <span class="nav-item-text">
-                <span class="nav-item-title">Settings</span>
-                <span class="nav-item-sub">Diagnostics &amp; Config</span>
-              </span>
-            </button>
+            <div class="sidebar-sub-items">
+              <button class="sidebar-nav-item sidebar-sub-nav-item" data-tab="tab-study-insights" id="nav-btn-study-insights" onclick="switchTab('tab-study-insights')" title="Study Insights — AI Copilot &amp; Rules">
+                <span class="nav-item-icon">💡</span>
+                <span class="nav-item-text">
+                  <span class="nav-item-title">Study Insights</span>
+                  <span class="nav-item-sub">Copilot &amp; Rule Search</span>
+                </span>
+              </button>
+              <button class="sidebar-nav-item sidebar-sub-nav-item" data-tab="tab-settings" id="nav-btn-settings" onclick="switchTab('tab-settings')" title="Settings — Diagnostics, Telemetry &amp; Registry">
+                <span class="nav-item-icon">⚙️</span>
+                <span class="nav-item-text">
+                  <span class="nav-item-title">Settings</span>
+                  <span class="nav-item-sub">Diagnostics &amp; Health</span>
+                </span>
+              </button>
+            </div>
           </li>
         </ul>
 
@@ -672,6 +672,19 @@
 
             <!-- TAB 2: DATASET INSPECTOR & AUDIT TRAIL -->
             <div class="tab-pane" id="tab-datasets">
+      <!-- Workspace Contextual Toolbar: Study Workspace -->
+      <div class="workspace-context-toolbar">
+        <div class="context-toolbar-left">
+          <span class="context-toolbar-title">📁 Study Workspace: Data Ingestion &amp; Repository</span>
+        </div>
+        <div class="context-toolbar-actions">
+          <button class="btn-toolbar-action" onclick="openStudyConfigModal()" title="Study Metadata &amp; Configuration"><span>⚙️</span> <span>Study Spec</span></button>
+          <button class="btn-toolbar-action" onclick="openDatasetProfilerModal()" title="Columnar Data Intelligence Profiler"><span>📊</span> <span>Profiler</span></button>
+          <button class="btn-toolbar-action" onclick="openSubjectTwinModal()" title="Subject Digital Twin &amp; Patient Timeline"><span>👯</span> <span>Digital Twin</span></button>
+          <button class="btn-toolbar-action" onclick="openDatasetRelationshipModal()" title="Dataset Relationship Explorer"><span>🕸️</span> <span>Relations</span></button>
+          <button class="btn-toolbar-action danger" onclick="purgeAllDataStore()" title="Purge loaded study data"><span>🗑️</span> <span>Reset Data</span></button>
+        </div>
+      </div>
               <div class="pane-card">
                 <div class="card-title-bar">
                   <div style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom:8px;">
@@ -889,6 +902,18 @@
 
                         <!-- TAB 3: SDTM VALIDATION WORKBENCH -->
             <div class="tab-pane" id="tab-sdtm-val">
+      <!-- Workspace Contextual Toolbar: Quality & Validation -->
+      <div class="workspace-context-toolbar">
+        <div class="context-toolbar-left">
+          <span class="context-toolbar-title">🛡️ Quality &amp; Validation: CDISC Conformance &amp; Risk</span>
+        </div>
+        <div class="context-toolbar-actions">
+          <button class="btn-toolbar-action" onclick="openRiskRadarModal()" title="Clinical Quality Risk Radar"><span>🎯</span> <span>Risk Radar</span></button>
+          <button class="btn-toolbar-action" onclick="openCdiscRulesModal()" title="Official CDISC Rules Directory"><span>📖</span> <span>CDISC Rules</span></button>
+          <button class="btn-toolbar-action" onclick="openRegressionLabModal()" title="Validation Regression Lab"><span>🧪</span> <span>Regression Lab</span></button>
+          <button class="btn-toolbar-action" onclick="openSpecDriftModal()" title="Specification Drift Detector"><span>📐</span> <span>Spec Drift</span></button>
+        </div>
+      </div>
               <!-- Workspace 3 Sub-Navigation -->
               <div class="workspace-subnav-bar">
                 <button class="workspace-subnav-pill active" onclick="switchTab('tab-sdtm-val')"><span>📐</span> <span>SDTM Conformance</span></button>
@@ -999,6 +1024,17 @@
 
             <!-- TAB 5: SAS/R DOUBLE PROGRAMMING WORKBENCH -->
             <div class="tab-pane" id="tab-double-prog">
+      <!-- Workspace Contextual Toolbar: Programming & Impact -->
+      <div class="workspace-context-toolbar">
+        <div class="context-toolbar-left">
+          <span class="context-toolbar-title">⚖️ Programming &amp; Impact: Dual Code &amp; Blast Radius</span>
+        </div>
+        <div class="context-toolbar-actions">
+          <button class="btn-toolbar-action" onclick="openExecutionAdaptersModal()" title="SAS &amp; R Execution Adapters"><span>🔌</span> <span>Execution Adapters</span></button>
+          <button class="btn-toolbar-action" onclick="openChangeImpactModal()" title="Change Impact Simulator &amp; Blast Radius"><span>⚡</span> <span>Impact Simulator</span></button>
+          <button class="btn-toolbar-action" onclick="openDoubleProgrammingModal()" title="Full Dual Programming Studio"><span>👥</span> <span>SAS/R Lab</span></button>
+        </div>
+      </div>
               <div class="pane-card">
                 <div class="card-title-bar">
                   <div style="display:flex; justify-content:space-between; align-items:center; width:100%; flex-wrap:wrap; gap:8px;">
@@ -1107,6 +1143,19 @@
 
             <!-- TAB 1: AUTOMATED DATA REVIEW -->
             <div class="tab-pane" id="tab-reports">
+      <!-- Workspace Contextual Toolbar: Evidence & Governance -->
+      <div class="workspace-context-toolbar">
+        <div class="context-toolbar-left">
+          <span class="context-toolbar-title">📋 Evidence &amp; Governance: Regulatory Audit &amp; GxP Passport</span>
+        </div>
+        <div class="context-toolbar-actions">
+          <button class="btn-toolbar-action" onclick="openDataDetectiveModal()" title="Clinical Data Detective 5-Tier Trace"><span>🕵️</span> <span>Data Detective</span></button>
+          <button class="btn-toolbar-action" onclick="openEvidencePassportModal()" title="GxP Evidence Passport &amp; SHA-256 Vault"><span>🛡️</span> <span>Evidence Passport</span></button>
+          <button class="btn-toolbar-action" onclick="openAuditTrailModal()" title="21 CFR Part 11 Audit Trail"><span>📜</span> <span>Audit Trail</span></button>
+          <button class="btn-toolbar-action" onclick="openReproducibilityManifestModal()" title="Reproducibility Manifest"><span>🔐</span> <span>Manifest</span></button>
+          <button class="btn-toolbar-action" onclick="openSystemHealthModal()" title="System Health Diagnostics"><span>🩺</span> <span>Health Diagnostics</span></button>
+        </div>
+      </div>
               <!-- Workspace 6 Sub-Navigation -->
               <div class="workspace-subnav-bar">
                 <button class="workspace-subnav-pill active" onclick="switchTab('tab-reports')"><span>📋</span> <span>Regulatory Reports</span></button>
@@ -1280,6 +1329,16 @@
 
             <!-- TAB 8: CSR TLF STUDIO (TABLES, LISTINGS & FIGURES) -->
             <div class="tab-pane" id="tab-tlfs">
+      <!-- Workspace Contextual Toolbar: Analysis & Deliverables -->
+      <div class="workspace-context-toolbar">
+        <div class="context-toolbar-left">
+          <span class="context-toolbar-title">📊 Analysis &amp; Deliverables: CSR Tables, Listings &amp; Figures</span>
+        </div>
+        <div class="context-toolbar-actions">
+          <button class="btn-toolbar-action" onclick="openStudyMapModal()" title="Visual Study Map &amp; Lineage Graph"><span>🗺️</span> <span>Study Map</span></button>
+          <button class="btn-toolbar-action" onclick="switchTab('tab-deliverables')" title="eCTD Module 5 Package"><span>📦</span> <span>eCTD Package</span></button>
+        </div>
+      </div>
               <!-- Workspace 5 Sub-Navigation -->
               <div class="workspace-subnav-bar">
                 <button class="workspace-subnav-pill active" onclick="switchTab('tab-tlfs')"><span>📊</span> <span>TLF Canvas</span></button>
