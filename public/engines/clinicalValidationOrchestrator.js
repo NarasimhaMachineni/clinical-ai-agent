@@ -8113,8 +8113,10 @@ ${itemDefXml}
   if (typeof module !== 'undefined' && module.exports) {
     module.exports = exportsObj;
   }
-  if (typeof global !== 'undefined') {
-    Object.assign(global, exportsObj);
+  // Universal browser & Node export: guarantee exports on window, global, and globalThis
+  const targetGlobal = (typeof window !== 'undefined') ? window : ((typeof global !== 'undefined') ? global : (typeof globalThis !== 'undefined' ? globalThis : null));
+  if (targetGlobal) {
+    Object.assign(targetGlobal, exportsObj);
   }
 
 })(typeof window !== 'undefined' ? window : globalThis);

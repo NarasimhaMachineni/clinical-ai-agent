@@ -1,3 +1,53 @@
+// ============================================================================
+// GLOBAL CLIENT STABILITY SHIELD & ERROR BOUNDARY (Zero-Crash / Zero-Freeze)
+// ============================================================================
+function resetAllLockedButtons() {
+  document.querySelectorAll('button:disabled').forEach(btn => {
+    // Only reset action/runner buttons, not pagination limits
+    const id = btn.id || '';
+    if (id.includes('run') || id.includes('execute') || id.includes('val') || id.includes('confirm')) {
+      btn.disabled = false;
+      if (btn.textContent.includes('⏳') || btn.textContent.includes('Executing')) {
+        btn.textContent = btn.getAttribute('data-original-text') || 'Execute';
+      }
+    }
+  });
+}
+window.resetAllLockedButtons = resetAllLockedButtons;
+
+function popStabilityRecoveryToast(msg) {
+  const container = document.getElementById('self-healing-toast-container');
+  if (!container) return;
+  const toast = document.createElement('div');
+  toast.className = 'healing-toast healed';
+  toast.innerHTML = `
+    <div class="toast-header-row">
+      <span class="toast-tag-healing"><span>🛡️</span> SYSTEM STABILITY SHIELD</span>
+      <span style="font-size:10px; color:var(--text-muted); font-family:monospace;">${new Date().toLocaleTimeString()}</span>
+    </div>
+    <div class="toast-title" style="color:#38bdf8;">Operation Safely Intercepted &amp; Recovered</div>
+    <div class="toast-body-text" style="font-size:11.5px; color:#cbd5e1;">${escapeHtml(msg || 'Handled non-blocking error. UI controls restored.')}</div>
+  `;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(100%)';
+    setTimeout(() => toast.remove(), 400);
+  }, 4000);
+}
+window.popStabilityRecoveryToast = popStabilityRecoveryToast;
+
+window.addEventListener('error', (event) => {
+  console.warn('[ClinicalOps Stability Shield] Intercepted runtime error:', event.error ? (event.error.message || event.error) : event.message);
+  resetAllLockedButtons();
+});
+
+window.addEventListener('unhandledrejection', (event) => {
+  console.warn('[ClinicalOps Stability Shield] Intercepted unhandled promise rejection:', event.reason);
+  resetAllLockedButtons();
+  event.preventDefault();
+});
+
 
 // ============================================================================
 // UNIVERSAL MODAL WORKBENCH & LIFECYCLE CONTROLLER (v9.1 Zero-Stuck Fix)
@@ -230,7 +280,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Initial SVG connectors render & window resize handler
   setTimeout(renderCanvasConnectors, 300);
-  window.addEventListener('resize', renderCanvasConnectors);
+  let resizeRafId = null;
+  window.addEventListener('resize', () => {
+    if (resizeRafId) cancelAnimationFrame(resizeRafId);
+    resizeRafId = requestAnimationFrame(() => {
+      renderCanvasConnectors();
+      resizeRafId = null;
+    });
+  });
 
   // Load initial PC, Git, and Pipeline state
   loadInitialState();
@@ -7524,7 +7581,12 @@ function updateUIWithTaskResult(data) {
   renderDoubleQcFindings(data.doubleQcReport);
   renderSafetySurveillance(data.safetyReport);
   renderTlfReport(data.tlfReport);
-  renderDatasetTable(currentDatasetTab);
+  // Only render dataset table if the dataset tab is currently active to avoid layout thrashing
+  const activePane = document.querySelector('.tab-pane.active');
+  const activePaneId = activePane ? activePane.id : '';
+  if (activePaneId === 'tab-datasets' || activePaneId === 'tab-study-workspace') {
+    renderDatasetTable(currentDatasetTab);
+  }
   renderDeliverables(data.deliverables);
   updateLiveStudyMetrics();
   renderDailyAutomationDashboard();
@@ -13187,10 +13249,12 @@ async function runAllFiveSubagents() {
   const btnCanvas = document.getElementById('btn-canvas-refresh-all');
   if (btnSidebar) {
     btnSidebar.disabled = true;
+    btnSidebar.setAttribute('data-original-text', btnSidebar.textContent);
     btnSidebar.textContent = '⏳ Executing 5 Subagents...';
   }
   if (btnCanvas) {
     btnCanvas.disabled = true;
+    btnCanvas.setAttribute('data-original-text', btnCanvas.textContent);
     btnCanvas.textContent = '⏳ Running 5 Subagents...';
   }
 
@@ -13204,7 +13268,8 @@ async function runAllFiveSubagents() {
     { key: 'SAFETY_SURVEILLANCE', label: '5. Safety & Efficacy Screening', badgeId: 'row-tag-safety', badgeVal: 'NORMAL' }
   ];
 
-  for (let i = 0; i < tasks.length; i++) {
+  try {
+    for (let i = 0; i < tasks.length; i++) {
     const t = tasks[i];
     
     // Update Radio Button Selection visually
@@ -13248,15 +13313,20 @@ async function runAllFiveSubagents() {
   // Reset automator countdown
   automatorCountdown = AUTOMATOR_PERIOD;
 
-  if (btnSidebar) {
-    btnSidebar.disabled = false;
-    btnSidebar.textContent = '⚡ Run All 5 Now';
+  } catch (subagentErr) {
+    console.warn('[runAllFiveSubagents] Intercepted execution error:', subagentErr);
+    appendTerminalLog('WARN', 'SUBAGENT_RECOVERED', 'Multi-subagent run intercepted exception; UI state preserved.');
+  } finally {
+    isRunningAllFive = false;
+    if (btnSidebar) {
+      btnSidebar.disabled = false;
+      btnSidebar.textContent = '⚡ Run All 5 Now';
+    }
+    if (btnCanvas) {
+      btnCanvas.disabled = false;
+      btnCanvas.textContent = '⚡ Run All 5 Subagents';
+    }
   }
-  if (btnCanvas) {
-    btnCanvas.disabled = false;
-    btnCanvas.textContent = '⚡ Run All 5 Subagents';
-  }
-  isRunningAllFive = false;
 }
 
 // =========================================================
@@ -13397,7 +13467,7 @@ function simulateSelfHealingAnomaly() {
 function renderCanvasConnectors() {
   const svg = document.getElementById('canvas-svg-lines');
   const container = document.querySelector('.canvas-flow-container');
-  if (!svg || !container) return;
+  if (!svg || !container || container.offsetParent === null) return;
 
   const contRect = container.getBoundingClientRect();
   if (contRect.width === 0 || contRect.height === 0) return;
@@ -22080,8 +22150,17 @@ function copyRCodeToClipboard() {
 window.copyRCodeToClipboard = copyRCodeToClipboard;
 
 function renderFindingsTab() {
-  // Alias to renderQcTab
-  if (typeof renderQcTab === 'function') renderQcTab();
+  // Direct resilient renderer for Findings & Evidence center
+  const qc = (latestTaskResult && latestTaskResult.qcReport) || null;
+  if (typeof renderQcFindings === 'function') {
+    renderQcFindings(qc);
+  }
+  if (typeof renderQualityGates === 'function') {
+    renderQualityGates();
+  }
+  if (typeof renderIssuesList === 'function') {
+    renderIssuesList(window.currentIssueTabFilter || 'ALL');
+  }
 }
 window.renderFindingsTab = renderFindingsTab;
 
